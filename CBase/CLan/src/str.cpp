@@ -110,4 +110,177 @@ namespace clan
 	u8 char_lower(u8 c) { return g_char_lower[c]; }
 	u8 char_upper(u8 c) { return g_char_upper[c]; }
 	  
+	namespace detail
+	{
+		namespace
+		{
+			//返回字符串长度, fraction表示小数部分
+			template<CharsType T, FloatType V>
+			inline s32 _do_ufval2str(T* buf, s32 size, V fval, s32 dst_fraction)
+			{
+				auto p = buf;
+
+				u64 uval = (u64)fval;
+				auto len = _uval2str(p, size, uval);
+
+				[[unlikely]]
+				if (len == 0) return 0;
+
+				s32 fraction = 2;
+				if (dst_fraction != 0) fraction = dst_fraction;
+
+				[[unlikely]]
+				if (size < 1 + fraction + 1) { *buf = 0; return 0; }//'.' + 小数 + 0 
+
+				fval -= uval;
+				p += len;
+				size -= len + 1;//+1是因为下面一行的'.' 
+				*p++ = '.';
+
+				auto cnt = fraction;
+				while (cnt--) fval *= 10;
+
+				uval = (u64)fval;
+				fval -= uval;
+				if (fval > 0.5) uval += 1;
+
+				len = _uval2str(p, size, uval);
+
+				[[unlikely]]
+				if (len == 0) { *buf = 0; return 0; }
+
+				if (len < fraction) //1.003 到这里是 1.3, 需要在3前面补0
+				{
+					auto dst = p + fraction - 1;
+					auto src = p + len - 1;
+					auto dif = fraction - len;
+					while (len--) *dst-- = *src--;
+					while (dif--) *dst-- = '0';
+
+					if (dst_fraction == 0) //没有指定小数位, 则裁剪后面的0
+					{
+						auto end = p + fraction - 1;
+						while (*end == '0') --end;
+						if (*end == '.') end += 1;
+
+						fraction = s32(end + 1 - p);
+					}
+				}
+				p += fraction;
+				p[0] = 0;
+
+				return s32(p - buf);
+			}
+		}
+		 
+		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
+		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
+		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
+		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
+
+		namespace
+		{
+			//返回第一个无法解析的字符位置
+			template<CharsType T>
+			inline T* _2uval(const T* str, s64& val)
+			{
+				val = 0;
+
+				auto p = str; 
+				while ('0' <= *p && *p <= '9')
+				{
+					s8 v = *p++ - '0';
+					val = val * 10 + v;
+				}
+				if (p == str) return nullptr;
+				return (T*)str;
+			}
+
+			//返回第一个无法解析的字符位置
+			template<CharsType T> 
+			inline T* _2val(const T* str, s64& val)
+			{ 
+				auto p = str; 
+				bool negative = false;
+				if (*p == '-') { negative = true; p++; }
+				 
+				auto end = _2uval(p, val);
+				if (end == p) return nullptr;
+				 
+				if (negative) val = -val;
+				return end;
+			}
+
+			//返回第一个无法解析的字符位置
+			template<CharsType T>
+			inline T* _2fval(const T* str, f64& val)
+			{ 
+				auto p = str;
+
+				bool negative = false;
+				if (*p == '-') { negative = true; p++; }
+				 
+				s64 uval;
+				auto end = _2uval(p, uval);
+				if (end == p) return nullptr;
+
+				val = (f64)uval;
+
+				p = end;
+				if (*p == '.')
+				{
+					++p;
+					auto fraction_end = _2uval(p, uval);
+					if (fraction_end != p)
+					{//整数变为小数
+						f64 fraction_val = (f64)uval;
+						s32 cnt = s32(fraction_end - p);
+						while (cnt--) fraction_val /= 10;
+						val += fraction_val;
+
+						end = fraction_end;
+					}
+				} 
+				if (negative) val = -val;
+				return end;
+			}
+			template<CharsType T>
+			 inline T* _2bool(const T* str, bool& val)
+			{
+				T buf[8];
+				for (s32 i = 0; i < 5; i++)
+					buf[i] = str[i];
+				buf[5] = 0;
+
+				Str::lower(buf);
+				if (buf[0] == 'f' &&
+					buf[1] == 'a' &&
+					buf[2] == 'l' &&
+					buf[3] == 's' &&
+					buf[4] == 'e') 
+				{
+					val = false;
+					return (T*)(str + 5);
+				}
+				if (buf[0] == 't' &&
+					buf[1] == 'r' &&
+					buf[2] == 'u' &&
+					buf[3] == 'e')
+				{
+					val = true;
+					return (T*)(str + 4);
+				} 
+				return nullptr;
+			}
+		}
+		char* _str2val(const char* str, s64& val) { return _2val(str, val); }
+		char* _str2val(const char* str, f64& val) { return _2fval(str, val); }
+		char* _str2val(const char* str, bool& val) { return _2bool(str, val); }
+
+		wchar* _str2val(const wchar* str, s64& val) { return _2val(str, val); } 
+		wchar* _str2val(const wchar* str, f64& val) { return _2fval(str, val); }
+		wchar* _str2val(const wchar* str, bool& val) { return _2bool(str, val); } 
+
+	}
+
 }

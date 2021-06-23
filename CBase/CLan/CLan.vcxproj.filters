@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClCompile Include="src\dll.cpp" />
     <ClCompile Include="src\str.cpp" />
+    <ClCompile Include="src\mem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="1config.h">

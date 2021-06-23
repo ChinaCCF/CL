@@ -1,11 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31321.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31410.414
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{9CC89A5F-F67C-4024-B8E5-51F1442B571C}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestMem", "Test\TestMem\TestMem.vcxproj", "{821A1896-4DC8-48BC-9364-4E2C45ABB433}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B7BE73EC-7AC5-4CAE-AA94-A38D1B874B83} = {B7BE73EC-7AC5-4CAE-AA94-A38D1B874B83}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CBase", "CBase", "{11977848-12E0-41F2-BF7E-FCAE51E114E7}"
 EndProject

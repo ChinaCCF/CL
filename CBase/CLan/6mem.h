@@ -10,24 +10,28 @@ namespace clan
 	public:
 		template<IntType T>
 		static inline void copy(void* _dst, const void* _src, T size)
-		{
-			auto dst = (u8*)_dst;
-			auto src = (u8*)_src;
-			for (T i = 0; i < size; i++)
-				dst[i] = src[i];
+		{ 
+			//auto dst = (u8*)_dst;
+			//auto src = (u8*)_src;
+			//for (T i = 0; i < size; i++)
+			//	dst[i] = src[i];
+
+            memcpy(_dst, _src, (size_t)size);
 		}
 		template<IntType T>
 		static inline void mov(void* _dst, const void* _src, T size)
 		{
-			if (_dst < _src)
-				copy(_dst, _src, size);
-			else
-			{
-				auto dst = (u8*)_dst;
-				auto src = (u8*)_src;
-				for (T i = size - 1; i >= 0; i--)
-					dst[i] = src[i];
-			}
+			//if (_dst < _src)
+			//	copy(_dst, _src, size);
+			//else
+			//{
+			//	auto dst = (u8*)_dst;
+			//	auto src = (u8*)_src;
+			//	for (T i = size - 1; i >= 0; i--)
+			//		dst[i] = src[i];
+			//}
+
+            memmove(_dst, _src, (size_t)size);
 		}
 		template<IntType T>
 		static inline void zero(void* _dst, T size)
@@ -66,7 +70,7 @@ namespace clan
         }
     public:
         template<IntType T>
-        static inline T exchange(T val)
+        static inline T change(T val)
         {
             static_assert(sizeof(T) >= 2);
             _size_swap<sizeof(T)>(&val);
@@ -84,8 +88,14 @@ namespace clan
 
         bool is_big() { return !is_little(); }
     };
+     
+    //返回字符串长度, 失败返回0
+    s32 hex_mem(char* buf, s32 buf_size, void* data, s32 data_size);
+    s32 hex_mem(wchar* buf, s32 buf_size, void* data, s32 data_size);
 
-    void hex(char* buf, s32 buf_size, void* data, s32 data_size);
+    //返回数据大小, 字符串可能以0x开始也可能不是, 失败返回0
+	s32 unhex_mem(void* data, s32 data_size, const char* str, s32 str_len);
+	s32 unhex_mem(void* data, s32 data_size, const wchar* str, s32 str_len);
 }
 
 #endif//__clan_mem__ 

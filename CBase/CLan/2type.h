@@ -17,9 +17,7 @@ typedef uint64_t u64;
 
 typedef float    f32;
 typedef double   f64;
-
-typedef char     c8;
-typedef wchar_t  c16;
+ 
 typedef wchar_t  wchar;
 
 static constexpr s8 max_s8 = (s8)0x7F;

@@ -3,21 +3,17 @@
 
 #include <stdio.h>
 #include <CLan/7str.h>
-
+ 
  
 int main()
-{    
+{      
 
-	char buf[256];
-	for (s32 i = 0; i < 256; i++)
-	{
-		buf[i] = (char)i;
-	}
-	buf[255] = 0;
-
-	for (s32 i = 0; i < 0xFFFFFF; i++)
-		clan::str_lower(buf);
-
+	char buf[32];
+	u32 val = 0x1234AF;
+	auto len = clan::hex_mem(buf, 32, &val, sizeof(u32));
+	u32 ret;
+	buf[2] = 'G';
+	len = clan::unhex_mem(&ret, sizeof(u32), buf, 4 * 2 + 2);
 	return 0;
 }
 

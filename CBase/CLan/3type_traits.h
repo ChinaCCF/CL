@@ -52,15 +52,17 @@ namespace clan
 		/*#####################################################################################*/
 		/*#####################################################################################*/
 
-		template<typename T> struct _IsInt { static constexpr bool value = false; };
-		template<> struct _IsInt<s8> { static constexpr bool value = true; };
-		template<> struct _IsInt<s16> { static constexpr bool value = true; };
-		template<> struct _IsInt<s32> { static constexpr bool value = true; };
-		template<> struct _IsInt<s64> { static constexpr bool value = true; };
-		template<> struct _IsInt<u8> { static constexpr bool value = true; };
-		template<> struct _IsInt<u16> { static constexpr bool value = true; };
-		template<> struct _IsInt<u32> { static constexpr bool value = true; };
-		template<> struct _IsInt<u64> { static constexpr bool value = true; };
+		template<typename T> struct _IsSignedInt { static constexpr bool value = false; };
+		template<> struct _IsSignedInt<s8> { static constexpr bool value = true; };
+		template<> struct _IsSignedInt<s16> { static constexpr bool value = true; };
+		template<> struct _IsSignedInt<s32> { static constexpr bool value = true; };
+		template<> struct _IsSignedInt<s64> { static constexpr bool value = true; };
+
+		template<typename T> struct _IsUnsignedInt { static constexpr bool value = false; };
+		template<> struct _IsUnsignedInt<u8> { static constexpr bool value = true; };
+		template<> struct _IsUnsignedInt<u16> { static constexpr bool value = true; };
+		template<> struct _IsUnsignedInt<u32> { static constexpr bool value = true; };
+		template<> struct _IsUnsignedInt<u64> { static constexpr bool value = true; }; 
 	}
 
 	template<typename T> struct IsChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsChar<raw_t>::value; };
@@ -69,12 +71,15 @@ namespace clan
 
 	template<typename T> struct IsBool { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsBool<raw_t>::value; };
 	template<typename T> struct IsFloat { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsFloat<raw_t>::value; };
-	template<typename T> struct IsInt { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsInt<raw_t>::value; };
+
+	template<typename T> struct IsSignedInt { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsSignedInt<raw_t>::value; };
+	template<typename T> struct IsUnsignedInt { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsUnsignedInt<raw_t>::value; };
+	template<typename T> struct IsInt { static constexpr bool value = IsSignedInt<T>::value || IsUnsignedInt<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是数值类型
 	/*#####################################################################################*/
-	template<typename T> struct IsVal { static constexpr bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value; };
+	template<typename T> struct IsVal { static constexpr bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value || IsChars<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是指针
