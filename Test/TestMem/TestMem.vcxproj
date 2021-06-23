@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>con</UM_Proj_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\3platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{821a1896-4dc8-48bc-9364-4e2c45abb433}</ProjectGuid>
+    <RootNamespace>TestMem</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup> 
+  <ItemGroup>
+    <ClCompile Include="TestMem.cpp" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\4setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

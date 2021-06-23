@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>dll</UM_Proj_Type>
+  </PropertyGroup> 
+  <Import Project="$(SolutionDir)\3platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{9bec8daf-3e04-471b-b489-0762f5764598}</ProjectGuid>
+    <RootNamespace>CStack</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dll.cpp" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\4setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+	<PropertyGroup Label="Configuration">
+		<ConfigurationType Condition="'$(UM_Proj_Type)'=='app'">Application</ConfigurationType>
+		<ConfigurationType Condition="'$(UM_Proj_Type)'=='dll'">DynamicLibrary</ConfigurationType>
+		<ConfigurationType Condition="'$(UM_Proj_Type)'=='lib'">StaticLibrary</ConfigurationType>
+		<ConfigurationType Condition="'$(UM_Proj_Type)'=='con'">Application</ConfigurationType> <!--console-->
+		<PlatformToolset>v142</PlatformToolset>
+		<CharacterSet>Unicode</CharacterSet><!--Unicode,MultiByte-->
+		<!---->
+		<UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+		<UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
+		<!---->
+		<WholeProgramOptimization Condition="'$(Configuration)'=='Debug'">false</WholeProgramOptimization>
+		<WholeProgramOptimization Condition="'$(Configuration)'!='Debug'">true</WholeProgramOptimization>
+	</PropertyGroup>
+	<Import Project="$(SolutionDir)\2dir.props"/>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+	<ImportGroup Label="ExtensionSettings"/>
+	<ImportGroup Label="Shared"/>
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+	</ImportGroup>
+	<PropertyGroup>
+	 	<LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
+		<LinkIncremental Condition="'$(Configuration)'!='Debug'">false</LinkIncremental>
+		<!---->
+		<TargetName Condition="'$(Configuration)'=='Debug'">$(ProjectName)D</TargetName>
+		<TargetName Condition="'$(Configuration)'!='Debug'">$(ProjectName)</TargetName>
+		<!---->
+		<OutDir>$(UM_Build_Dir)$(Configuration)_$(PlatformTarget)\</OutDir>
+		<IntDir>$(UM_Build_Dir)Tmp\$(Configuration)_$(PlatformTarget)\$(TargetName)\</IntDir>
+	</PropertyGroup>
+	<ItemDefinitionGroup>
+		<ClCompile> 
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+
+			<WarningLevel>Level3</WarningLevel>
+			<LanguageStandard>stdcpplatest</LanguageStandard><!--stdcpplatest, stdcpp17 stdcpp20-->
+			<LanguageStandard_C>stdc17</LanguageStandard_C>
+
+			<!--移除未被引用的变量-->
+			<RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+
+			<!---->
+			<FunctionLevelLinking Condition="'$(Configuration)'=='Debug'">false</FunctionLevelLinking>
+			<FunctionLevelLinking Condition="'$(Configuration)'!='Debug'">true</FunctionLevelLinking>
+			<!---->
+			<IntrinsicFunctions Condition="'$(Configuration)'=='Debug'">false</IntrinsicFunctions>
+			<IntrinsicFunctions Condition="'$(Configuration)'!='Debug'">true</IntrinsicFunctions>
+
+			<SDLCheck>true</SDLCheck>
+			<ConformanceMode>true</ConformanceMode>
+
+			<!--内联函数生成方式-->
+			<InlineFunctionExpansion Condition="'$(Configuration)'=='Debug'">Disabled</InlineFunctionExpansion>
+			<InlineFunctionExpansion Condition="'$(Configuration)'!='Debug'">OnlyExplicitInline</InlineFunctionExpansion>
+
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<!--c++->优化->优化 Disabled MaxSpeed MinSpace Full-->
+			<Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
+			<Optimization Condition="'$(Configuration)'!='Debug'">MaxSpeed</Optimization> 
+			<!-- 
+			<RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RuntimeLibrary>
+      		<RuntimeLibrary Condition="'$(Configuration)'!='Debug'">MultiThreaded</RuntimeLibrary> 
+			--> 
+			<!--预定义宏-->
+			<PreprocessorDefinitions>WIN64; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">XDEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(Configuration)'=='Condition'">Build_Condition; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='dll'">$(ProjectName)_DLL; _USRDLL; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='lib'">$(ProjectName)_LIB; %(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<!--头文件目录-->
+			<AdditionalIncludeDirectories>$(UM_inc_Dir); $(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+
+		</ClCompile>
+		<Link>
+			<!--子系统 Console Windows-->
+			<SubSystem Condition="'$(UM_Proj_Type)'!='con'">Windows</SubSystem>
+			<SubSystem Condition="'$(UM_Proj_Type)'=='con'">Console</SubSystem>
+			<!--链接器->优化->引用[当变量没有使用时候,会自动优化去掉]-->
+			<OptimizeReferences>false</OptimizeReferences>
+			<!--链接器->调试->生成调试信息, true(Debug), DebugFull-->
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<!---->
+			<LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+			<!--链接目录--> 
+			<AdditionalLibraryDirectories Condition="'$(Configuration)'=='Debug'">$(UM_libD_Dir); $(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
+			<AdditionalLibraryDirectories Condition="'$(Configuration)'!='Debug'">$(UM_lib_Dir); $(AdditionalLibraryDirectories);</AdditionalLibraryDirectories>
+		</Link>
+		<BuildLog>
+			<Path>$(UM_Build_Dir)Tmp\$(Configuration)_$(PlatformTarget)\$(TargetName).log</Path>
+		</BuildLog>
+		<PreBuildEvent>
+			<!--生成前事件,用于复制文件或者签名等-->
+			<Command/>
+		</PreBuildEvent>
+		<PostBuildEvent>
+			<!--生成后事件,用于复制文件或者签名等-->
+			<Command >python $(SolutionDir)\5build.py $(SolutionDir) $(ProjectDir) $(UM_Build_Dir) $(ProjectName) $(TargetName) $(Configuration)</Command>
+		</PostBuildEvent>
+	</ItemDefinitionGroup>
+</Project>

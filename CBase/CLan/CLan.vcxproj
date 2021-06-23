@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>lib</UM_Proj_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\3platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{b7be73ec-7ac5-4cae-aa94-a38d1b874b83}</ProjectGuid>
+    <RootNamespace>CLan</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dll.cpp" />
+    <ClCompile Include="src\str.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="1config.h" />
+    <ClInclude Include="2type.h" />
+    <ClInclude Include="3type_traits.h" />
+    <ClInclude Include="4concept.h" />
+    <ClInclude Include="5val.h" />
+    <ClInclude Include="6mem.h" />
+    <ClInclude Include="7str.h" />
+    <ClInclude Include="8call.h" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\4setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

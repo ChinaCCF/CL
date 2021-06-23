@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros"> 
+    <UM_Build_Dir>W:\Build\</UM_Build_Dir>
+    <UM_Self_inc_Dir>W:\Build\;</UM_Self_inc_Dir>
+    <UM_Self_lib_Dir>W:\Build\$(Configuration)_$(PlatformTarget);</UM_Self_lib_Dir>
+    <UM_Self_libD_Dir>W:\Build\$(Configuration)_$(PlatformTarget);</UM_Self_libD_Dir>
+  </PropertyGroup> 
+</Project>
