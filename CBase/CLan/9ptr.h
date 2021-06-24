@@ -6,8 +6,12 @@
 
 namespace clan
 { 
-	//常规的内存申请器
-	//template<typename T = char>
+    //内存指针 #include<memory>
+    //share_ptr 是一个多线程共享安全的指针, 这就带来了性能的损失
+    //然后auto_ptr是使用默认的new 和 delete内存管理的, 对于一些特许要求,不想使用默认内存操作的人来说就头大
+    //下面这些对象都是非线程安全的
+
+	//常规的内存申请器 
 	//class AllocMem
 	//{
 	//public:
@@ -43,10 +47,7 @@ namespace clan
         T* operator->() const { return obj_; }
         T& operator*() const { return *obj_; }
     };
-
-	template<typename T, template<typename> class A> 
-	using Ptr = _Ptr<T, A<T>>; 
-
+      
     /*############################################################################################*/
     //计数指针对象
     /*############################################################################################*/ 
@@ -68,8 +69,12 @@ namespace clan
 		{
 			T obj_;
 		public: 
-			HoldObj() { iHolder<T>::ptr_ = &obj_; }
-            virtual ~HoldObj() { obj_.~T(); }
+			HoldObj() 
+            { 
+                new(&obj_)T();
+                iHolder<T>::ptr_ = &obj_;
+            }
+            virtual ~HoldObj() { }//无需手动调用obj_的析构函数
 		};
 
 		template<typename T, typename A> requires AllocObjType<A, T> || AllocMemType<A>
@@ -140,18 +145,19 @@ namespace clan
 
         operator T* () const { return holder_->ptr_; }
         T* operator->() const { return holder_->ptr_; } 
-        T& operator*() const { return *holder_->ptr_; }
+        T& operator*() const { return *holder_->ptr_; } 
     };
 
-    //template<typename T, typename ... Args>
-    //_PtrCnt<T> make_ptr(Args&& ... args)
-    //{
-    //    _PtrCnt<T> ret;
-    //    using CWO = detail::HoldObj<T, CLDel>;
-    //    ret.ic_ = cl_new(CWO, std::forward<Args>(args)...);
-    //    ret.ic_->cnt_++;
-    //    return ret;
-    //}
+    template<typename T, typename AllocHolder>
+    auto make_ptr()
+    {
+        using HoldObj = detail::HoldObj<T>;
+        _PtrCnt<T, AllocHolder, AllocHolder> ptr; 
+        ptr.holder_ = (HoldObj*)AllocHolder().alloc(sizeof(HoldObj));
+        new(ptr.holder_)HoldObj(); 
+        ptr.holder_->cnt_++;
+        return ptr;
+    }
 }
 
 #endif//__clan_ptr__ 

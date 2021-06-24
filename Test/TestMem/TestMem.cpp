@@ -7,6 +7,8 @@
 
 #include <string>
 #include <new>
+
+#include<memory>
 class A
 {
 public:
@@ -15,8 +17,7 @@ public:
 		printf("~A\n");
 	}
 };
-  
-template<typename T>
+   
 class Alloc
 {
 public:
@@ -32,17 +33,26 @@ public:
 	static void free(T* p) { p->~T(); ::free(p); }
 };
    
+template<typename T, typename A>
+using Ptr = clan::_Ptr<T, A>;
+
 int main()
-{        
-	clan::Ptr<char, Alloc> ptr = (char*)malloc(32);
+{         
+	Ptr<char, Alloc> ptr = (char*)malloc(32);
+
+	//{
+	//	Ptr<A, AllocObj<A>> ptr2 = AllocObj<A>::alloc(); 
+	//}
+
+	//{
+	//	clan::_PtrCnt<A, AllocObj<A>, Alloc> ptr3 = AllocObj<A>::alloc(); 
+	//}
 
 	{
-		//clan::Ptr<A, AllocObj> ptr2 = AllocObj<A>::alloc();
+		auto p = clan::make_ptr<A, Alloc>();
 
-		clan::_PtrCnt<A, AllocObj<A>, Alloc<char>> ptr3 = AllocObj<A>::alloc();
+		int i = 0;
 	}
-
-	
 
 	return 0;
 }

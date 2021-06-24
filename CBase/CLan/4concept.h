@@ -31,10 +31,10 @@ namespace clan
 
     //定义内存分配器
     template<typename A>
-    concept AllocMemType = requires(A a, s64 size, char* p)
+    concept AllocMemType = requires(A a, s64 size, void* p)
     {
         a.alloc(size);//具备alloc 指定大小函数
-        requires IsSameType<char*, decltype(a.alloc(1))>::value;
+        requires IsSameType<char*, decltype(a.alloc(1))>::value;//确保申请函数返回char* 指针
         a.free(p);//释放任意大小指针空间
     };
 
@@ -42,7 +42,8 @@ namespace clan
     template<typename A, typename T>
     concept AllocObjType = requires(A a, T * p)
     {
-        a.alloc();//应具备alloc函数
+        a.alloc(); 
+        requires IsSameType<T*, decltype(a.alloc())>::value; 
         a.free(p);
     };
 }
