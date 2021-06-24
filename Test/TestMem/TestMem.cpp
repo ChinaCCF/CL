@@ -3,17 +3,47 @@
 
 #include <stdio.h>
 #include <CLan/7str.h>
- 
- 
-int main()
-{      
+#include <CLan/9ptr.h>
 
-	char buf[32];
-	u32 val = 0x1234AF;
-	auto len = clan::hex_mem(buf, 32, &val, sizeof(u32));
-	u32 ret;
-	buf[2] = 'G';
-	len = clan::unhex_mem(&ret, sizeof(u32), buf, 4 * 2 + 2);
+#include <string>
+#include <new>
+class A
+{
+public:
+	~A() 
+	{
+		printf("~A\n");
+	}
+};
+  
+template<typename T>
+class Alloc
+{
+public:
+	char* alloc(s64 size) { return (char*)malloc(size); }
+	void free(void* p) { ::free(p); }
+};
+
+template<typename T>
+class AllocObj
+{
+public:
+	static T* alloc() { auto p = (T*)malloc(sizeof(T)); new(p)T(); return p; }
+	static void free(T* p) { p->~T(); ::free(p); }
+};
+   
+int main()
+{        
+	clan::Ptr<char, Alloc> ptr = (char*)malloc(32);
+
+	{
+		//clan::Ptr<A, AllocObj> ptr2 = AllocObj<A>::alloc();
+
+		clan::_PtrCnt<A, AllocObj<A>, Alloc<char>> ptr3 = AllocObj<A>::alloc();
+	}
+
+	
+
 	return 0;
 }
 

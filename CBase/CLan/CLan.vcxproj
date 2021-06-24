@@ -25,7 +25,9 @@
     <ClInclude Include="5val.h" />
     <ClInclude Include="6mem.h" />
     <ClInclude Include="7str.h" />
-    <ClInclude Include="8call.h" />
+    <ClInclude Include="10call.h" />
+    <ClInclude Include="9ptr.h" />
+    <ClInclude Include="8obj.h" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\4setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

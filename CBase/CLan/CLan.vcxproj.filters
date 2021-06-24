@@ -37,7 +37,13 @@
     <ClInclude Include="7str.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="8call.h">
+    <ClInclude Include="10call.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="9ptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="8obj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

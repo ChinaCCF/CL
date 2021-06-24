@@ -128,10 +128,9 @@ namespace clan
 	template<typename T> struct DestructorCheck { static constexpr bool value = IsClass<T>::value ? VirtualClassCheck<T>::value : true; };
 
 	//static_assert 不能输出中文
-#define  clan_CheckClass(T) do{\
-static_assert(clan::MoveCheck<T>::value : true, "class need move assign and construct!");\
-static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destructor!");\
-}while(false);
+#define  clan_CheckClass(T) \
+static_assert(clan::MoveCheck<T>::value, "class need move assign and construct!");\
+static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destructor!");
 
 	/*#####################################################################################*/
 	//选择类型, 等价于 typename std::conditional<bool, Type1, Type2>::type;

@@ -28,6 +28,23 @@ namespace clan
 
     template<typename T>
     concept MoveType = MoveCheck<T>::value;
+
+    //定义内存分配器
+    template<typename A>
+    concept AllocMemType = requires(A a, s64 size, char* p)
+    {
+        a.alloc(size);//具备alloc 指定大小函数
+        requires IsSameType<char*, decltype(a.alloc(1))>::value;
+        a.free(p);//释放任意大小指针空间
+    };
+
+    //定义对象分配器
+    template<typename A, typename T>
+    concept AllocObjType = requires(A a, T * p)
+    {
+        a.alloc();//应具备alloc函数
+        a.free(p);
+    };
 }
 
 #endif//__clan_concept__ 

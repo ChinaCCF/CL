@@ -4,7 +4,7 @@
 #include "5val.h"
 
 namespace clan
-{
+{ 
 	class Byte
 	{
 	public:

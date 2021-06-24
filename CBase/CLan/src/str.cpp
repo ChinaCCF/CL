@@ -280,7 +280,52 @@ namespace clan
 		wchar* _str2val(const wchar* str, s64& val) { return _2val(str, val); } 
 		wchar* _str2val(const wchar* str, f64& val) { return _2fval(str, val); }
 		wchar* _str2val(const wchar* str, bool& val) { return _2bool(str, val); } 
-
+		 
 	}
 
+	CharCode Str::judge_char_code(const char* _str)
+	{ 
+		auto str = (const u8*)_str;
+
+		while (*str && *str < 0x80) str++;//跳过ascii部分
+
+		if (*str == 0) return CharCode::GBK;//前面都是ascii部分,所以只需要返回ascii
+
+		auto c = *str;
+
+		//判断的原理: 根据字符串是否符合utf8的编码规则来判断
+		s32 utf8_char_byte_cnt = 0;
+		if ((c & 0xE0) == 0xC0) //0xE=1110, 0xC=1100
+			utf8_char_byte_cnt = 1;
+		else
+		{
+			if ((c & 0xF0) == 0xE0)
+				utf8_char_byte_cnt = 2;
+			else
+			{
+				if ((c & 0xF8) == 0xF0)//0x8=1000
+					utf8_char_byte_cnt = 3;
+				else
+				{
+					if ((c & 0xFC) == 0xF8)
+						utf8_char_byte_cnt = 4;
+					else
+					{
+						if ((c & 0xFE) == 0xFC)
+							utf8_char_byte_cnt = 5;
+						else
+							return CharCode::GBK;
+					}
+				}
+			}
+		}
+
+		auto p = str + 1;
+		for (s32 i = 0; i < utf8_char_byte_cnt; i++)
+		{
+			c = p[i];
+			if ((c & 0xC0) != 0x80) return CharCode::GBK;
+		}
+		return CharCode::UTF8;
+	}
 }

@@ -135,7 +135,11 @@ namespace clan
 		wchar* _str2val(const wchar* str, f64& val); 
 		wchar* _str2val(const wchar* str, bool& val);
 	}
-
+	enum class CharCode
+	{
+		UTF8,
+		GBK
+	};
 	class Str
 	{
 	public:
@@ -285,6 +289,8 @@ namespace clan
 			val = (T)tmp;
 			return ret;
 		}
+		/**************************************************************************************************************/
+		static inline CharCode judge_char_code(const char* str);
 	};
 
 
