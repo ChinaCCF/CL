@@ -31,11 +31,11 @@ namespace clan
 	{
 		/*#####################################################################################*/
 		/*#####################################################################################*/
-		template<typename T> struct _IsChar { static constexpr bool value = false; };
-		template<> struct _IsChar<char> { static constexpr bool value = true; };
+		template<typename T> struct _IsC8 { static constexpr bool value = false; };
+		template<> struct _IsC8<char> { static constexpr bool value = true; };
 
-		template<typename T> struct _IsWChar { static constexpr bool value = false; };
-		template<> struct _IsWChar<wchar> { static constexpr bool value = true; };
+		template<typename T> struct _IsC16 { static constexpr bool value = false; };
+		template<> struct _IsC16<wchar> { static constexpr bool value = true; };
 
 		/*#####################################################################################*/
 		/*#####################################################################################*/
@@ -65,9 +65,9 @@ namespace clan
 		template<> struct _IsUnsignedInt<u64> { static constexpr bool value = true; }; 
 	}
 
-	template<typename T> struct IsChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsChar<raw_t>::value; };
-	template<typename T> struct IsWChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsWChar<raw_t>::value; };
-	template<typename T> struct IsChars { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsWChar<raw_t>::value || detail::_IsChar<raw_t>::value; };
+	template<typename T> struct IsC8 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC8<raw_t>::value; };
+	template<typename T> struct IsC16 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value; };
+	template<typename T> struct IsChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value || detail::_IsC8<raw_t>::value; };
 
 	template<typename T> struct IsBool { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsBool<raw_t>::value; };
 	template<typename T> struct IsFloat { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsFloat<raw_t>::value; };
@@ -79,7 +79,7 @@ namespace clan
 	/*#####################################################################################*/
 	//判断是否是数值类型
 	/*#####################################################################################*/
-	template<typename T> struct IsVal { static constexpr bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value || IsChars<T>::value; };
+	template<typename T> struct IsVal { static constexpr bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value || IsChar<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是指针
@@ -97,6 +97,10 @@ namespace clan
 	/*#####################################################################################*/
 	template<typename T> struct IsClass { static constexpr bool value = std::is_class<T>::value; };
 
+	/*#####################################################################################*/
+	//判断是否是成员函数
+	/*#####################################################################################*/
+	template<typename T> struct IsClassFun { static constexpr bool value = std::is_member_function_pointer<T>::value; };
 	/*#####################################################################################*/
 	//判断是否右值移动赋值
 	/*#####################################################################################*/
@@ -174,5 +178,19 @@ static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destr
 
 	template<typename T>
 	struct MinType<T> { using type = T; enum { size = sizeof(T) }; };
+
+	/*#####################################################################################*/
+	//判断某个类是否含有某个函数
+	//先用这个宏定义类模板, 再调用具体模板
+	//Def_Class_Has(fun, void, int); //定义函数名称为fun, 返回值为void, 一个int为参数的函数判断模板
+	//auto v = class_has_fun<A>::value; //使用这个具体模板来测试
+#define Def_Class_Has(FunName, Return, ...) \
+	template <typename T> struct class_has_##FunName{ \
+		typedef Return (T::* FunType)(##__VA_ARGS__); \
+		template <typename X, X> struct MatchStruct; \
+		template <typename S> static int match_test(MatchStruct<FunType, &S::FunName>*); \
+		template <typename S> static char match_test(...); \
+		static bool const value = sizeof(match_test<T>(0)) == sizeof(int); };
+
 }
 #endif//__clan_type_traits__ 

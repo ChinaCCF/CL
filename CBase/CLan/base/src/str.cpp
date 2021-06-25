@@ -115,7 +115,7 @@ namespace clan
 		namespace
 		{
 			//返回字符串长度, fraction表示小数部分
-			template<CharsType T, FloatType V>
+			template<CharType T, FloatType V>
 			inline s32 _do_ufval2str(T* buf, s32 size, V fval, s32 dst_fraction)
 			{
 				auto p = buf;
@@ -181,7 +181,7 @@ namespace clan
 		namespace
 		{
 			//返回第一个无法解析的字符位置
-			template<CharsType T>
+			template<CharType T>
 			inline T* _2uval(const T* str, s64& val)
 			{
 				val = 0;
@@ -197,7 +197,7 @@ namespace clan
 			}
 
 			//返回第一个无法解析的字符位置
-			template<CharsType T> 
+			template<CharType T> 
 			inline T* _2val(const T* str, s64& val)
 			{ 
 				auto p = str; 
@@ -212,7 +212,7 @@ namespace clan
 			}
 
 			//返回第一个无法解析的字符位置
-			template<CharsType T>
+			template<CharType T>
 			inline T* _2fval(const T* str, f64& val)
 			{ 
 				auto p = str;
@@ -244,7 +244,7 @@ namespace clan
 				if (negative) val = -val;
 				return end;
 			}
-			template<CharsType T>
+			template<CharType T>
 			 inline T* _2bool(const T* str, bool& val)
 			{
 				T buf[8];

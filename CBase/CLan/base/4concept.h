@@ -6,7 +6,7 @@
 namespace clan
 { 
     template<typename T>
-    concept CharsType = IsChars<T>::value;
+    concept CharType = IsChar<T>::value;
 
     template<typename T>
     concept BoolType = IsBool<T>::value;
@@ -27,6 +27,12 @@ namespace clan
     concept ValType = IsVal<T>::value;
 
     template<typename T>
+    concept ClassType = IsClass<T>::value;
+
+    template<typename T>
+    concept ClassFunType = IsClassFun<T>::value;
+
+    template<typename T>
     concept MoveType = MoveCheck<T>::value;
 
     //定义内存分配器
@@ -34,7 +40,9 @@ namespace clan
     concept AllocMemType = requires(A a, s64 size, void* p)
     {
         a.alloc(size);//具备alloc 指定大小函数
+        a.realloc(p, size);//具备realloc函数
         requires IsSameType<char*, decltype(a.alloc(1))>::value;//确保申请函数返回char* 指针
+        requires IsSameType<char*, decltype(a.realloc(p,1))>::value;//确保申请函数返回char* 指针
         a.free(p);//释放任意大小指针空间
     };
 

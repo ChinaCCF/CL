@@ -1,59 +1,32 @@
 ﻿// TestMem.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 
-#include <stdio.h>
-#include <CLan/7str.h>
-#include <CLan/9ptr.h>
+#include <stdio.h>   
 
-#include <string>
-#include <new>
+#include <CLan/base/10call.h>
+#include <CLan/base/11time.h>
+#include <CLan/base/7str.h>
 
-#include<memory>
-class A
-{
-public:
-	~A() 
+	class AllocMem
 	{
-		printf("~A\n");
-	}
-};
-   
-class Alloc
-{
-public:
-	char* alloc(s64 size) { return (char*)malloc(size); }
-	void free(void* p) { ::free(p); }
-};
-
-template<typename T>
-class AllocObj
-{
-public:
-	static T* alloc() { auto p = (T*)malloc(sizeof(T)); new(p)T(); return p; }
-	static void free(T* p) { p->~T(); ::free(p); }
-};
-   
-template<typename T, typename A>
-using Ptr = clan::_Ptr<T, A>;
+	public:
+		char* alloc(s64 size) { return (char*)malloc(size); }
+		char* realloc(void* p, s64 size) { return (char*)p; }
+		void free(void* p) { ::free(p); }
+	};
 
 int main()
 {         
-	Ptr<char, Alloc> ptr = (char*)malloc(32);
-
-	//{
-	//	Ptr<A, AllocObj<A>> ptr2 = AllocObj<A>::alloc(); 
-	//}
-
-	//{
-	//	clan::_PtrCnt<A, AllocObj<A>, Alloc> ptr3 = AllocObj<A>::alloc(); 
-	//}
-
+	//clan::_String<char, AllocMem, 0> str;
+	//auto s = str.str();
+	int val = 10;
+	clan::Call<void(int)> call = [&val](int a) 
 	{
-		auto p = clan::make_ptr<A, Alloc>();
-
-		int i = 0;
-	}
-
+		printf("%d\n", val + a);
+	};
+ 
+	clan::Call<void(int)> call2 = call;
+	call2(3);
 	return 0;
 }
 

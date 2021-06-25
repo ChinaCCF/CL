@@ -43,7 +43,7 @@ namespace clan
 			0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,
 		};
 
-		template<CharsType T>
+		template<CharType T>
 		inline s32 _hex_mem(T* buf, s32 buf_size, void* data, s32 data_size)
 		{
 			auto dst_len = 2 + (data_size << 1);// 0xXXXXXXX
@@ -66,7 +66,7 @@ namespace clan
 			return dst_len;
 		}
 		 
-		template<CharsType T>
+		template<CharType T>
 		inline s32 _unhex_mem(void* data, s32 data_size, const T* str, s32 str_len)
 		{
 			auto dst_len = (str_len - 2) >> 1;

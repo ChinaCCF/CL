@@ -14,6 +14,8 @@
 #   endif 
 #endif
 
+#define Compiler_VC
+
 #endif//_MSC_VER
 
 #endif//__clan_config__
