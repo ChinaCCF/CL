@@ -85,12 +85,12 @@ namespace clan
 		//lamda捕捉的对象尽量少, 否则超过这个缓存...
 		//class类对象指针 vt + this + fun = 8 + 8 + 8 = 24
 		u64 buf_[8];//64个字节
-		CallType* call_; 
+		CallType* call_ = nullptr; 
 	public:
 		~Call() { if (call_) call_->~iCall(); }
 
-		Call() { clan_CheckClass(Call); call_ = nullptr; }
-		Call(const std::nullptr_t&) { call_ = nullptr; }
+		Call() { clan_CheckClass(Call); }
+		Call(const std::nullptr_t&) { }
 
 		//函数指针
 		Call(Return(*fun)(Args...))
@@ -131,8 +131,11 @@ namespace clan
 
 		Call(const Call& c)
 		{ 
-			c.call_->copy_to(buf_); 
-			call_ = (CallType*)buf_;
+			if (c.call_)
+			{
+				c.call_->copy_to(buf_);
+				call_ = (CallType*)buf_;
+			} 
 		}
 
 		Call& operator=(const Call& c)

@@ -26,6 +26,7 @@ int main()
 	};
  
 	clan::Call<void(int)> call2 = call;
+	call2 = call;
 	call2(3);
 	return 0;
 }
