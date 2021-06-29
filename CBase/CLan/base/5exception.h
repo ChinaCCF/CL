@@ -43,7 +43,7 @@ namespace clan
     //使用示例
     // try
     //{
-    //    clan_throw(0, 0, "123");
+    //    clan_throw(0, 0, L"123");
     //}catch(std::exception& e) //注意最好使用引用, 否则Exception会发生拷贝, 导致性能损失
     //{ 
     //    int i = 0;

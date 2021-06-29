@@ -31,19 +31,16 @@ namespace clan
     concept ValExFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
 
     template<typename T>
-    concept CharsType = 
-        IsSameType<typename RawType<T>::type, char*>::value ||
-        IsSameType<typename RawType<T>::type, wchar*>::value;
+    concept PtrType = std::is_pointer<T>::value;
+
+    template<typename T>
+	concept CharsType = IsSameType<typename RawType<T>::type, char*>::value || IsSameType<typename RawType<T>::type, wchar*>::value;
 
     template<typename T>
     concept NotCharsType = !CharsType<T>;
 
     template<typename T>
-    concept StrType = 
-        std::is_convertible<T, char*>::value || 
-        std::is_convertible<T, const char*>::value ||
-        std::is_convertible<T, wchar*>::value ||
-        std::is_convertible<T, const wchar*>::value;
+    concept StrType = IsStrC8<T>::value || IsStrC16<T>::value;
      
     template<typename T>
     concept ClassType = IsClass<T>::value;

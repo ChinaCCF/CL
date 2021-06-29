@@ -8,17 +8,28 @@
 #include <CLan/set/2arr.h>
 #include <CLan/set/3list.h>
 #include <CLan/set/4heap.h>
+#include <CLan/set/5map.h>
  
-template<clan::NotCharsType T>
-void add(const T& v)
-{ 
-}
+	class AllocMem
+	{
+	public:
+		char* alloc(s64 size) { return (char*)malloc(size); }
+		char* realloc(void* p, s64 size) { return (char*)realloc(p, size); }
+		void free(void* p) { ::free(p); }
+	};
+ 
 int main()
 {    
-	char buf[32];
+	//clan::HashMap<int, int, AllocMem> map;
+	//map[1] = 2;
+	//map[2] = 3;
+	//map[3] = 4;
+	//map[4] = 5;
 
-	clan::StrView<char> str;
-	add(L"");
+	//int v = map[2];
+	//int v2 = map[3];
+	//int v3 = map[4];
+	 
 	return 0;
 }
 

@@ -68,6 +68,8 @@ namespace clan
 	template<typename T> struct IsC8 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC8<raw_t>::value; };
 	template<typename T> struct IsC16 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value; };
 	template<typename T> struct IsChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value || detail::_IsC8<raw_t>::value; };
+	template<typename T> struct IsStrC8 { static constexpr bool value = std::is_convertible<T, char*>::value || std::is_convertible<T, const char*>::value; };
+	template<typename T> struct IsStrC16 { static constexpr bool value = std::is_convertible<T, wchar*>::value || std::is_convertible<T, const wchar*>::value; };
 
 	template<typename T> struct IsBool { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsBool<raw_t>::value; };
 	template<typename T> struct IsFloat { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsFloat<raw_t>::value; };

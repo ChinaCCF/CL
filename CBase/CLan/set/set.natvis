@@ -33,4 +33,37 @@
       </ArrayItems>
     </Expand>
   </Type>
+  
+  <!--HashMapNode-->
+  <Type Name="clan::detail::HashMapNode&lt;*,*&gt;">
+    <DisplayString>Key: {first} | Val: {second}</DisplayString>
+    <Expand>
+      <Item Name="Key">first</Item>
+      <Item Name="Val">second</Item>
+    </Expand>
+  </Type>
+  
+  <!--HeapArr-->
+  <Type Name="clan::HashMap&lt;*,*,*&gt;">
+    <DisplayString>cnt: {cnt_}</DisplayString>
+    <Expand>
+      <CustomListItems MaxItemsPerView="100">
+        <Variable Name="index" InitialValue="0"/>
+        <Variable Name="p" InitialValue="arr_[0]"/>
+        <!--size 一定要放在变量后面-->
+        <Size>cnt_</Size>
+        <Loop>
+          <If Condition="p == nullptr">
+            <Exec>index++</Exec>
+            <Break Condition="index &gt;= size_"/>
+            <Exec>p = arr_[index]</Exec>
+          </If>
+          <If Condition="p != nullptr">
+            <Item>*p</Item>
+            <Exec>p = p-&gt;next_</Exec>
+          </If>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
 </AutoVisualizer>

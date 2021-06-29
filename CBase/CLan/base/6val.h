@@ -3,8 +3,22 @@
 
 #include "4concept.h"
 
+//if x < y, then -(x < y) will be all ones, so r = y ^ (x ^ y) & ~0 = y ^ x ^ y = x. 
+//Otherwise, if x >= y, then -(x < y) will be all zeros, so r = y ^ ((x ^ y) & 0) = y.
+template<clan::IntType T> inline T cl_max(const T& x, const T& y) { return x ^ ((x ^ y) & -(x < y)); }
+template<clan::IntType T> inline T cl_min(const T& x, const T& y) { return y ^ ((x ^ y) & -(x < y)); }
+
+template<clan::FloatType T> inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
+template<clan::FloatType T> inline T cl_min(const T& x, const T& y) { return x > y ? y : x; }
+
 namespace clan
 {
+	template<IntType T> inline T abs(T val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
+	inline f32 abs(f32 v) { auto tv = *(u32*)&v; tv &= 0x7FFFFFFF; return *(f32*)&tv; }
+	inline f64 abs(f64 v) { auto tv = *(u64*)&v; tv &= 0x7FFFFFFFFFFFFFFF; return *(f64*)&tv; }
+
+	template<MoveType T> inline void swap(T& a, T& b) { T tmp = std::move(a); a = std::move(b); b = std::move(tmp); }
+
 	/*############################################################################################*/
 	//本对象用来处理enum class对象, 因为C++11之后, enum class 对象不支持 | &等运算了 
 	/*############################################################################################*/
@@ -32,31 +46,31 @@ namespace clan
 		// EnumType e; bool val = e == 1.0; 会编译成功!
 		//operator u32() { return (u32)val_; }
 		operator T() { return val_; }
-		operator bool(){ return (u32)val_ != 0; }
+		operator bool() { return (u32)val_ != 0; }
 
 		template<typename R> requires detail::_EnumVal<T, R> inline EnumType operator=(R v) { return val_ = (T)v; }
 
 		template<IntType R> inline void operator+=(R v) { val_ = T((u32)val_ + (u32)v); }
 		template<IntType R> inline void operator-=(R v) { val_ = T((u32)val_ - (u32)v); }
 
-		template<typename R> requires detail::_EnumType<T, R> inline bool operator== (R v) const { return (u32)val_ == (u32)EnumType(v).val_; } 
+		template<typename R> requires detail::_EnumType<T, R> inline bool operator== (R v) const { return (u32)val_ == (u32)EnumType(v).val_; }
 		template<typename R> requires detail::_EnumType<T, R> inline bool operator!= (R v) const { return (u32)val_ != (u32)EnumType(v).val_; }
 		/******************************************************************************************************************************************/
-		template<typename R> requires detail::_EnumType<T, R> inline EnumType operator& (R v) const { return T((u32)val_ & (u32)EnumType(v).val_); } 
-		template<typename R> requires detail::_EnumType<T, R> inline EnumType operator| (R v) const { return T((u32)val_ | (u32)EnumType(v).val_); } 
+		template<typename R> requires detail::_EnumType<T, R> inline EnumType operator& (R v) const { return T((u32)val_ & (u32)EnumType(v).val_); }
+		template<typename R> requires detail::_EnumType<T, R> inline EnumType operator| (R v) const { return T((u32)val_ | (u32)EnumType(v).val_); }
 		template<typename R> requires detail::_EnumType<T, R> inline EnumType operator^ (R v) const { return T((u32)val_ ^ (u32)EnumType(v).val_); }
 		/******************************************************************************************************************************************/
-		template<typename R> requires detail::_EnumType<T, R> inline void operator&= (R v) { val_ = T((u32)val_ & (u32)EnumType(v).val_); } 
-		template<typename R> requires detail::_EnumType<T, R> inline void operator|= (R v) { val_ = T((u32)val_ | (u32)EnumType(v).val_); } 
+		template<typename R> requires detail::_EnumType<T, R> inline void operator&= (R v) { val_ = T((u32)val_ & (u32)EnumType(v).val_); }
+		template<typename R> requires detail::_EnumType<T, R> inline void operator|= (R v) { val_ = T((u32)val_ | (u32)EnumType(v).val_); }
 		template<typename R> requires detail::_EnumType<T, R> inline void operator^= (R v) { val_ = T((u32)val_ ^ (u32)EnumType(v).val_); }
 		/******************************************************************************************************************************************/
-		template<typename R> requires detail::_EnumType<T, R> inline bool operator> (R v) const { return (u32)val_ > (u32)EnumType(v).val_; } 
-		template<typename R> requires detail::_EnumType<T, R> inline bool operator>= (R v) const { return (u32)val_ >= (u32)EnumType(v).val_; } 
-		template<typename R> requires detail::_EnumType<T, R> inline bool operator< (R v) const { return (u32)val_ < (u32)EnumType(v).val_; } 
+		template<typename R> requires detail::_EnumType<T, R> inline bool operator> (R v) const { return (u32)val_ > (u32)EnumType(v).val_; }
+		template<typename R> requires detail::_EnumType<T, R> inline bool operator>= (R v) const { return (u32)val_ >= (u32)EnumType(v).val_; }
+		template<typename R> requires detail::_EnumType<T, R> inline bool operator< (R v) const { return (u32)val_ < (u32)EnumType(v).val_; }
 		template<typename R> requires detail::_EnumType<T, R> inline bool operator<= (R v) const { return (u32)val_ <= (u32)EnumType(v).val_; }
 	};
 
-	template<IntType T, IntType R> inline T align(T val, R align) { T n = align - 1; return (val + n) & ~n;	}
+	template<IntType T, IntType R> inline T align(T val, R align) { T n = align - 1; return (val + n) & ~n; }
 
 	//2的指数都是最高为1,后面都是0,那么减一就变成 011...
 	//例如 4  为  100,   4-1  为 011
@@ -79,19 +93,41 @@ namespace clan
 	template<IntType T>
 	inline s32 log2(T val) { s32 index = 0; while (val >>= 1) index++; return index; }
 
-	template<IntType T> inline T abs(T val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
-	inline f32 abs(f32 v) { auto tv = *(u32*)&v; tv &= 0x7FFFFFFF; return *(f32*)&tv; }
-	inline f64 abs(f64 v) { auto tv = *(u64*)&v; tv &= 0x7FFFFFFFFFFFFFFF; return *(f64*)&tv; } 
+	namespace detail
+	{
+		template<FloatType T>
+		u32 _hash(T val)
+		{
+			auto f = (u32*)&val;
+			return f[0];
+		};
 
-	template<MoveType T> inline void swap(T& a, T& b) { T tmp = std::move(a); a = std::move(b); b = std::move(tmp); }
+		template<IntType T>
+		u32 _hash(T val)
+		{ 
+			return (u32)(u64)val;
+		};
+
+		template<PtrType T>
+		u32 _hash(T val)
+		{
+			return (u32)(u64)val;
+		};
+		 
+		template<StrType T>
+		u32 _hash(const T& val)
+		{
+			using Type = SelectType<IsStrC8<T>::value, char, wchar>::type;
+			Type* str = (const Type*)val;
+			u32 seed = 1313;
+			u32 ret = 0;
+			while (*str) ret = ret * seed + (*str++);
+			return ret & 0x7FFFFFFF;
+		};
+	}
+
+	template<typename T>
+	u32 hash(const T& val) { return detail::_hash(val); }
 }
-
-//if x < y, then -(x < y) will be all ones, so r = y ^ (x ^ y) & ~0 = y ^ x ^ y = x. 
-//Otherwise, if x >= y, then -(x < y) will be all zeros, so r = y ^ ((x ^ y) & 0) = y.
-template<clan::IntType T> inline T cl_max(const T& x, const T& y) { return x ^ ((x ^ y) & -(x < y)); }
-template<clan::IntType T> inline T cl_min(const T& x, const T& y) { return y ^ ((x ^ y) & -(x < y)); }
- 
-template<clan::FloatType T> inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
-template<clan::FloatType T> inline T cl_min(const T& x, const T& y) { return x > y ? y : x; } 
 
 #endif//__clan_base_val__ 
