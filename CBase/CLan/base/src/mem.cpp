@@ -1,4 +1,4 @@
-#include "../6mem.h"
+#include "../7mem.h"
 
 namespace clan
 {
@@ -101,6 +101,8 @@ namespace clan
 			return s32(p - (u8*)data);
 		}
 	}
+	u8 hex_char_val(char c) { return g_hex_char_val[c]; }
+	u8 hex_char_val(wchar c) { return g_hex_char_val[c]; }
 	s32 hex_mem(char* buf, s32 buf_size, void* data, s32 data_size) { return _hex_mem(buf, buf_size, data, data_size); }
 	s32 hex_mem(wchar* buf, s32 buf_size, void* data, s32 data_size) { return _hex_mem(buf, buf_size, data, data_size); }
 

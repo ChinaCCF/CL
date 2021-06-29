@@ -1,6 +1,7 @@
-﻿#ifndef __clan_concept__
-#define __clan_concept__
+﻿#ifndef __clan_base_concept__
+#define __clan_base_concept__
 
+#include <concepts>
 #include "3type_traits.h"
 
 namespace clan
@@ -27,6 +28,24 @@ namespace clan
     concept ValType = IsVal<T>::value;
 
     template<typename T>
+    concept ValExFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
+
+    template<typename T>
+    concept CharsType = 
+        IsSameType<typename RawType<T>::type, char*>::value ||
+        IsSameType<typename RawType<T>::type, wchar*>::value;
+
+    template<typename T>
+    concept NotCharsType = !CharsType<T>;
+
+    template<typename T>
+    concept StrType = 
+        std::is_convertible<T, char*>::value || 
+        std::is_convertible<T, const char*>::value ||
+        std::is_convertible<T, wchar*>::value ||
+        std::is_convertible<T, const wchar*>::value;
+     
+    template<typename T>
     concept ClassType = IsClass<T>::value;
 
     template<typename T>
@@ -46,14 +65,14 @@ namespace clan
         a.free(p);//释放任意大小指针空间
     };
 
-    //定义对象分配器
-    template<typename A, typename T>
-    concept AllocObjType = requires(A a, T * p)
-    {
-        a.alloc(); 
-        requires IsSameType<T*, decltype(a.alloc())>::value; 
-        a.free(p);
-    };
+    //常规的内存申请器 
+    //class AllocMem
+    //{
+    //public:
+    //	char* alloc(s64 size) { return (char*)malloc(size); }
+    //	char* realloc(void* p, s64 size) { return (char*)realloc(p, size); }
+    //	void free(void* p) { ::free(p); }
+    //};
 }
 
-#endif//__clan_concept__ 
+#endif//__clan_base_concept__ 

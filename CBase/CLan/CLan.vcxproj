@@ -13,23 +13,33 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="base\src\dll.cpp" />
+    <ClCompile Include="base\src\exception.cpp" />
     <ClCompile Include="base\src\mem.cpp" />
     <ClCompile Include="base\src\str.cpp" />
     <ClCompile Include="base\src\time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base\11time.h" />
+    <ClInclude Include="base\12time.h" />
     <ClInclude Include="base\1config.h" />
     <ClInclude Include="base\2type.h" />
     <ClInclude Include="base\3type_traits.h" />
     <ClInclude Include="base\4concept.h" />
-    <ClInclude Include="base\5val.h" />
-    <ClInclude Include="base\6mem.h" />
-    <ClInclude Include="base\7str.h" />
-    <ClInclude Include="base\10call.h" />
-    <ClInclude Include="base\9ptr.h" />
-    <ClInclude Include="base\8obj.h" />
+    <ClInclude Include="base\5exception.h" />
+    <ClInclude Include="base\6val.h" />
+    <ClInclude Include="base\7mem.h" />
+    <ClInclude Include="base\8str.h" />
+    <ClInclude Include="base\11call.h" />
+    <ClInclude Include="base\10ptr.h" />
+    <ClInclude Include="base\9obj.h" />
+    <ClInclude Include="set\2arr.h" />
+    <ClInclude Include="set\1base.h" />
+    <ClInclude Include="set\3list.h" />
+    <ClInclude Include="set\4heap.h" />
+    <ClInclude Include="set\5map.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="base\src\base.natvis" />
+    <Natvis Include="set\set.natvis" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\4setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

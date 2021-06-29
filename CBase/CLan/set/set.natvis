@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!--数组-->
+  <Type Name="clan::Array&lt;*,*&gt;">
+    <DisplayString>cnt: {cnt_}  |  size: {size_}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>cnt_</Size>
+        <ValuePointer>arr_</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+  <!--链表-->
+  <Type Name="clan::List&lt;*,*&gt;">
+    <DisplayString>cnt: {cnt_}</DisplayString>
+    <Expand>
+      <LinkedListItems>
+        <Size>cnt_</Size>
+        <HeadPointer>((Node*)buf_)-&gt;next_</HeadPointer>
+        <NextPointer>next_</NextPointer>
+        <ValueNode>val_</ValueNode>
+      </LinkedListItems>
+    </Expand>
+  </Type>
+
+  <!--HeapArr-->
+  <Type Name="clan::HeapArr&lt;*,*,*&gt;">
+    <DisplayString>cnt: {cnt_}  |  size: {size_}</DisplayString>
+    <Expand>
+      <ArrayItems>
+        <Size>cnt_</Size>
+        <ValuePointer>arr_ + 1</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>

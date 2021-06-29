@@ -1,7 +1,7 @@
-#ifndef __clan_mem__
-#define __clan_mem__
+#ifndef __clan_base_mem__
+#define __clan_base_mem__
 
-#include "5val.h"
+#include "6val.h"
 
 namespace clan
 { 
@@ -89,6 +89,11 @@ namespace clan
         bool is_big() { return !is_little(); }
     };
      
+    //返回字符的16进制值, 失败返回0xCC
+    u8 hex_char_val(char c);
+    //返回字符的16进制值, 失败返回0xCC
+    u8 hex_char_val(wchar c);
+
     //返回字符串长度, 失败返回0
     s32 hex_mem(char* buf, s32 buf_size, void* data, s32 data_size);
     s32 hex_mem(wchar* buf, s32 buf_size, void* data, s32 data_size);
@@ -98,4 +103,4 @@ namespace clan
 	s32 unhex_mem(void* data, s32 data_size, const wchar* str, s32 str_len);
 }
 
-#endif//__clan_mem__ 
+#endif//__clan_base_mem__ 

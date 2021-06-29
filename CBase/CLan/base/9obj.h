@@ -1,5 +1,5 @@
-#ifndef __clan_obj__
-#define __clan_obj__
+#ifndef __clan_base_obj__
+#define __clan_base_obj__
  
 namespace clan
 {
@@ -14,4 +14,4 @@ namespace clan
      };
 }
 
-#endif//__clan_obj__ 
+#endif//__clan_base_obj__ 

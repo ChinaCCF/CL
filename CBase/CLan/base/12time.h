@@ -1,5 +1,5 @@
-#ifndef __clan_time__
-#define __clan_time__
+#ifndef __clan_base_time__
+#define __clan_base_time__
 
 #include "2type.h"
 
@@ -35,4 +35,4 @@ namespace clan
 	int week_day(int year, int month, int day);
 }
 
-#endif//__clan_time__ 
+#endif//__clan_base_time__ 

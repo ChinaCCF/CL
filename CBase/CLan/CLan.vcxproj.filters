@@ -11,10 +11,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="base\src\dll.cpp" />
     <ClCompile Include="base\src\str.cpp" />
     <ClCompile Include="base\src\mem.cpp" />
     <ClCompile Include="base\src\time.cpp" />
+    <ClCompile Include="base\src\exception.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\1config.h">
@@ -26,29 +26,51 @@
     <ClInclude Include="base\3type_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\5val.h">
+    <ClInclude Include="base\6val.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="base\4concept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\6mem.h">
+    <ClInclude Include="base\7mem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\7str.h">
+    <ClInclude Include="base\8str.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\10call.h">
+    <ClInclude Include="base\11call.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\9ptr.h">
+    <ClInclude Include="base\10ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\8obj.h">
+    <ClInclude Include="base\9obj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="base\11time.h">
+    <ClInclude Include="base\12time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="base\5exception.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set\2arr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set\3list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set\4heap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set\5map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="set\1base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="base\src\base.natvis" />
+    <Natvis Include="set\set.natvis" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
-﻿#ifndef __clan_type_traits__
-#define __clan_type_traits__
+﻿#ifndef __clan_base_type_traits__
+#define __clan_base_type_traits__
 
 //对std的<type_traits>补充
 #include "2type.h"
@@ -193,4 +193,4 @@ static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destr
 		static bool const value = sizeof(match_test<T>(0)) == sizeof(int); };
 
 }
-#endif//__clan_type_traits__ 
+#endif//__clan_base_type_traits__ 

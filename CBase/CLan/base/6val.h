@@ -1,5 +1,5 @@
-﻿#ifndef __clan_val__
-#define __clan_val__
+﻿#ifndef __clan_base_val__
+#define __clan_base_val__
 
 #include "4concept.h"
 
@@ -94,4 +94,4 @@ template<clan::IntType T> inline T cl_min(const T& x, const T& y) { return y ^ (
 template<clan::FloatType T> inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
 template<clan::FloatType T> inline T cl_min(const T& x, const T& y) { return x > y ? y : x; } 
 
-#endif//__clan_val__ 
+#endif//__clan_base_val__ 

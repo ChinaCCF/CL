@@ -1,4 +1,4 @@
-#include "../7str.h"
+#include "../8str.h"
 
 namespace clan
 {
@@ -187,13 +187,14 @@ namespace clan
 				val = 0;
 
 				auto p = str; 
-				while ('0' <= *p && *p <= '9')
-				{
-					s8 v = *p++ - '0';
-					val = val * 10 + v;
+				u8 u8v;
+				while ((u8v = hex_char_val(*p)) != 0xCC)
+				{ 
+					val = val * 10 + u8v;
+					++p;
 				}
 				if (p == str) return nullptr;
-				return (T*)str;
+				return (T*)p;
 			}
 
 			//返回第一个无法解析的字符位置
@@ -281,6 +282,8 @@ namespace clan
 		wchar* _str2val(const wchar* str, f64& val) { return _2fval(str, val); }
 		wchar* _str2val(const wchar* str, bool& val) { return _2bool(str, val); } 
 		 
+		char* _empty(char*) { return (char*)""; }
+		wchar* _empty(wchar*) { return (wchar*)L""; }
 	}
 
 	CharCode Str::judge_char_code(const char* _str)

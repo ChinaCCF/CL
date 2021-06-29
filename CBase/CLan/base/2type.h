@@ -1,5 +1,5 @@
-#ifndef __clan_type__
-#define __clan_type__
+#ifndef __clan_base_type__
+#define __clan_base_type__
 
 #include "1config.h"
 #include <stdint.h> 
@@ -46,7 +46,11 @@ typedef s32 st;
 typedef u32 ut;
 #endif
 
-#ifdef XDEBUG
+#define __clan_W(x) L##x
+#define _clan_W(x) __clan_W(x)
+
+//仅用来调试
+#ifdef XDEBUG 
 #define cl_dbg(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else
 #define cl_dbg(x) 
@@ -58,4 +62,4 @@ typedef u32 ut;
 #   define cl_thread
 #endif
 
-#endif//__clan_type__ 
+#endif//__clan_base_type__ 

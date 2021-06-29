@@ -1,9 +1,10 @@
-#ifndef __clan_call__
-#define __clan_call__
+#ifndef __clan_base_call__
+#define __clan_base_call__
 
 #include <new>
-#include "8obj.h"
 #include "4concept.h"
+#include "9obj.h"
+
 
 namespace clan
 {
@@ -178,4 +179,4 @@ namespace clan
 	};
 }
 
-#endif//__clan_call__ 
+#endif//__clan_base_call__ 

@@ -1,8 +1,9 @@
-#ifndef __clan_ptr__
-#define __clan_ptr__
+#ifndef __clan_base_ptr__
+#define __clan_base_ptr__
 
-#include "8obj.h"
 #include "4concept.h"
+#include "9obj.h"
+
 
 namespace clan
 {
@@ -10,30 +11,12 @@ namespace clan
 	//share_ptr 是一个多线程共享安全的指针, 这就带来了性能的损失
 	//然后auto_ptr是使用默认的new 和 delete内存管理的, 对于一些特许要求可能会不合适,例如不想使用默认内存操作
 	//下面这些对象都是非线程安全的
-
-	//常规的内存申请器 
-	//class AllocMem
-	//{
-	//public:
-	//	char* alloc(s64 size) { return malloc(size); }
-	//	void free(void* p) { ::free(p); }
-	//};
-
-	//常规的对象申请器
-	//template<typename T>
-	//class AllocObj
-	//{
-	//public:
-	//	static T* alloc() { auto p = (T*)malloc(sizeof(T)); new(p)T(); return p; }
-	//	static void free(T* p) { p->~T(); ::free(p); }
-	//};
-
+	 
 	/*############################################################################################*/
 	//指针对象, 用来保存指针
 	/*############################################################################################*/
-	template<typename T, typename A>
-	requires AllocObjType<A, T> || AllocMemType<A>
-		class _Ptr : public NoCopyObj
+	template<typename T, AllocMemType A>
+	class _Ptr : public NoCopyObj
 	{
 	public:
 		T* obj_ = nullptr;//对象指针
@@ -41,9 +24,9 @@ namespace clan
 		_Ptr() { clan_CheckClass(_Ptr); }
 		_Ptr(T* p) : obj_(p) {}
 		_Ptr(_Ptr&& pt) : obj_(pt.obj_) { pt.obj_ = nullptr; }
-		~_Ptr() { if (obj_) A().free(obj_); }
+		~_Ptr() { if (obj_) { obj_->~T(); A().free(obj_); } }
 
-		void operator=(T* p) { if (obj_) A().free(obj_); obj_ = p; }
+		void operator=(T* p) { ~_Ptr(); obj_ = p; }
 		operator T* () const { return obj_; }
 		T* operator->() const { return obj_; }
 		T& operator*() const { return *obj_; }
@@ -78,24 +61,30 @@ namespace clan
 			virtual ~HoldObj() {}//无需手动调用obj_的析构函数
 		};
 
-		template<typename T, typename A>
-		requires AllocObjType<A, T> || AllocMemType<A>
-			class HoldPtr : public iHolder<T>
+		template<typename T, AllocMemType A>
+		class HoldPtr : public iHolder<T>
 		{
+			using iHolder<T>::ptr_;
 		public:
-			HoldPtr(T* p) { iHolder<T>::ptr_ = p; }
-			virtual ~HoldPtr() { if (iHolder<T>::ptr_) A().free(iHolder<T>::ptr_); }
+			HoldPtr(T* p) { ptr_ = p; }
+			virtual ~HoldPtr() 
+			{
+				if (ptr_)
+				{ 
+					ptr_->~T();
+					A().free(ptr_); 
+				}
+			}
 		};
 	}
 
 	//和_Ptr一样需要自己重新定义
-	template<typename T, typename AllocObj, typename AllocHolder>
-	requires (AllocObjType<AllocObj, T> || AllocMemType<AllocObj>) && AllocMemType<AllocHolder>
-		class _PtrCnt
+	template<typename T, AllocMemType A> 
+	class _PtrCnt
 	{
 	public:
 		using Holder = detail::iHolder<T>;
-		using HoldPtr = detail::HoldPtr<T, AllocObj>;
+		using HoldPtr = detail::HoldPtr<T, A>;
 	private:
 		//强制转换容器指针, 例如父类A, 子类B, A转换到B, iHolder<A> => iHolder<B>
 		template<typename R>
@@ -112,7 +101,7 @@ namespace clan
 				if (holder_->cnt_ <= 0)
 				{
 					holder_->~Holder();
-					AllocHolder().free(holder_);
+					A().free(holder_);
 				}
 				holder_ = nullptr;
 			}
@@ -124,7 +113,7 @@ namespace clan
 		_PtrCnt() { clan_CheckClass(_PtrCnt); }
 		_PtrCnt(T* p)
 		{
-			holder_ = (Holder*)AllocHolder().alloc(sizeof(HoldPtr));
+			holder_ = (Holder*)A().alloc(sizeof(HoldPtr));
 			new(holder_)HoldPtr(p);
 			holder_->cnt_ = 1;
 		}
@@ -140,8 +129,8 @@ namespace clan
 		s32 cnt() const { return holder_->cnt_; }
 		operator bool() const { return holder_ != nullptr; }
 
-		bool operator==(std::nullptr_t) const { return holder_ == nullptr; }
-		bool operator!=(std::nullptr_t) const { return holder_ != nullptr; }
+		bool operator==(const std::nullptr_t&) const { return holder_ == nullptr; }
+		bool operator!=(const std::nullptr_t&) const { return holder_ != nullptr; }
 		bool operator==(T* p) const { if (!holder_) return false; return holder_->ptr_ == p; }
 		bool operator!=(T* p) const { if (!holder_) return false; return holder_->ptr_ != p; }
 
@@ -150,16 +139,16 @@ namespace clan
 		T& operator*() const { return *holder_->ptr_; }
 	};
 
-	template<typename T, typename AllocHolder>
+	template<typename T, AllocMemType A>
 	auto make_ptr()
 	{
 		using HoldObj = detail::HoldObj<T>;
-		_PtrCnt<T, AllocHolder, AllocHolder> ptr;
-		ptr.holder_ = (HoldObj*)AllocHolder().alloc(sizeof(HoldObj));
+		_PtrCnt<T, A> ptr;
+		ptr.holder_ = (HoldObj*)A().alloc(sizeof(HoldObj));
 		new(ptr.holder_)HoldObj();
 		ptr.holder_->cnt_++;
 		return ptr;
 	}
 }
 
-#endif//__clan_ptr__ 
+#endif//__clan_base_ptr__ 

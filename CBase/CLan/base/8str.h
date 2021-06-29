@@ -1,9 +1,10 @@
-#ifndef __clan_str__
-#define __clan_str__
- 
+#ifndef __clan_base_str__
+#define __clan_base_str__
+
 #include <new>
 #include <string.h>
-#include "6mem.h"
+#include "5exception.h"
+#include "7mem.h"
 
 namespace clan
 {
@@ -114,7 +115,7 @@ namespace clan
 		}
 
 		template<CharType T, FloatType V>
-		inline s32 _fval2str(T* buf, s32 size, V val, s32 fraction)
+		inline s32 _val2str(T* buf, s32 size, V val, s32 fraction)
 		{
 			s32 len = 0;
 			if (val < 0)
@@ -133,7 +134,7 @@ namespace clan
 		char* _str2val(const char* str, bool& val);
 
 		wchar* _str2val(const wchar* str, s64& val);
-		wchar* _str2val(const wchar* str, f64& val); 
+		wchar* _str2val(const wchar* str, f64& val);
 		wchar* _str2val(const wchar* str, bool& val);
 	}
 	enum class CharCode
@@ -194,7 +195,7 @@ namespace clan
 			while (*end > 0 && *end <= 32 && end >= str) --end;
 			end[1] = 0;
 			return s32(end - str) + 1;
-		} 
+		}
 		//去掉字符串前端和末端无法显示的字符,返回裁剪后的长度
 		template<CharType T> static inline s32 trim(T* str, s32 len)
 		{
@@ -253,16 +254,16 @@ namespace clan
 			buf[0] = val;
 			buf[1] = 0;
 			return 1;
-		} 
+		}
 		template<CharType T, IntType V> static inline s32 convert(T* buf, s32 size, V val)
 		{
 			return detail::_val2str(buf, size, val);
-		} 
+		}
 		template<CharType T, FloatType V> static inline s32 convert(T* buf, s32 size, V val, s32 fraction = 0)
 		{
-			return detail::_fval2str(buf, size, val, fraction);
+			return detail::_val2str(buf, size, val, fraction);
 		}
-		/**************************************************************************************************************/ 
+		/**************************************************************************************************************/
 		template<CharType T, BoolType V> static inline T* to(const T* buf, V& val)
 		{
 			return detail::_str2val(buf, val);
@@ -295,30 +296,30 @@ namespace clan
 	};
 
 	template<CharType T>
-	class cstr
+	class StrView
 	{
 	public:
 		const T* str_ = nullptr;
 		s32 len_ = 0;
 
-		cstr() { clan_CheckClass(cstr); }
-		cstr(const std::nullptr_t&) {}
-		cstr(const T* str) { str_ = str; len_ = Str::len(str); }
-		cstr(const cstr& str) { str_ = str.str_; len_ = str.len_; } 
-		cstr(const T* str, s32 len) {  str_ = str; len_ = len; }
+		StrView() { clan_CheckClass(StrView); }
+		StrView(const std::nullptr_t&) {}
+		StrView(const T* str) { str_ = str; len_ = Str::len(str); }
+		StrView(const StrView& str) { str_ = str.str_; len_ = str.len_; }
+		StrView(const T* str, s32 len) { str_ = str; len_ = len; }
 		/*#######################################################################################*/
-		cstr& operator=(const T* str) { new(this)cstr(str); return *this; }
-		cstr& operator=(const cstr& str) { str_ = str.str_; len_ = str.len_; return *this; }
+		StrView& operator=(const T* str) { new(this)StrView(str); return *this; }
+		StrView& operator=(const StrView& str) { str_ = str.str_; len_ = str.len_; return *this; }
 		/*#######################################################################################*/
-		
+
 		s32 len() const { return len_; }
 		const T* data() const { return str_; }
 
 		operator const T* () const { return str_; }
 		char operator[](s32 index) const { return str_[index]; }
 
-		template<ValType R> 
-		operator R() const 
+		template<ValType R>
+		operator R() const
 		{
 			R val;
 			Str::to(str_, val);
@@ -353,7 +354,7 @@ namespace clan
 			_StrBase() { str_[0] = 0; }
 			~_StrBase() {}
 		protected:
-			bool _need(s32 len) { if (len >= N) return false; return true; }
+			void _need(s32 len) { clan_assert(len + len_ < N); }
 			void _move(_StrBase* str)
 			{
 				len_ = str->len_;
@@ -363,36 +364,29 @@ namespace clan
 		};
 
 		template<CharType T, AllocMemType A> class _StrBase<T, A, 0>
-		{ 
-			s32 size_;
+		{
+			s32 size_ = 0; //可以存储的字符数目, 非内存大小
 		public:
-			T* str_;
-			s32 len_;
+			T* str_ = nullptr;
+			s32 len_ = 0;
 
-			_StrBase()
-			{
-				str_ = nullptr;
-				len_ = 0;
-				size_ = 0;
-			}
+			_StrBase() {}
 			~_StrBase() { if (str_) A().free(str_); }
 		protected:
 			void _need(s32 len)
 			{
-				if (size_ == 0)
-				{ 
-					auto le = align(len + 1, 16);
-					size_ = sizeof(T) * le;
-					str_ = (T*)A().alloc(size_);
+				if (str_ == nullptr)
+				{
+					size_ = align(len + 1, 16);
+					str_ = (T*)A().alloc(size_ * sizeof(T));
 					str_[0] = 0;
 				}
 				else
 				{
 					if (len_ + len + 1 >= size_)
 					{
-						auto le = align(len_ + len + 1, 16);
-						size_ = sizeof(T) * le; 
-						str_ = (T*)A().realloc(str_, size_);
+						size_ = align(len_ + len + 1, 16);
+						str_ = (T*)A().realloc(str_, size_ * sizeof(T));
 					}
 				}
 			}
@@ -405,205 +399,160 @@ namespace clan
 				str_ = str->str_; str->str_ = nullptr;
 			}
 			s32 _size() const { return size_; }
-		}; 
+		};
+
+		char* _empty(char*);
+		wchar* _empty(wchar*);
 	}
 
+	struct Fraction
+	{
+		s32 len_;//小数部分的长度
+		Fraction(s32 len = 2) : len_(len) {}
+	};
+	 
 	template<CharType T, AllocMemType A, s32 N> class _String : public detail::_StrBase<T, A, N>
 	{
-		using Base = detail::_StrBase<T, A, N>; 
-		//void _set(const T* str, s32 len)
-		//{
-		//	if (len == 0)
-		//	{
-		//		if (str_) str_[0] = 0;
-		//		len_ = 0;
-		//		return;
-		//	}
+		using Base = detail::_StrBase<T, A, N>;
+		using SelfType = _String<T, A, N>;
+		using Base::_need;
+		using Base::_move;
+		using Base::_size;//可以存储的字符数目, 非内存大小
+		  
+		void _set(const T* str, s32 len)
+		{
+			_need(len);
+			len_ = len;
+			Str::copy(str_, str);
+		}
+	public:
+		s32 fraction_ = 2;//默认小数位2位
+		using Base::str_;
+		using Base::len_;
 
-		//	_reserve(len);
-		//	len_ = len;
-		//	strcpy(str_, str);
-		//}
-	public: 
 		_String() {}
-	//	_String(const char* str) { if (str == nullptr) _set(0, 0); else _set(str, strlen(str)); }
-	//	_String(const cstr& str) { _set(str.data(), str.len()); }
-	//	_String(const std::string& str) { _set(str.data(), (s32)str.length()); }
-	//	_String(const _String<N>& str) { _set(str.data(), str.len()); } //无法取消,否则会提示调用已删除的函数 
+		_String(const std::nullptr_t&) {}
+		_String(const T* str) { _set(str, Str::len(str)); }
+		_String(const StrView<T>& str) { if (str.str_) _set(str.data(), str.len()); }
+		template<s32 M>
+		_String(const _String<T, A, M>& str) { _set(str.str_, str.len_); } 
+		_String(const SelfType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
+		_String(SelfType&& str) noexcept { _move(&str); }
+		 
+		_String& operator=(const T* str) { if (str == nullptr) _set("", 0); else _set(str, Str::len(str)); return *this; }
+		_String& operator=(const StrView<T>& str) { _set(str.data(), str.len()); return *this; }
+		template<s32 M>
+		_String& operator=(const _String<T, A, M>& str) noexcept { _set(str.str_, str.len_); return *this; }
+		_String& operator=(SelfType&& str) noexcept { _move(&str); return *this; }
+		template<ValType R> _String& operator=(const R& val) { len_ = 0; return operator<<(val); }
 
-	//	_String(_String<N>&& str) noexcept { _move(&str); }
+		T* data() const { return (T*)str_; }
+		s32 len() const { return len_; }
+		s32 size() const { return _size(); }
+		void need(s32 len) { _need(len); }
 
-	//	_String& operator=(const c8* str) { if (str == nullptr) _set(0, 0); else _set(str, strlen(str)); return *this; }
-	//	_String& operator=(const cstr& str) { _set(str.data(), str.len()); return *this; }
-	//	_String& operator=(const std::string& str) { _set(str.data(), (s32)str.length()); return *this; }
-	//	_String& operator=(const _String<N>& str) noexcept { _set(str.data(), str.len()); return *this; } //无法取消,否则会提示调用已删除的函数 
+		StrView<T> view() const { return StrView<T>(str_, len_); }
+		T& operator[](s32 index) const { return str_[index]; }
 
-	//	_String& operator=(_String<N>&& str) noexcept { _move(&str); return *this; }
+		operator StrView<T>() const { return view(); }
+		operator T* () const { return str_ ? str_ : detail::_empty(str_); } 
+		template<ValType R>
+		operator R() const { R val = R(); if(len_ != 0) Str::to(str_, val); return val; }
+		/*#######################################################################################*/
+		T& back() { return str_[len_ - 1]; }
+		T pop_back() { T c = str_[--len_]; str_[len_] = 0; return c; }
+		_String& push_back(T c) { str_[len_++] = c; return *this; }
 
+		_String& push_back(const T* str, s32 len)
+		{
+			_need(len);
+			Byte::copy(str_ + len_, str, len);
+			len_ += len;
+			str_[len_] = 0;
+			return *this;
+		}
+		/*#######################################################################################*/
+		void trim() { len_ = Str::trim(str_, len_); }
+		/*#######################################################################################*/
+		//若查找失败返回-1
+		s32 find(T c) const { auto p = Str::find(str_, c); if (!p) return -1; return s32(p - str_); }
+		//若查找失败返回-1
+		s32 find(s32 index, T c) const { auto p = Str::find(str_ + index, c); if (!p) return -1; return s32(p - str_); }
+		//若查找失败返回-1
+		s32 find(const T* str) const { auto p = Str::find(str_, str); if (!p) return -1; return s32(p - str_); }
+		//若查找失败返回-1
+		s32 find(s32 index, const T* str) const { auto p = Str::find(str_ + index, str); if (!p) return -1; return s32(p - str_); }
+		//若查找失败返回-1
+		s32 rfind(T c) const { auto p = Str::rfind(str_, c); if (!p) return -1; return s32(p - str_); }
+		/*###############################################################################*/
+		//移除指定索引开始的指定长度字符串
+		void remove(s32 index, s32 len)
+		{
+			clan_assert(index + len <= len_);
 
-	//	c8* data() const { return (c8*)str_; }
-	//	s32 len() const { return len_; }
-	//	s32 size() const { return _size(); }
+			s32 tail = len_ - index - len;
+			Byte::copy(str_ + index, str_ + index + len, tail);
+			len_ -= len;
+			str_[len_] = 0;
+		}
+		void remove(const T* str, s32 len)
+		{
+			auto p = Str::find(str_, str);
+			if (p) remove(s32(p - str_), len);
+		}
+		void remove(const T* str) { remove(str, Str::len(str)); }
+		void remove(const StrView<T>& str) { remove(str.data(), str.len()); }
+		/*###############################################################################*/
+		void replace(T src, T dst) { Str::replace(str_, src, dst); }
+		/*###############################################################################*/
+		s32 sub(T* buf, s32 start, s32 len) const
+		{
+			clan_assert(len_ >= start);
+			s32 tail = len_ - start;
+			if (len > tail) len = tail;
+			Str::copy(buf, 9999, str_ + start, len);
+			return len;
+		}
 
-	//	void reserve(s32 len) { _reserve(len); }
+		s32 sub(T* buf, s32 start) const { return sub(buf, start, len_); }
+		/*###############################################################################*/
+	public:
+		_String& operator=(const Fraction& f) { fraction_ = f.len_; return *this; }
+		_String& operator<<(const Fraction& f) { fraction_ = f.len_; return *this; }
+		_String& operator<<(const std::nullptr_t&) { return push_back("null", 4); }
 
-	//	void set_len(s32 len) { len_ = len; if (str_) str_[len] = 0; }
-	//	void cal_len() { len_ = strlen(str_); }
+		template<ValExFloatType R>
+		_String& operator<<(const R& val)
+		{
+			T buf[64];
+			s32 len = Str::convert(buf, 64, val);
+			return push_back((const T*)buf, len);
+		}
+		template<FloatType R>
+		_String& operator<<(const R& val)
+		{
+			T buf[64];
+			s32 len = Str::convert(buf, 64, val, fraction_);
+			return push_back((const T*)buf, len);
+		}
+		_String& operator<<(const T* str) { return push_back(str, Str::len(str)); }
+		_String& operator<<(const StrView<T>& str) { return push_back(str.data(), str.len()); }
+		template<s32 M> _String& operator<<(const _String<T, A, M>& str) { return push_back(str.data(), str.len()); }
 
-	//	c8& back() { return str_[len_ - 1]; }
-	//	void pop(s32 len = 1) { len_ -= len; str_[len_] = 0; }
+		/*###############################################################################*/
+		bool operator==(const std::nullptr_t&) const { return len_ == 0; }
+		bool operator!=(const std::nullptr_t&) const { return len_ != 0; }
 
-	//	void trim() { len_ = cl::trim(str_, len_); }
-	//	/*#######################################################################################*/
-	//	//若查找失败返回-1
-	//	s32 find(c8 c) const { auto p = strfind(str_, c); if (!p) return -1; return s32(p - str_); }
-	//	//若查找失败返回-1
-	//	s32 find(s32 index, c8 c) const { auto p = strfind(str_ + index, c); if (!p) return -1; return s32(p - str_); }
-	//	//若查找失败返回-1
-	//	s32 find(const c8* str) const { auto p = strfind(str_, str); if (!p) return -1; return s32(p - str_); }
-	//	//若查找失败返回-1
-	//	s32 find(s32 index, const c8* str) const { auto p = strfind(str_ + index, str); if (!p) return -1; return s32(p - str_); }
-	//	//若查找失败返回-1
-	//	s32 rfind(c8 c) const { char* p = str_ + len_ - 1; while (*p != c && p >= str_) --p; return s32(p - str_); }
-	//	/*###############################################################################*/
-	//	//移除指定索引开始的指定长度字符串
-	//	void remove(s32 index, s32 len)
-	//	{
-	//		cl_assert(index + len <= len_);
-	//		s32 tail = len_ - index - len;
-	//		Byte::copy(str_ + index, str_ + index + len, tail);
-	//		len_ -= len;
-	//		str_[len_] = 0;
-	//	}
-	//	void remove(const char* str, s32 len)
-	//	{
-	//		auto p = strfind(str_, str);
-	//		if (p) remove(s32(p - str_), len);
-	//	}
-	//	void remove(const char* str) { remove(str, strlen(str)); }
-	//	void remove(const cstr& str) { remove(str.data(), str.len()); }
-	//	void remove(const std::string& str) { remove(str.data(), (s32)str.length()); }
-	//	/*###############################################################################*/
-	//	void replace(c8 src, c8 dst) { strrpl(str_, src, dst); }
-	//	void replace(const char* src, s32 src_len, const char* dst, s32 dst_len)
-	//	{
-	//		s32 dif_len = dst_len - src_len;
-	//		if (dif_len > 0) _reserve(dif_len);
-	//		len_ = strrpl(str_, size(), len_, src, src_len, dst, dst_len);
-	//	}
-	//	void replace(const char* src, const char* dst) { replace(src, strlen(src), dst, strlen(dst)); }
-	//	void replace(const cstr& src, const cstr& dst) { replace(src.data(), src.len(), dst.data(), dst.len()); }
-	//	void replace(const std::string& src, const std::string& dst) { replace(src.data(), (s32)src.length(), dst.data(), (s32)dst.length()); }
-	//	/*###############################################################################*/
-	//	template<s32 M> void sub(s32 start, s32 len, _String<M>* ret) const
-	//	{
-	//		cl_assert(len_ >= start);
-	//		s32 tail = len_ - start;
-	//		ret->len_ = 0;
-	//		if (tail > 0)
-	//		{
-	//			len = (len > tail) ? tail : len;
-	//			ret->append((c8*)str_ + start, len);
-	//		}
-	//	}
-	//	_String<0> sub(s32 start, s32 len) const
-	//	{
-	//		_String<0> str;
-	//		sub(start, len, &str);
-	//		return str;
-	//	}
-	//	_String<0> sub(s32 start) const { return sub(start, len_); }
-	//	/*###############################################################################*/
-	//	_String& append(const c8 c)
-	//	{
-	//		_reserve(1);
-	//		str_[len_++] = c;
-	//		str_[len_] = 0;
-	//		return *this;
-	//	}
-	//	_String& append(const c8* str, s32 len)
-	//	{
-	//		_reserve(len);
-	//		Byte::copy(str_ + len_, str, len);
-	//		len_ += len;
-	//		str_[len_] = 0;
-	//		return *this;
-	//	}
-	//	/*###############################################################################*/
-	//private:
-	//	template<typename T> //可以接受的类型为数值
-	//	struct _AddVal
-	//	{
-	//		enum { value = IsVal<T>::value };
-	//		inline void operator()(_String* s, const T& val)
-	//		{
-	//			char buf[64];
-	//			s32 len = val2str(buf, 64, val);
-	//			s->append(buf, len);
-	//		}
-	//	};
-	//	template<typename T>
-	//	struct _AddStr
-	//	{
-	//		enum { value = IsStr<T>::value };
-	//		inline void operator()(_String* s, const T& val)
-	//		{
-	//			cstr cs(val);
-	//			s->append(cs.data(), cs.len());
-	//		}
-	//	};
-	//public:
-	//	template<typename T>
-	//	_String& operator<<(const T& val)
-	//	{
-	//		using Type = typename SelectSupportT<_AddVal<T>, _AddStr<T>>::type;
-	//		Type()(this, val);
-	//		return *this;
-	//	}
-	//	_String& operator<<(const Float& val)
-	//	{
-	//		char buf[64];
-	//		s32 len = val2str(buf, 64, val);
-	//		append(buf, len);
-	//		return *this;
-	//	}
-	//	_String& operator<<(const std::nullptr_t&) { return append("null"); }
-	//	_String& operator<<(char c) { return append(c); }
-
-	//	template<typename T> _String& operator=(T&& val) { len_ = 0; return this->operator<<(std::forward<T>(val)); }
-	//	template<typename T> _String& operator+=(T&& val) { return this->operator<<(std::forward<T>(val)); }
-	//	/*###############################################################################*/
-
-	//	cstr cs() const { return cstr(str_, len_); }
-	//	operator cstr () const { return cstr(str_, len_); }
-	//	operator c8* () const { auto ret = str_ == nullptr ? "" : str_; return (c8*)ret; }
-	//	c8& operator[](s32 index) { return str_[index]; }
-	//private:
-	//	template<typename T> T _2val() const { cl_assert(len_ > 0); T val; str2val(str_, val); return val; }
-	//public:
-	//	operator bool() const { return _2val<bool>(); }
-	//	operator s8() const { return _2val<s8>(); }
-	//	operator s16() const { return _2val<s16>(); }
-	//	operator s32() const { return _2val<s32>(); }
-	//	operator s64() const { return _2val<s64>(); }
-	//	operator u8() const { return _2val<u8>(); }
-	//	operator u16() const { return _2val<u16>(); }
-	//	operator u32() const { return _2val<u32>(); }
-	//	operator u64() const { return _2val<u64>(); }
-	//	operator f32() const { return _2val<f32>(); }
-	//	operator f64() const { return _2val<f64>(); }
-
-	//	template<typename T> bool operator==(const T& t) const
-	//	{
-	//		const char* src = str_;
-	//		if (str_ == nullptr || len_ == 0) src = "";
-
-	//		return strcmp(src, (const char*)t) == 0;
-	//	}
-	//	template<typename T> bool operator!=(const T& t) const { return !this->operator==(t); }
-	//	template<> bool operator==(const std::nullptr_t&) const { return len_ == 0; }
-	//	template<> bool operator!=(const std::nullptr_t&) const { return len_ != 0; }
+		bool operator==(const T* t) const
+		{
+			auto src = str_ ? str_ : detail::_empty();
+			return Str::equ(src, t);
+		}
+		bool operator==(const StrView<T>& t) const { return operator==(t.data()); }
+		template<s32 M>
+		bool operator==(const _String<T, A, M>& t) const { return operator==(t.data()); }
+		template<typename T> bool operator!=(const T& t) const { return !operator==(t); }
 	};
 }
 
-#endif//__clan_str__ 
+#endif//__clan_base_str__ 

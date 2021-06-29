@@ -1,8 +1,8 @@
 ﻿//本项目是视线一些c++语言层次的代码
 //io, 内存, 线程等均不包含
 
-#ifndef __clan_config__
-#define __clan_config__
+#ifndef __clan_base_config__
+#define __clan_base_config__
 
 #ifdef _MSC_VER
 
@@ -18,4 +18,4 @@
 
 #endif//_MSC_VER
 
-#endif//__clan_config__
+#endif//__clan_base_config__

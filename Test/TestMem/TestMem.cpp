@@ -2,32 +2,23 @@
 //
 
 #include <stdio.h>   
+#include <CLan/base/8str.h>
 
-#include <CLan/base/10call.h>
-#include <CLan/base/11time.h>
-#include <CLan/base/7str.h>
-
-	class AllocMem
-	{
-	public:
-		char* alloc(s64 size) { return (char*)malloc(size); }
-		char* realloc(void* p, s64 size) { return (char*)p; }
-		void free(void* p) { ::free(p); }
-	};
-
-int main()
-{         
-	//clan::_String<char, AllocMem, 0> str;
-	//auto s = str.str();
-	int val = 10;
-	clan::Call<void(int)> call = [&val](int a) 
-	{
-		printf("%d\n", val + a);
-	};
+#include <CLan/set/1base.h>
+#include <CLan/set/2arr.h>
+#include <CLan/set/3list.h>
+#include <CLan/set/4heap.h>
  
-	clan::Call<void(int)> call2 = call;
-	call2 = call;
-	call2(3);
+template<clan::NotCharsType T>
+void add(const T& v)
+{ 
+}
+int main()
+{    
+	char buf[32];
+
+	clan::StrView<char> str;
+	add(L"");
 	return 0;
 }
 
