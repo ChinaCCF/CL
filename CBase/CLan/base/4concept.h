@@ -27,24 +27,30 @@ namespace cl
     template<typename T>
     concept ValType = IsVal<T>::value;
 
+    //除了浮点数外, 其他基础值数据
     template<typename T>
     concept ValExFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
      
+    //字符串数据
     template<typename T>
-	concept CharsType = IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value;
+    concept CharsType = IsChars<T>::value;
 
+    //非字符串数据, concept NotCharsType = !CharsType<T>; 注意这样的写法编译没问题, 但是实际中不起作用
     template<typename T>
-    concept NotCharsType = !CharsType<T>;
+    concept NotCharsType = IsNotChars<T>::value;
 
+    //是否是指针, 但不包含字符串
     template<typename T>
-    concept PtrType = std::is_pointer<T>::value && !(IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value);
+    concept PtrType = std::is_pointer<T>::value && IsNotChars<T>::value;
 
+    //能够转换位字符串的类型
     template<typename T>
     concept StrType = Convert2C8<T>::value || Convert2C16<T>::value;
      
     template<typename T>
     concept ClassType = IsClass<T>::value;
 
+    //成员函数类型
     template<typename T>
     concept ClassFunType = IsClassFun<T>::value;
 
@@ -52,6 +58,7 @@ namespace cl
     concept MoveType = MoveCheck<T>::value;
 
     //定义内存分配器
+    //这样很多对象操作可以在本库进行定义,但是涉及内存操作的地方可以在后面再定义
     template<typename A>
     concept AllocMemType = requires(A a, s64 size, void* p)
     {

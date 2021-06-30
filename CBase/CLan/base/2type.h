@@ -46,10 +46,11 @@ typedef s32 st;
 typedef u32 ut;
 #endif
 
+//多字节转为宽字节的宏
 #define __cl_W(x) L##x
 #define _cl_W(x) __cl_W(x)
 
-//仅用来调试
+//用来调试代码
 #ifdef XDEBUG 
 #define cl_dbg(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else

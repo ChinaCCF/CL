@@ -41,26 +41,11 @@ namespace cl
 		template<IntType T>
 		static inline void copy(void* _dst, const void* _src, T size)
 		{ 
-			//auto dst = (u8*)_dst;
-			//auto src = (u8*)_src;
-			//for (T i = 0; i < size; i++)
-			//	dst[i] = src[i];
-
             memcpy(_dst, _src, (size_t)size);
 		}
 		template<IntType T>
 		static inline void mov(void* _dst, const void* _src, T size)
 		{
-			//if (_dst < _src)
-			//	copy(_dst, _src, size);
-			//else
-			//{
-			//	auto dst = (u8*)_dst;
-			//	auto src = (u8*)_src;
-			//	for (T i = size - 1; i >= 0; i--)
-			//		dst[i] = src[i];
-			//}
-
             memmove(_dst, _src, (size_t)size);
 		}
 		template<IntType T>
@@ -72,6 +57,7 @@ namespace cl
 		}
 	};
 
+    //内存 大小端 工具类
     class Endian
     {
         template<size_t Size>
@@ -100,6 +86,7 @@ namespace cl
         }
     public:
         template<IntType T>
+        //改变当前值为另一端, 大端变小端 或 小端变大端
         static inline T change(T val)
         {
             static_assert(sizeof(T) >= 2);

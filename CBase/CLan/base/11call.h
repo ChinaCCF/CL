@@ -79,12 +79,15 @@ namespace cl
 	template <typename Return, typename... Args>
 	class Call;
 
+	//通用函数定义
+	//支持 纯函数, 成员函数, lamda表达式(注意不要捕捉太多对象, 本对象64个字节,  实际可用为56字节)
+	//扣除对齐等额外字节, 大概能够捕捉7个s64
 	template <typename Return, typename... Args>
 	class Call<Return(Args...)>
 	{  
 		using CallType = detail::iCall<Return, Args...>;
 		//lamda捕捉的对象尽量少, 否则超过这个缓存...
-		//class类对象指针 vt + this + fun = 8 + 8 + 8 = 24
+		//class类对象指针 vt + obj_ + fun = 8 + 8 + 8 = 24
 		u64 buf_[8];//64个字节
 		CallType* call_ = nullptr; 
 	public:

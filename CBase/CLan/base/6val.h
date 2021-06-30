@@ -118,7 +118,7 @@ namespace cl
 		u32 _hash(const T& val)
 		{
 			using Type = SelectType<Convert2C8<T>::value, char, wchar>::type;
-			Type* str = (Type*)val;
+			const Type* str = (const Type*)val;
 			u32 seed = 1313;
 			u32 ret = 0;
 			while (*str) ret = ret * seed + (*str++);

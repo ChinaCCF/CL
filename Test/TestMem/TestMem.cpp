@@ -11,6 +11,7 @@
 #include <CLan/set/4heap.h>
 #include <CLan/set/5map.h>
 #include <CLan/set/6mix_obj.h>
+#include <string>
 
 	class AllocMem
 	{
@@ -31,6 +32,8 @@
  
 int main()
 {    
+	std::string str;
+	str.reserve(128);
 	cl::_List<int, AllocMem> list;
 	list.push_back(1);
 	list.push_back(2);

@@ -41,6 +41,7 @@ namespace cl
 			return s32(t1 - org);
 		}
 
+		//返回拷贝的字节数
 		template<CharType T>
 		inline s32 _strcpy_s(T* t1, s32 size, const T* t2)
 		{
@@ -50,6 +51,7 @@ namespace cl
 			return s32(t1 - org);
 		}
 
+		//返回拷贝的字节数
 		template<CharType T>
 		inline s32 _strcpy_ns(T* t1, s32 size, const T* t2, s32 len)
 		{
@@ -58,6 +60,8 @@ namespace cl
 			*t1 = 0;
 			return s32(t1 - org);
 		}
+
+		//反转指定长度字符串
 		template<CharType T>
 		inline void _flip(T* str, s32 len)
 		{
@@ -65,6 +69,7 @@ namespace cl
 			while (str < end) swap(*str++, *end--);
 		}
 		/**************************************************************************************************************/
+		//格式化无符号整型到字符串缓冲区中
 		//返回字符串长度 
 		template<CharType T, IntType V>
 		inline s32 _uval2str(T* buf, s32 size, V val)
@@ -90,16 +95,21 @@ namespace cl
 
 		//返回字符串长度, fraction表示小数部分 
 		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度
 		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction);
+		//返回字符串长度,
 		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度,
 		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction);
 
+		//返回字符串长度,
 		template<CharType T, UintType V>
 		inline s32 _val2str(T* buf, s32 size, V val)
 		{
 			return _uval2str(buf, size, val);
 		}
 
+		//返回字符串长度,
 		template<CharType T, SintType V>
 		inline s32 _val2str(T* buf, s32 size, V val)
 		{
@@ -114,6 +124,7 @@ namespace cl
 			return _uval2str(buf, size, val) + len;
 		}
 
+		//返回字符串长度,
 		template<CharType T, FloatType V>
 		inline s32 _val2str(T* buf, s32 size, V val, s32 fraction)
 		{
@@ -130,11 +141,16 @@ namespace cl
 		/**************************************************************************************************************/
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, s64& val);
+		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, f64& val);
+		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, bool& val);
 
+		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, s64& val);
+		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, f64& val);
+		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, bool& val);
 	}
 	enum class CharCode
@@ -175,10 +191,12 @@ namespace cl
 		static inline s32 copy(wchar* t1, s32 size, const wchar* t2, s32 len) { return detail::_strcpy_ns(t1, size, t2, len); }
 		/**************************************************************************************************************/
 		static inline char* find(const char* str, char c) { return (char*)::strchr(str, c); }
+		//从字符串右侧返回第一个查找到指定字符位置
 		static inline char* rfind(const char* str, char c) { return (char*)::strrchr(str, c); }
 		static inline char* find(const char* str, const char* dst) { return (char*)::strstr(str, dst); }
 
 		static inline wchar* find(const wchar* str, wchar c) { return (wchar*)::wcschr(str, c); }
+		//从字符串右侧返回第一个查找到指定字符位置
 		static inline wchar* rfind(const wchar* str, wchar c) { return (wchar*)::wcsrchr(str, c); }
 		static inline wchar* find(const wchar* str, const wchar* dst) { return (wchar*)::wcsstr(str, dst); }
 		/**************************************************************************************************************/
@@ -227,8 +245,10 @@ namespace cl
 			}
 		}
 		/**************************************************************************************************************/
+		//格式化数值到字符串缓冲区中
+		//返回格式化字符串长度
 		template<CharType T>
-		static inline s32 convert(T* buf, s32 size, bool val)
+		static inline s32 format(T* buf, s32 size, bool val)
 		{
 			if (val)
 			{
@@ -249,26 +269,33 @@ namespace cl
 			buf[5] = 0;
 			return 5;
 		}
-		template<CharType T> static inline s32 convert(T* buf, s32 size, T val)
+		//格式化数值到字符串缓冲区中
+		//返回格式化字符串长度
+		template<CharType T> static inline s32 format(T* buf, s32 size, T val)
 		{
 			buf[0] = val;
 			buf[1] = 0;
 			return 1;
 		}
-		template<CharType T, IntType V> static inline s32 convert(T* buf, s32 size, V val)
+		//格式化数值到字符串缓冲区中
+		//返回格式化字符串长度
+		template<CharType T, IntType V> static inline s32 format(T* buf, s32 size, V val)
 		{
 			return detail::_val2str(buf, size, val);
 		}
-		template<CharType T, FloatType V> static inline s32 convert(T* buf, s32 size, V val, s32 fraction = 0)
+		//格式化数值到字符串缓冲区中
+		//返回格式化字符串长度
+		template<CharType T, FloatType V> static inline s32 format(T* buf, s32 size, V val, s32 fraction = 0)
 		{
 			return detail::_val2str(buf, size, val, fraction);
 		}
 		/**************************************************************************************************************/
+		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
 		template<CharType T, BoolType V> static inline T* to(const T* buf, V& val)
 		{
 			return detail::_str2val(buf, val);
 		}
-
+		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
 		template<CharType T, FloatType V> static inline T* to(const T* buf, V& val)
 		{
 			f64 tmp;
@@ -276,7 +303,7 @@ namespace cl
 			val = (V)tmp;
 			return ret;
 		}
-
+		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
 		template<CharType T, IntType V> static inline T* to(const T* buf, V& val)
 		{
 			s64 tmp;
@@ -284,6 +311,7 @@ namespace cl
 			val = (V)tmp;
 			return ret;
 		}
+		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
 		template<CharType T> static inline T* to(const T* buf, T& val)
 		{
 			s64 tmp;
@@ -292,9 +320,11 @@ namespace cl
 			return ret;
 		}
 		/**************************************************************************************************************/
+		//判断多字节字符串是什么编码, utf8还是ASCII(GBK)
 		static inline CharCode judge_char_code(const char* str);
 	};
 
+	//产量字符串视图, 类似标准库的std::string_view 和 win32驱动中的UnicodeString
 	template<CharType T>
 	class StrView
 	{
@@ -345,17 +375,19 @@ namespace cl
 
 	namespace detail
 	{
-		template<CharType T, AllocMemType A, s32 N> class _StrBase
+		//一个指定大小的字符串缓冲区
+		template<CharType T, AllocMemType A, s32 N> class _StrBuf
 		{
+			using ThisType = _StrBuf<T, A, N>;
 		public:
 			T str_[N];
 			s32 len_ = 0;
 
-			_StrBase() { str_[0] = 0; }
-			~_StrBase() {}
+			_StrBuf() { str_[0] = 0; }
+			~_StrBuf() {}
 		protected:
 			void _need(s32 len) { cl_assert(len + len_ < N); }
-			void _move(_StrBase* str)
+			void _move(ThisType* str)
 			{
 				len_ = str->len_;
 				Str::copy(str_, str->str_);
@@ -363,15 +395,17 @@ namespace cl
 			s32 _size() const { return N; }
 		};
 
-		template<CharType T, AllocMemType A> class _StrBase<T, A, 0>
+		//一个不是固定大小的字符串缓冲区
+		template<CharType T, AllocMemType A> class _StrBuf<T, A, 0>
 		{
+			using ThisType = _StrBuf<T, A, 0>;
 			s32 size_ = 0; //可以存储的字符数目, 非内存大小
 		public:
 			T* str_ = nullptr;
 			s32 len_ = 0;
 
-			_StrBase() {}
-			~_StrBase() { if (str_) A().free(str_); }
+			_StrBuf() {}
+			~_StrBuf() { if (str_) A().free(str_); }
 		protected:
 			void _need(s32 len)
 			{
@@ -390,7 +424,7 @@ namespace cl
 					}
 				}
 			}
-			void _move(_StrBase* str)
+			void _move(ThisType* str)
 			{
 				if (str_) A().free(str_);
 
@@ -405,16 +439,23 @@ namespace cl
 		wchar* _empty(wchar*);
 	}
 
+	//用于格式化时, 指示浮点数保留多少位小数
 	struct Fraction
 	{
 		s32 len_;//小数部分的长度
 		Fraction(s32 len = 2) : len_(len) {}
 	};
 	 
-	template<CharType T, AllocMemType A, s32 N> class _String : public detail::_StrBase<T, A, N>
+	//为啥要写这个类呢? 一个很简单的问题 std::string str; str.reserve(4096 * 4096); auto p = (char*)str.data(); do some thing with p, .... then crash
+	//原因是, VS或者GCC实现时, 判断保留的大小超过一定数目就不会申请这么大的内存, 而是等到具体使用时再申请,
+	//然后再一些常规操作, 例如 str = 123;//数值转化为字符串, 或者 int v = str; //字符串转换为数值
+	//若使用标准库是非常麻烦
+	//然后再就是, 在一个函数内部可以明确只需要使用某个数目的字符串缓冲区, 这时候定义一个std::string, 就会导致内存申请
+	//若定义 char buf[32]; 这样..又导致必须使用C方式的函数处理..非常麻烦
+	template<CharType T, AllocMemType A, s32 N> class _String : public detail::_StrBuf<T, A, N>
 	{
-		using Base = detail::_StrBase<T, A, N>;
-		using SelfType = _String<T, A, N>;
+		using Base = detail::_StrBuf<T, A, N>;
+		using ThisType = _String<T, A, N>;
 		using Base::_need;
 		using Base::_move;
 		using Base::_size;//可以存储的字符数目, 非内存大小
@@ -436,14 +477,14 @@ namespace cl
 		_String(const StrView<T>& str) { if (str.str_) _set(str.data(), str.len()); }
 		template<s32 M>
 		_String(const _String<T, A, M>& str) { _set(str.str_, str.len_); } 
-		_String(const SelfType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
-		_String(SelfType&& str) noexcept { _move(&str); }
+		_String(const ThisType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
+		_String(ThisType&& str) noexcept { _move(&str); }
 		 
 		_String& operator=(const T* str) { if (str == nullptr) _set("", 0); else _set(str, Str::len(str)); return *this; }
 		_String& operator=(const StrView<T>& str) { _set(str.data(), str.len()); return *this; }
 		template<s32 M>
 		_String& operator=(const _String<T, A, M>& str) noexcept { _set(str.str_, str.len_); return *this; }
-		_String& operator=(SelfType&& str) noexcept { _move(&str); return *this; }
+		_String& operator=(ThisType&& str) noexcept { _move(&str); return *this; }
 		template<ValType R> _String& operator=(const R& val) { len_ = 0; return operator<<(val); }
 
 		T* data() const { return (T*)str_; }
@@ -457,7 +498,16 @@ namespace cl
 		operator StrView<T>() const { return view(); }
 		operator T* () const { return str_ ? str_ : detail::_empty(str_); } 
 		template<ValType R>
-		operator R() const { R val = R(); if(len_ != 0) Str::to(str_, val); return val; }
+		operator R() const 
+		{ 
+			R val = R();
+			if (len_ != 0)
+			{
+				auto end_str = Str::to(str_, val);
+				cl_assert(end_str != nullptr);
+			} 
+			return val; 
+		}
 		/*#######################################################################################*/
 		T& back() { return str_[len_ - 1]; }
 		T pop_back() { T c = str_[--len_]; str_[len_] = 0; return c; }

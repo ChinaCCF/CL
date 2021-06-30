@@ -2,6 +2,8 @@
 #define __clan_base_type_traits__
 
 //对std的<type_traits>补充
+//一些基础type_traits是无法复写的, 因为要用到编译器底层接口, 这些接口...
+//例如 std::is_convertible, 就用到 __is_convertible_to, 这个东西是无法复写的
 #include "2type.h"
 #include <type_traits>
 
@@ -69,6 +71,9 @@ namespace cl
 	template<typename T> struct IsC8 { const_bool value = detail::_IsC8<RawType<T>::type>::value; };
 	template<typename T> struct IsC16 { const_bool value = detail::_IsC16<RawType<T>::type>::value; };
 	template<typename T> struct IsChar { const_bool value = detail::_IsC16<RawType<T>::type>::value || detail::_IsC8<RawType<T>::type>::value; };
+	template<typename T> struct IsChars {const_bool value = IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value;};
+	template<typename T> struct IsNotChars { const_bool value = !IsSameType<RawType<T>::type, char*>::value && !IsSameType<RawType<T>::type, wchar*>::value; };
+	
 	template<typename T> struct Convert2C8 { const_bool value = std::is_convertible<T, char*>::value || std::is_convertible<T, const char*>::value; };
 	template<typename T> struct Convert2C16 { const_bool value = std::is_convertible<T, wchar*>::value || std::is_convertible<T, const wchar*>::value; };
 
@@ -118,23 +123,25 @@ namespace cl
 	//判断是否是虚基类, 类中有虚函数的类, std::is_abstract是判断是否声明了纯虚函数
 	/*#####################################################################################*/
 	template<typename T> struct IsVirtualClass { const_bool value = std::is_polymorphic<T>::value; };
-	 
-	/*#####################################################################################*/
-	//判断虚基类是否有虚析构函数
-	/*#####################################################################################*/
-	template<typename T> struct HasVirtualDestructor { const_bool value = std::has_virtual_destructor<T>::value; };
-
+	  
 	/*#####################################################################################*/
 	//检查类
 	/*#####################################################################################*/
-	//常规类的右值赋值和右值构造检查
-	template<typename T> struct NormalClassCheck { const_bool value = IsMoveAssignable<T>::value && IsMoveConstructible<T>::value; };
-	template<typename T> struct VirtualClassCheck { const_bool value = IsVirtualClass<T>::value ? HasVirtualDestructor<T>::value : true; };
-
-	template<typename T> struct MoveCheck { const_bool value = IsClass<T>::value ? NormalClassCheck<T>::value : true; };
-	template<typename T> struct DestructorCheck { const_bool value = IsClass<T>::value ? VirtualClassCheck<T>::value : true; };
-
-	//static_assert 不能输出中文
+	namespace detail
+	{
+		//判断虚基类是否有虚析构函数
+		template<typename T> struct HasVirtualDestructor { const_bool value = std::has_virtual_destructor<T>::value; }; 
+		//常规类的右值赋值和右值构造检查
+		template<typename T> struct NormalClassCheck { const_bool value = IsMoveAssignable<T>::value && IsMoveConstructible<T>::value; };
+		//检查虚函数是否定义了虚析构函数
+		template<typename T> struct VirtualClassCheck { const_bool value = IsVirtualClass<T>::value ? HasVirtualDestructor<T>::value : true; };
+	} 
+	//检查类是否定义了移动语义
+	template<typename T> struct MoveCheck { const_bool value = IsClass<T>::value ? detail::NormalClassCheck<T>::value : true; };
+	//检查类的是否定义了虚析构函数
+	template<typename T> struct DestructorCheck { const_bool value = IsClass<T>::value ? detail::VirtualClassCheck<T>::value : true; };
+	 
+	//检查类的定义详情,是否定义了移动语义, 虚类是否定义了虚析构函数
 #define  clan_CheckClass(T) \
 static_assert(cl::MoveCheck<T>::value, "class need move assign and construct!");\
 static_assert(cl::DestructorCheck<T>::value, "virtual class need virtual destructor!");
@@ -184,9 +191,9 @@ static_assert(cl::DestructorCheck<T>::value, "virtual class need virtual destruc
 
 	/*#####################################################################################*/
 	//判断某个类是否含有某个函数
-	//先用这个宏定义类模板, 再调用具体模板
-	//Def_Class_Has(fun, void, int); //定义函数名称为fun, 返回值为void, 一个int为参数的函数判断模板
-	//auto v = class_has_fun<A>::value; //使用这个具体模板来测试
+	//先用这个宏定义类模板, 再调用具体模板, 使用例子:
+	//Def_Class_Has(fun, void, int); //要判断某个类是否定义了函数fun, 返回值为void, 一个int为参数
+	//auto v = class_has_fun<A>::value; //判断类A是否定义了函数fun
 #define Def_Class_Has(FunName, Return, ...) \
 	template <typename T> struct class_has_##FunName{ \
 		typedef Return (T::* FunType)(##__VA_ARGS__); \
