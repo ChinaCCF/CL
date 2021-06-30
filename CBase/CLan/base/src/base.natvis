@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <!--字符串String-->
-  <Type Name="clan::_String&lt;*,*,*&gt;">
+  <Type Name="cl::_String&lt;*,*,*&gt;">
     <DisplayString>{str_}</DisplayString>
     <Expand>
       <Item Name="str">str_</Item>
@@ -10,7 +10,7 @@
     </Expand>
   </Type>
   <!--字符串String-->
-  <Type Name="clan::_PtrCnt&lt;*,*,*&gt;">
+  <Type Name="cl::_PtrCnt&lt;*,*,*&gt;">
     <DisplayString>{holder_-&gt;ptr_}</DisplayString>
     <Expand>
       <Item Name="obj">holder_-&gt;ptr_</Item>

@@ -46,8 +46,8 @@ typedef s32 st;
 typedef u32 ut;
 #endif
 
-#define __clan_W(x) L##x
-#define _clan_W(x) __clan_W(x)
+#define __cl_W(x) L##x
+#define _cl_W(x) __cl_W(x)
 
 //仅用来调试
 #ifdef XDEBUG 

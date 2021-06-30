@@ -1,6 +1,6 @@
 #include "../8str.h"
 
-namespace clan
+namespace cl
 {
 	namespace
 	{

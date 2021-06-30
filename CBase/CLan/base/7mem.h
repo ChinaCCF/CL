@@ -3,8 +3,38 @@
 
 #include "6val.h"
 
-namespace clan
+namespace cl
 { 
+    template<AllocMemType A, typename T, typename ... Args>
+    inline T* _new(Args&& ... args)
+    {
+        auto p = (T*)A().alloc(sizeof(T));
+        ::new(p)T(std::forward<Args>(args)...);
+        return p;
+    } 
+    template<AllocMemType A, typename T>
+    inline void _del(T* p)
+    {
+        p->~T();
+        A().free(p);
+    }
+
+    template<AllocMemType A, typename T>
+    inline T* _news(s32 N)
+    {
+        auto p = (T*)A().alloc(sizeof(T) * N);
+        for (s32 i = 0; i < N; ++i) ::new(p + i)T();
+        return p;
+    }
+
+    template<AllocMemType A, typename T>
+    inline void _dels(T* p, s32 N) 
+    {
+        for (s32 i = 0; i < N; ++i) 
+            (p + i)->~T();
+        A().free(p); 
+    }
+
 	class Byte
 	{
 	public:

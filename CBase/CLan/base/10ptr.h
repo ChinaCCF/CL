@@ -1,11 +1,10 @@
 #ifndef __clan_base_ptr__
 #define __clan_base_ptr__
 
-#include "4concept.h"
+#include "7mem.h"
 #include "9obj.h"
 
-
-namespace clan
+namespace cl
 {
 	//内存指针 #include<memory>
 	//share_ptr 是一个多线程共享安全的指针, 这就带来了性能的损失
@@ -24,7 +23,7 @@ namespace clan
 		_Ptr() { clan_CheckClass(_Ptr); }
 		_Ptr(T* p) : obj_(p) {}
 		_Ptr(_Ptr&& pt) : obj_(pt.obj_) { pt.obj_ = nullptr; }
-		~_Ptr() { if (obj_) { obj_->~T(); A().free(obj_); } }
+		~_Ptr() { if (obj_) _del<A>(obj_); }
 
 		void operator=(T* p) { ~_Ptr(); obj_ = p; }
 		operator T* () const { return obj_; }
@@ -51,14 +50,11 @@ namespace clan
 		template<typename T>
 		class HoldObj : public iHolder<T>
 		{
+			using iHolder<T>::ptr_;
 			T obj_;
 		public:
-			HoldObj()
-			{
-				new(&obj_)T();
-				iHolder<T>::ptr_ = &obj_;
-			}
-			virtual ~HoldObj() {}//无需手动调用obj_的析构函数
+			HoldObj() : ptr_(&obj_) {}
+			virtual ~HoldObj() {}
 		};
 
 		template<typename T, AllocMemType A>
@@ -67,14 +63,7 @@ namespace clan
 			using iHolder<T>::ptr_;
 		public:
 			HoldPtr(T* p) { ptr_ = p; }
-			virtual ~HoldPtr() 
-			{
-				if (ptr_)
-				{ 
-					ptr_->~T();
-					A().free(ptr_); 
-				}
-			}
+			virtual ~HoldPtr() { if (ptr_) _del<A>(ptr_); }
 		};
 	}
 
@@ -98,11 +87,8 @@ namespace clan
 			if (holder_)
 			{
 				--holder_->cnt_;
-				if (holder_->cnt_ <= 0)
-				{
-					holder_->~Holder();
-					A().free(holder_);
-				}
+				if (holder_->cnt_ <= 0) 
+					_del<A>(holder_);  
 				holder_ = nullptr;
 			}
 		}
@@ -113,8 +99,7 @@ namespace clan
 		_PtrCnt() { clan_CheckClass(_PtrCnt); }
 		_PtrCnt(T* p)
 		{
-			holder_ = (Holder*)A().alloc(sizeof(HoldPtr));
-			new(holder_)HoldPtr(p);
+			holder_ = _new<A, HoldPtr>(p);  
 			holder_->cnt_ = 1;
 		}
 		_PtrCnt(const _PtrCnt& p) { _retain(p.holder_); }
@@ -144,9 +129,8 @@ namespace clan
 	{
 		using HoldObj = detail::HoldObj<T>;
 		_PtrCnt<T, A> ptr;
-		ptr.holder_ = (HoldObj*)A().alloc(sizeof(HoldObj));
-		new(ptr.holder_)HoldObj();
-		ptr.holder_->cnt_++;
+		ptr.holder_ = _new<A, HoldObj>(); 
+		ptr.holder_->cnt_ = 1;
 		return ptr;
 	}
 }

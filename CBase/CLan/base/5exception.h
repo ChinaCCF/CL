@@ -6,7 +6,7 @@
 
 //异常和错误代码是C/C++中最常见的错误处理方式
 //由于C++使用了构造函数和赋值函数等无返回值函数, 所以异常处理是C++最好的错误处理方式
-namespace clan
+namespace cl
 {  
     //由于跨语言需要, 基本大部分的编程环境都已经转换为wchar编码, window的底层驱动强制所有字符串必须是wchar
     class Exception : public std::exception
@@ -32,12 +32,12 @@ namespace clan
         virtual char const* what() const override { return "using msg, file instace!"; }
     };
        
-#define	clan_throw(main_code, sub_code, msg) do{throw clan::Exception(_clan_W(__FILE__), __LINE__, main_code, sub_code, msg);}while(0)
+#define	cl_throw(main_code, sub_code, msg) do{throw cl::Exception(_cl_W(__FILE__), __LINE__, main_code, sub_code, msg);}while(0)
 
 #if defined(XDEBUG)
-#   define clan_assert(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
+#   define cl_assert(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else
-#   define clan_assert(x) do{if(!(x)) clan_throw(0, 0, _clan_W(#x)); } while(0)
+#   define cl_assert(x) do{if(!(x)) cl_throw(0, 0, _cl_W(#x)); } while(0)
 #endif
 
     //使用示例

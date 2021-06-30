@@ -8,7 +8,7 @@
 
 #include "1base.h"
 
-namespace clan
+namespace cl
 {
 	enum class HeapType
 	{
@@ -18,8 +18,10 @@ namespace clan
 
 	//使用数组来实现大小堆
 	template<typename T, AllocMemType A, HeapType type = HeapType::Max>
-	class HeapArr
+	class _HeapArr : public NoCopyObj
 	{
+		using ThisType = _HeapArr<T, A, type>;
+
 		T* arr_ = nullptr;
 		s32 size_ = 0;
 		s32 cnt_ = 0;
@@ -79,7 +81,7 @@ namespace clan
 			}
 		}
 	public:
-		~HeapArr()
+		~_HeapArr()
 		{
 			if (arr_)
 			{
@@ -113,17 +115,21 @@ namespace clan
 		}
 		T& top() { return arr_[1]; }
 
-		void push(T v)
+		template<typename ... Args>
+		void push(Args&& ... args)
 		{
 			need(1);
-			arr_[++cnt_] = v;
+			++cnt_;
+			new(arr_ + cnt_)T(std::forward<Args>(args)...); 
 			_float_node(cnt_);
 		}
 		T pop()
 		{
-			clan_assert(cnt_ > 0);
-			T ret = arr_[1];
-			arr_[1] = arr_[cnt_--];
+			cl_assert(cnt_ > 0);
+			T ret = std::move(arr_[1]);
+			arr_[1] = std::move(arr_[cnt_]);
+			arr_[cnt_].~T();
+			cnt_--;
 			_sink_node(1);
 			return ret;
 		}

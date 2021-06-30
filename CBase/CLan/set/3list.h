@@ -7,7 +7,7 @@
 
 #include "1base.h"
 
-namespace clan
+namespace cl
 {
     namespace detail
     { 
@@ -19,9 +19,7 @@ namespace clan
             T val_;
 
             template<typename ... Args>
-            ListNode(Args&&... args) : val_(std::forward<Args>(args)...)
-            { 
-            }
+			ListNode(Args&&... args) : val_(std::forward<Args>(args)...) {}
         };
 
         template<typename T>
@@ -80,10 +78,11 @@ namespace clan
             return node;
         }
     }
-
+  
     template<typename T, AllocMemType A>
-    class List
+    class _List
     {
+        using ThisType = _List<T, A>;
         using Node = detail::ListNode<T>;
 
         struct HeadNode
@@ -98,18 +97,6 @@ namespace clan
 
         s32 cnt_ = 0;
 
-        template<typename ... Args>
-        inline Node* new_node(Args&& ... val) 
-        {
-            auto node = (Node*)A().alloc(sizeof(Node));
-            new(&node->val_)T(std::forward<Args>(val)...);
-            return node;
-        }
-        void del_node(Node* node)
-        {
-            node->val_.~T();
-            A().free(node);
-        }
         inline void _a2b(Node* a, Node* b)
         {
             a->next_ = b;
@@ -129,7 +116,7 @@ namespace clan
         }
         inline Node* _pop_front_node()
         {
-            clan_assert(cnt_ > 0);
+            cl_assert(cnt_ > 0);
             auto node = (Node*)head()->next_;
             _a2b(head(), (Node*)node->next_);
             cnt_--;
@@ -137,13 +124,13 @@ namespace clan
         }
         inline Node* _pop_back_node()
         {
-            clan_assert(cnt_ > 0);
+            cl_assert(cnt_ > 0);
             auto node = (Node*)tail()->pre_;
             _a2b((Node*)node->pre_, tail());
             cnt_--;
             return node;
         }
-        inline void _move(List* list)
+        inline void _move(ThisType* list)
         {
             cnt_ = list->cnt_;
             _a2b(head(), (Node*)list->head()->next_);
@@ -151,7 +138,7 @@ namespace clan
             _a2b(list->head(), list->tail());
             list->cnt_ = 0;
         }
-        inline void _append(const List& list)
+        inline void _append(const ThisType& list)
         {
             if (list.cnt_ == 0) return;
 
@@ -160,7 +147,7 @@ namespace clan
             auto p = (Node*)list.head()->next_;
             do
             {
-                auto node = new_node(p->val_); 
+                auto node = _new<A, Node>(p->val_); 
                 _a2b(self, node);
                 self = node;
                 p = (Node*)p->next_;
@@ -174,7 +161,7 @@ namespace clan
             auto pre = (Node*)node->pre_;
             auto next = (Node*)node->next_;
             _a2b(pre, next);
-            del_node(node); 
+            _del<A>(node); 
             return next;
         }
 
@@ -192,44 +179,44 @@ namespace clan
             Node* p = (Node*)head()->next_;
             while (index-- && p != tail())
                 p = p->next_;
-			clan_assert(index == -1 && p != tail());
+			cl_assert(index == -1 && p != tail());
             return p;
         }
     public:
-        List()
+        _List()
         {
             _a2b(head(), tail());
             head()->pre_ = nullptr;
             tail()->next_ = nullptr;
         }
-        List(const List& list) : List()
+        _List(const ThisType& list) : _List()
         {
             _append(list);
         }
-        List(List&& list) noexcept : List()
+        _List(ThisType&& list) noexcept : _List()
         {
             _move(&list);
         }
         //#############################################
-        List& operator=(const List& list)
+        _List& operator=(const ThisType& list)
         {
             clear();
             _append(list);
             return *this;
         }
-        List& operator=(List&& list) noexcept
+        _List& operator=(ThisType&& list) noexcept
         {
             clear();
             _move(&list);
             return *this;
         }
         //#############################################
-        List& operator<<(const List& list)
+        _List& operator<<(const ThisType& list)
         {
             _append(list);
             return *this;
         }
-        List& operator<<(List&& list)
+        _List& operator<<(ThisType&& list)
         {
             cnt_ += list.cnt_;
             _a2b((Node*)tail()->pre_, (Node*)list.head()->next_);
@@ -239,20 +226,20 @@ namespace clan
             return *this;
         }
 
-        ~List()
+        ~_List()
         {
             auto node = (Node*)head()->next_;
             while (node != tail())
             {
                 auto tmp = node;
                 node = (Node*)node->next_;
-                del_node(tmp); 
+                _del<A>(node); 
             }
         }
         void clear()
         {
             if (cnt_ == 0) return;
-            this->~List();
+            this->~_List();
             _a2b(head(), tail());
             cnt_ = 0;
         }
@@ -264,14 +251,14 @@ namespace clan
         template<typename ... Args>
         void push_front(Args&& ... args)
         {
-			auto node = new_node(std::forward<Args>(args)...);
+            auto node = _new<A, Node>(std::forward<Args>(args)...);
             _push_front_node(node);
         }
 
         template<typename ... Args>
         void push_back(Args&& ... args)
         {
-            auto node = new_node(std::forward<Args>(args)...);
+            auto node = _new<A, Node>(std::forward<Args>(args)...);
             _push_back_node(node);
         }
 
@@ -279,14 +266,14 @@ namespace clan
         {
             auto node = _pop_front_node();
             T val = std::move(node->val_);
-            del_node(node); 
+            _del<A>(node); 
             return val;
         }
         T pop_back()
         {
             auto node = _pop_back_node();
             T val = std::move(node->val_);
-            del_node(node);
+            _del<A>(node);
             return val;
         }
 
@@ -295,7 +282,7 @@ namespace clan
         {
             Node* p = _find_node(index); 
             cnt_++;
-            auto node = new_node(std::forward<Args>(args)...);
+            auto node = _new<A, Node>(std::forward<Args>(args)...);
 
             auto pre = (Node*)p->pre_;
             _a2b(pre, node);
@@ -317,7 +304,7 @@ namespace clan
             _a2b(h, tail());
         }
 
-        T& operator[](s32 index)
+        T& operator[](s32 index) const
         {
             Node* p = _find_node(index); 
             return p->val_;
@@ -326,7 +313,7 @@ namespace clan
         class It
         {
             Node* node_;
-            friend class List<T, A>;
+            friend class _List;
         public:
             It(Node* cur = nullptr) : node_(cur) {}
 
@@ -359,7 +346,7 @@ namespace clan
         void remove(const R& val)
         {
             auto it = find(val);
-            clan_assert(it.node_ != tail());
+            cl_assert(it.node_ != tail());
             remove(it);
         }
         void remove_if(const Call<bool(T*)>& call)

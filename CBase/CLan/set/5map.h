@@ -1,14 +1,10 @@
 #ifndef __clan_set_map__
 #define __clan_set_map__
+ 
+#include "../base/6val.h"  
+#include "3list.h"
 
-#include "../base/4concept.h"
-#include "../base/5exception.h"
-#include "../base/6val.h"
-#include "../base/11call.h"
-
-#include "1base.h"
-
-namespace clan
+namespace cl
 {
 	namespace detail
 	{
@@ -20,11 +16,115 @@ namespace clan
 		};
 	}
 
+	//serial 顾名思义 就是序列化, 本对象是用于读取例如xml或者保存xml时候用到的
+	template<NotCharsType Key, typename Val, AllocMemType A>
+	class _SerialHashMap : public NoCopyObj
+	{
+	protected:
+		using ThisType = _SerialHashMap<Key, Val, A>;
+		using Node = detail::HashMapNode<Key, Val>; 
+
+		Node** arr_ = nullptr;
+		s32 size_ = 0;
+		s32 cnt_ = 0;
+		_List<Node*, A> list_;
+
+		template<typename R>
+		inline Node* _find(const R& key, s32 index) const
+		{
+			auto node = arr_[index];
+			while (node && CmpVal<Key>()(node->first, key) != 0) node = node->next_;
+			return node;
+		}
+		inline void _add_to_list(Node* node, s32 index)
+		{
+			cnt_++;
+			node->next_ = arr_[index];
+			arr_[index] = node; 
+			list_.push_back(node);
+		}
+		inline void _move(ThisType* map)
+		{
+			size_ = map->size_; map->size_ = 0;
+			cnt_ = map->cnt_; map->cnt_ = 0;
+			arr_ = map->arr_; map->arr_ = nullptr;
+			list_ = std::move(map->list_);
+		} 
+	public:
+		_SerialHashMap() : _SerialHashMap(32) {}
+		explicit _SerialHashMap(s32 size)
+		{
+			size_ = size;
+			arr_ = (Node**)A().alloc(sizeof(Node*) * size_);
+			for (s32 i = 0; i < size_; ++i)
+				arr_[i] = nullptr;
+		}
+		_SerialHashMap(ThisType&& map) noexcept { _move(&map); }
+
+		~_SerialHashMap() { clear(); if (arr_) A().free(arr_); }
+
+		s32 size() const { return cnt_; }
+
+		void clear()
+		{
+			for (s32 i = 0; i < size_; ++i)
+			{
+				auto p = arr_[i];
+				while (p)
+				{
+					auto t = p;
+					p = p->next_;
+					_del<A>(t); 
+				};
+				arr_[i] = nullptr;
+			}
+			cnt_ = 0;
+		}
+
+		_SerialHashMap& operator=(ThisType&& map) noexcept
+		{
+			this->~_SerialHashMap();
+			_move(&map);
+			return *this;
+		}
+
+		template<typename R>
+		Val& operator[](const R& key)
+		{
+			s32 index = hash(key) % size_;
+			auto node = _find(key, index);
+			if (!node)
+			{
+				node = _new<A, Node>();
+				node->first = key; 
+				_add_to_list(node, index); 
+			}
+			return node->second;
+		}
+
+		template<typename R>
+		bool find(const R& key) const
+		{
+			s32 index = hash(key) % size_;
+			Node* node = _find(key, index);
+
+			return node != nullptr;
+		}
+
+		using It = typename _List<Node*, A>::It;
+
+		auto begin() const { return list_.begin(); }
+		auto end() const { return list_.end(); }
+	};
+
+
 	//不允许字符串作为字典的关键词
 	template<NotCharsType Key, typename Val, AllocMemType A>
-	class HashMap
+	class _HashMap
 	{
+	protected:
 		friend class It;
+		using ThisType = _HashMap<Key, Val, A>;
 		using Node = detail::HashMapNode<Key, Val>;
 
 		Node** arr_ = nullptr;
@@ -44,47 +144,26 @@ namespace clan
 			node->next_ = arr_[index];
 			arr_[index] = node;
 		}
-		inline void _move(HashMap* map)
+		inline void _move(ThisType* map)
 		{
 			size_ = map->size_; map->size_ = 0;
 			cnt_ = map->cnt_; map->cnt_ = 0;
 			arr_ = map->arr_; map->arr_ = nullptr;
 		}
 
-		template<typename R>
-		inline Node* new_node(const R& key)
-		{
-			auto node = (Node*)A().alloc(sizeof(Node));
-			new(node)Node();
-			node->first = key;
-			return node;
-		}
-		inline void del_node(Node* node)
-		{
-			node->~Node();
-			A().free(node);
-		}
-
-		void _add(const Key& key, const Val& val)
-		{
-			auto node = new_node(key);
-			node->second = val;
-			s32 index = hash(node->first) % size_;
-			_add_to_list(node, index);
-		}
 	public:
-		HashMap() : HashMap(32) {}
-		explicit HashMap(s32 size)
+		_HashMap() : _HashMap(32) {}
+		explicit _HashMap(s32 size)
 		{
 			size_ = size;
 			arr_ = (Node**)A().alloc(sizeof(Node*) * size_);
 			for (s32 i = 0; i < size_; ++i)
 				arr_[i] = nullptr;
 		}
-		HashMap(HashMap&& map) noexcept { _move(&map); }
-		HashMap(const HashMap& map) : HashMap(map.size_) { this->operator<<(map); }
+		_HashMap(ThisType&& map) noexcept { _move(&map); }
+		_HashMap(const ThisType& map) : _HashMap(map.size_) { this->operator<<(map); }
 
-		~HashMap() { clear(); if (arr_) A().free(arr_); }
+		~_HashMap() { clear(); if (arr_) A().free(arr_); }
 
 		s32 size() const { return cnt_; }
 
@@ -97,35 +176,41 @@ namespace clan
 				{
 					auto t = p;
 					p = p->next_;
-					del_node(t);
+					_del<A>(t); 
 				};
 				arr_[i] = nullptr;
 			}
 			cnt_ = 0;
 		}
 
-		HashMap& operator=(HashMap&& map) noexcept
+		_HashMap& operator=(ThisType&& map) noexcept
 		{
-			this->~HashMap();
+			this->~_HashMap();
 			_move(&map);
 			return *this;
 		}
 
-		HashMap& operator=(const HashMap& map)
+		_HashMap& operator=(const ThisType& map)
 		{
 			clear();
 			this->operator<<(map);
 			return *this;
 		}
 
-		HashMap& operator<<(const HashMap& map)
+		_HashMap& operator<<(const ThisType& map)
 		{
 			for (auto& p : map)
-				_add(p.first, p.second);
+			{
+				auto node = _new<A, Node>();
+				node->first = p.first;
+				node->second = p.second;
+				s32 index = hash(node->first) % size_;
+				_add_to_list(node, index);
+			} 
 			return *this;
 		}
 
-		HashMap& operator<<(HashMap&& map)
+		_HashMap& operator<<(ThisType&& map)
 		{
 			for (s32 i = 0; i < map.size_; i++)
 			{
@@ -153,7 +238,8 @@ namespace clan
 			auto node = _find(key, index);
 			if (!node)
 			{
-				node = new_node(key);
+				node = _new<A, Node>();
+				node->first = key;
 				_add_to_list(node, index);
 			}
 			return node->second;
@@ -161,15 +247,14 @@ namespace clan
 
 		class It
 		{
-			friend class HashMap<Key, Val, A>;
-			HashMap<Key, Val, A>* map_;
-			s32 size_ = 0;
-			s32 index_ = 0;
-			Node** arr_ = nullptr;
+			using MapType = _HashMap<Key, Val, A>;
+			friend class MapType;
+			s32 index_ = 0; 
+			const MapType* map_ = nullptr;
 			Node* node_ = nullptr;
 		public:
 			It() {}
-			It(Node** arr, Node* node, s32 size, s32 index) : arr_(arr), node_(node), size_(size), index_(index) {}
+			It(const MapType* map, Node* node,s32 index) : map_(map), node_(node), index_(index) {}
 
 			Pair<Key, Val>* operator->() { return node_; }
 			Pair<Key, Val>& operator*() { return *node_; }
@@ -181,8 +266,8 @@ namespace clan
 				{
 					if (node_) break;
 					index_++;
-					if (index_ >= size_) break;
-					node_ = arr_[index_];
+					if (index_ >= map_->size_) break;
+					node_ = map_->arr_[index_];
 				} while (true);
 				return *this;
 			}
@@ -205,7 +290,7 @@ namespace clan
 					}
 				}
 			}
-			return It(arr_, node, size_, i);
+			return It(this, node, i);
 		}
 
 		It end() const { return It(); }
@@ -216,7 +301,7 @@ namespace clan
 			s32 index = hash(key) % size_;
 			Node* node = _find(key, index);
 
-			return It(arr_, node, size_, index);
+			return It(this, node, index);
 		}
 
 		void remove(const It& it)
@@ -232,11 +317,10 @@ namespace clan
 			else
 			{
 				while (p->next_ != node) p = p->next_;
-				clan_assert(p != nullptr);
+				cl_assert(p != nullptr);
 				p->next_ = node->next_;
 			}
-
-			del_node(node);
+			_del<A>(node); 
 			cnt_--;
 		}
 
@@ -244,7 +328,7 @@ namespace clan
 		void remove(const T& key)
 		{
 			auto it = find(key);
-			clan_assert(it.node_ != nullptr);
+			cl_assert(it.node_ != nullptr);
 			remove(it);
 		}
 
@@ -265,7 +349,7 @@ namespace clan
 					if (call(t))
 					{
 						--cnt_;
-						del_node(t);
+						_del<A>(t); 
 					}
 					else
 					{

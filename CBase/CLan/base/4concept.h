@@ -4,7 +4,7 @@
 #include <concepts>
 #include "3type_traits.h"
 
-namespace clan
+namespace cl
 { 
     template<typename T>
     concept CharType = IsChar<T>::value;
@@ -29,18 +29,18 @@ namespace clan
 
     template<typename T>
     concept ValExFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
-
+     
     template<typename T>
-    concept PtrType = std::is_pointer<T>::value;
-
-    template<typename T>
-	concept CharsType = IsSameType<typename RawType<T>::type, char*>::value || IsSameType<typename RawType<T>::type, wchar*>::value;
+	concept CharsType = IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value;
 
     template<typename T>
     concept NotCharsType = !CharsType<T>;
 
     template<typename T>
-    concept StrType = IsStrC8<T>::value || IsStrC16<T>::value;
+    concept PtrType = std::is_pointer<T>::value && !(IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value);
+
+    template<typename T>
+    concept StrType = Convert2C8<T>::value || Convert2C16<T>::value;
      
     template<typename T>
     concept ClassType = IsClass<T>::value;
@@ -59,9 +59,9 @@ namespace clan
         a.realloc(p, size);//具备realloc函数
         requires IsSameType<char*, decltype(a.alloc(1))>::value;//确保申请函数返回char* 指针
         requires IsSameType<char*, decltype(a.realloc(p,1))>::value;//确保申请函数返回char* 指针
-        a.free(p);//释放任意大小指针空间
+        a.free(p);//释放任意大小指针空间 
     };
-
+      
     //常规的内存申请器 
     //class AllocMem
     //{

@@ -1,7 +1,7 @@
 #include "../5exception.h"
 #include "../8str.h"
 
-namespace clan
+namespace cl
 {
     Exception::Exception(const Exception& e)
     {

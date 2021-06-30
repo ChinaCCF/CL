@@ -4,7 +4,7 @@
 #include "../base/4concept.h"
 #include "../base/8str.h"
 
-namespace clan
+namespace cl
 {
 	template<typename T>
 	struct CmpVal

@@ -3,7 +3,7 @@
 
 #include "2type.h"
 
-namespace clan
+namespace cl
 {
 	//ÊÇ·ñÊÇÈòÄê
 	inline bool is_leap_year(int year)

@@ -6,7 +6,7 @@
 #include "5exception.h"
 #include "7mem.h"
 
-namespace clan
+namespace cl
 {
 	enum class CharProperty
 	{
@@ -354,7 +354,7 @@ namespace clan
 			_StrBase() { str_[0] = 0; }
 			~_StrBase() {}
 		protected:
-			void _need(s32 len) { clan_assert(len + len_ < N); }
+			void _need(s32 len) { cl_assert(len + len_ < N); }
 			void _move(_StrBase* str)
 			{
 				len_ = str->len_;
@@ -488,7 +488,7 @@ namespace clan
 		//移除指定索引开始的指定长度字符串
 		void remove(s32 index, s32 len)
 		{
-			clan_assert(index + len <= len_);
+			cl_assert(index + len <= len_);
 
 			s32 tail = len_ - index - len;
 			Byte::copy(str_ + index, str_ + index + len, tail);
@@ -507,7 +507,7 @@ namespace clan
 		/*###############################################################################*/
 		s32 sub(T* buf, s32 start, s32 len) const
 		{
-			clan_assert(len_ >= start);
+			cl_assert(len_ >= start);
 			s32 tail = len_ - start;
 			if (len > tail) len = tail;
 			Str::copy(buf, 9999, str_ + start, len);

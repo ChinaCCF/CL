@@ -3,13 +3,15 @@
 
 #include <stdio.h>   
 #include <CLan/base/8str.h>
+#include <CLan/base/10ptr.h>
 
 #include <CLan/set/1base.h>
 #include <CLan/set/2arr.h>
 #include <CLan/set/3list.h>
 #include <CLan/set/4heap.h>
 #include <CLan/set/5map.h>
- 
+#include <CLan/set/6mix_obj.h>
+
 	class AllocMem
 	{
 	public:
@@ -17,19 +19,61 @@
 		char* realloc(void* p, s64 size) { return (char*)realloc(p, size); }
 		void free(void* p) { ::free(p); }
 	};
+
+	class A
+	{
+	public:
+		~A() 
+		{
+			printf("~A\n");
+		}
+	};
  
 int main()
 {    
-	//clan::HashMap<int, int, AllocMem> map;
-	//map[1] = 2;
-	//map[2] = 3;
-	//map[3] = 4;
-	//map[4] = 5;
+	cl::_List<int, AllocMem> list;
+	list.push_back(1);
+	list.push_back(2);
 
-	//int v = map[2];
-	//int v2 = map[3];
-	//int v3 = map[4];
+	auto it = list.begin();
+	auto p = &*it;
+	{
+		cl::_PtrCnt<A, AllocMem> ptr = (A*)AllocMem().alloc(sizeof(A));
+	}
+	
+
+	cl::_HashMap<int, int, AllocMem> map;
+	map[1] = 2;
+	map[2] = 3;
+	map[3] = 4;
+	map[4] = 5;
+
+	int v = map[2];
+	int v2 = map[3];
+	int v3 = map[4];
+
+	cl::_HashMap<int, int, AllocMem> map2;
+	map2 << map;
 	 
+	cl::_MixObj<char, AllocMem> mo;
+	mo["a"] = 1;
+	mo["b"] = 2;
+
+	cl::_MixObj<char, AllocMem> mo2;
+	mo2 = 8; 
+
+	mo["1"] = std::move(mo2);
+
+	for (auto& i : mo)
+	{
+		for (auto& j : *i.second)
+		{
+			for (auto& k : *j.second) 
+			{
+				int ccfi = 0;
+			}
+		}
+	}
 	return 0;
 }
 

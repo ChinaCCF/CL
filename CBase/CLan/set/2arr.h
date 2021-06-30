@@ -8,25 +8,26 @@
 
 #include "1base.h"
 
-namespace clan
+namespace cl
 {
 	template<typename T, AllocMemType A>
-	class Array
+	class _Array
 	{
+		using ThisType = _Array<T, A>;
 		T* arr_ = nullptr; 
 		s32 cnt_ = 0;//当前存储的对象数
 		s32 size_ = 0;//可以存储的对象的数目
 
-		void _copy(const Array& arr)
+		void _copy(const ThisType& arr)
 		{
-			clan_assert(size_ - cnt_ >= arr.cnt_);
+			cl_assert(size_ - cnt_ >= arr.cnt_);
 			 
 			for (s32 i = 0; i < arr.cnt_; i++) 
 				new(arr_ + cnt_ + i)T(arr.arr_[i]);
 			cnt_ += arr.cnt_;
 		}
 
-		void _move(Array* arr)
+		void _move(ThisType* arr)
 		{
 			cnt_ = arr->cnt_; arr->cnt_ = 0;
 			size_ = arr->size_; arr->size_ = 0;
@@ -34,18 +35,18 @@ namespace clan
 		}
 		 
 	public:
-		Array() {}
+		_Array() {}
 
-		Array(const Array& arr)
+		_Array(const ThisType& arr)
 		{
 			size_ = arr.size_;
 			arr_ = (T*)A().alloc(sizeof(T) * size_); 
 			_copy(arr);
 		}
 
-		Array(Array&& arr) noexcept { _move(&arr); }
+		_Array(ThisType&& arr) noexcept { _move(&arr); }
 		 
-		~Array()
+		~_Array()
 		{
 			clear();
 			if (arr_) A().free(arr_);  
@@ -80,12 +81,12 @@ namespace clan
 			}
 		}
 
-		Array& operator=(const Array& arr)
+		_Array& operator=(const ThisType& arr)
 		{ 
 			if (size_ < arr.size_)
 			{
-				this->~Array();
-				new(this)Array(arr);
+				this->~_Array();
+				new(this)_Array(arr);
 			}
 			else
 			{
@@ -95,21 +96,21 @@ namespace clan
 			return *this;
 		}
 
-		Array& operator=(Array&& arr) noexcept
+		_Array& operator=(ThisType&& arr) noexcept
 		{
-			this->~Array();
-			new(this)Array(std::move(arr)); 
+			this->~_Array();
+			new(this)_Array(std::move(arr)); 
 			return *this;
 		}
 		 
-		Array& operator<<(const Array& arr)
+		_Array& operator<<(const ThisType& arr)
 		{
 			need(arr.cnt_);
 			_copy(arr);
 			return *this;
 		}
 
-		Array& operator<<(Array&& arr)
+		_Array& operator<<(ThisType&& arr)
 		{
 			need(arr.cnt_);
 			auto dst = arr_ + cnt_;
@@ -158,7 +159,7 @@ namespace clan
 		{
 			s32 index_ = 0;
 			T* arr_ = nullptr;
-			friend class Array<T, A>;
+			friend class _Array<T, A>;
 		public:
 			It(T* arr, s32 index) : arr_(arr), index_(index) {}
 
@@ -204,7 +205,7 @@ namespace clan
 			remove(it);
 		}
 
-		void remove_if(const clan::Call<bool(T*)>& is_remove)
+		void remove_if(const Call<bool(T*)>& is_remove)
 		{
 			u8 _buf[128];
 			bool need_free = false;
@@ -256,7 +257,7 @@ namespace clan
 			swap(arr_[index], arr_[index + 1]);
 		}
 	private:
-		void _quick_sort(T* arr, s32 size, const clan::Call<s32(T*, T*)>& cmp)
+		void _quick_sort(T* arr, s32 size, const Call<s32(T*, T*)>& cmp)
 		{
 			if (size <= 1) return;
 			s32 head = 0;
@@ -275,7 +276,7 @@ namespace clan
 			_quick_sort(arr + head + 1, size - head - 1, cmp);
 		}
 	public:
-		void sort(const clan::Call<s32(T*, T*)>& cmp) { _quick_sort(arr_, cnt_, cmp); }
+		void sort(const Call<s32(T*, T*)>& cmp) { _quick_sort(arr_, cnt_, cmp); }
 	};
 }
 

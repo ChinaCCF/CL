@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <!--数组-->
-  <Type Name="clan::Array&lt;*,*&gt;">
+  <Type Name="cl::_Array&lt;*,*&gt;">
     <DisplayString>cnt: {cnt_}  |  size: {size_}</DisplayString>
     <Expand>
       <ArrayItems>
@@ -11,7 +11,7 @@
     </Expand>
   </Type>
   <!--链表-->
-  <Type Name="clan::List&lt;*,*&gt;">
+  <Type Name="cl::_List&lt;*,*&gt;">
     <DisplayString>cnt: {cnt_}</DisplayString>
     <Expand>
       <LinkedListItems>
@@ -24,7 +24,7 @@
   </Type>
 
   <!--HeapArr-->
-  <Type Name="clan::HeapArr&lt;*,*,*&gt;">
+  <Type Name="cl::_HeapArr&lt;*,*,*&gt;">
     <DisplayString>cnt: {cnt_}  |  size: {size_}</DisplayString>
     <Expand>
       <ArrayItems>
@@ -33,9 +33,17 @@
       </ArrayItems>
     </Expand>
   </Type>
+
+  <!--_SerialHashMap-->
+  <Type Name="cl::_SerialHashMap&lt;*,*,*&gt;">
+    <DisplayString>cnt: {cnt_}</DisplayString>
+    <Expand>
+      <Item Name="Serial">list_</Item>
+    </Expand>
+  </Type>
   
   <!--HashMapNode-->
-  <Type Name="clan::detail::HashMapNode&lt;*,*&gt;">
+  <Type Name="cl::detail::HashMapNode&lt;*,*&gt;">
     <DisplayString>Key: {first} | Val: {second}</DisplayString>
     <Expand>
       <Item Name="Key">first</Item>
@@ -43,8 +51,8 @@
     </Expand>
   </Type>
   
-  <!--HeapArr-->
-  <Type Name="clan::HashMap&lt;*,*,*&gt;">
+  <!--HashMap-->
+  <Type Name="cl::_HashMap&lt;*,*,*&gt;">
     <DisplayString>cnt: {cnt_}</DisplayString>
     <Expand>
       <CustomListItems MaxItemsPerView="100">

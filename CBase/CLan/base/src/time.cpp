@@ -1,6 +1,6 @@
 #include "../12time.h"
 
-namespace clan
+namespace cl
 {
     //计算某一年有多少天
     int accumulate_year_day(int year)

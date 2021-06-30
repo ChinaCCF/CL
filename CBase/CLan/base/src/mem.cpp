@@ -1,6 +1,6 @@
 #include "../7mem.h"
 
-namespace clan
+namespace cl
 {
 	namespace 
 	{ 

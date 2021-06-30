@@ -5,138 +5,139 @@
 #include "2type.h"
 #include <type_traits>
 
-namespace clan
+namespace cl
 {
+#define const_bool static constexpr bool
 	/*#####################################################################################*/
 	//类似于std::decay, 但是仅对有限的类型操作
 	/*#####################################################################################*/
-	template<typename T> struct RawType { using type = T; static constexpr bool is_ptr = false; };
-	template<typename T> struct RawType<T&> { using type = T; static constexpr bool is_ptr = false; };
-	template<typename T> struct RawType<T&&> { using type = T; static constexpr bool is_ptr = false; };
-	template<typename T> struct RawType<const T> { using type = T; static constexpr bool is_ptr = false; };
-	template<typename T> struct RawType<const T&> { using type = T; static constexpr bool is_ptr = false; };
+	template<typename T> struct RawType { using type = T; const_bool is_ptr = false; };
+	template<typename T> struct RawType<T&> { using type = T; const_bool is_ptr = false; };
+	template<typename T> struct RawType<T&&> { using type = T; const_bool is_ptr = false; };
+	template<typename T> struct RawType<const T> { using type = T; const_bool is_ptr = false; };
+	template<typename T> struct RawType<const T&> { using type = T; const_bool is_ptr = false; };
 
-	template<typename T> struct RawType<T*> { using type = T*; static constexpr bool is_ptr = true; };
-	template<typename T> struct RawType<const T*> { using type = T*; static constexpr bool is_ptr = true; };
+	template<typename T> struct RawType<T*> { using type = T*; const_bool is_ptr = true; };
+	template<typename T> struct RawType<const T*> { using type = T*; const_bool is_ptr = true; };
 
-	template<typename T> struct RawType<T[]> { using type = T*; static constexpr bool is_ptr = true; };
-	template<typename T> struct RawType<const T[]> { using type = T*; static constexpr bool is_ptr = true; };
-	template<typename T> struct RawType<const T(&)[]> { using type = T*; static constexpr bool is_ptr = true; };
+	template<typename T> struct RawType<T[]> { using type = T*; const_bool is_ptr = true; };
+	template<typename T> struct RawType<const T[]> { using type = T*; const_bool is_ptr = true; };
+	template<typename T> struct RawType<const T(&)[]> { using type = T*; const_bool is_ptr = true; };
 
-	template<typename T, int N> struct RawType<T[N]> { using type = T*; static constexpr bool is_ptr = true; };
-	template<typename T, int N> struct RawType<const T[N]> { using type = T*; static constexpr bool is_ptr = true; };
-	template<typename T, int N> struct RawType<const T(&)[N]> { using type = T*; static constexpr bool is_ptr = true; };
+	template<typename T, int N> struct RawType<T[N]> { using type = T*; const_bool is_ptr = true; };
+	template<typename T, int N> struct RawType<const T[N]> { using type = T*; const_bool is_ptr = true; };
+	template<typename T, int N> struct RawType<const T(&)[N]> { using type = T*; const_bool is_ptr = true; };
 
 	namespace detail
 	{
 		/*#####################################################################################*/
 		/*#####################################################################################*/
-		template<typename T> struct _IsC8 { static constexpr bool value = false; };
-		template<> struct _IsC8<char> { static constexpr bool value = true; };
+		template<typename T> struct _IsC8 { const_bool value = false; };
+		template<> struct _IsC8<char> { const_bool value = true; };
 
-		template<typename T> struct _IsC16 { static constexpr bool value = false; };
-		template<> struct _IsC16<wchar> { static constexpr bool value = true; };
-
-		/*#####################################################################################*/
-		/*#####################################################################################*/
-
-		template<typename T> struct _IsBool { static constexpr bool value = false; };
-		template<> struct _IsBool<bool> { static constexpr bool value = true; };
-		/*#####################################################################################*/
-		/*#####################################################################################*/
-
-		template<typename T> struct _IsFloat { static constexpr bool value = false; };
-		template<> struct _IsFloat<f32> { static constexpr bool value = true; };
-		template<> struct _IsFloat<f64> { static constexpr bool value = true; };
+		template<typename T> struct _IsC16 { const_bool value = false; };
+		template<> struct _IsC16<wchar> { const_bool value = true; };
 
 		/*#####################################################################################*/
 		/*#####################################################################################*/
 
-		template<typename T> struct _IsSignedInt { static constexpr bool value = false; };
-		template<> struct _IsSignedInt<s8> { static constexpr bool value = true; };
-		template<> struct _IsSignedInt<s16> { static constexpr bool value = true; };
-		template<> struct _IsSignedInt<s32> { static constexpr bool value = true; };
-		template<> struct _IsSignedInt<s64> { static constexpr bool value = true; };
+		template<typename T> struct _IsBool { const_bool value = false; };
+		template<> struct _IsBool<bool> { const_bool value = true; };
+		/*#####################################################################################*/
+		/*#####################################################################################*/
 
-		template<typename T> struct _IsUnsignedInt { static constexpr bool value = false; };
-		template<> struct _IsUnsignedInt<u8> { static constexpr bool value = true; };
-		template<> struct _IsUnsignedInt<u16> { static constexpr bool value = true; };
-		template<> struct _IsUnsignedInt<u32> { static constexpr bool value = true; };
-		template<> struct _IsUnsignedInt<u64> { static constexpr bool value = true; }; 
+		template<typename T> struct _IsFloat { const_bool value = false; };
+		template<> struct _IsFloat<f32> { const_bool value = true; };
+		template<> struct _IsFloat<f64> { const_bool value = true; };
+
+		/*#####################################################################################*/
+		/*#####################################################################################*/
+
+		template<typename T> struct _IsSignedInt { const_bool value = false; };
+		template<> struct _IsSignedInt<s8> { const_bool value = true; };
+		template<> struct _IsSignedInt<s16> { const_bool value = true; };
+		template<> struct _IsSignedInt<s32> { const_bool value = true; };
+		template<> struct _IsSignedInt<s64> { const_bool value = true; };
+
+		template<typename T> struct _IsUnsignedInt { const_bool value = false; };
+		template<> struct _IsUnsignedInt<u8> { const_bool value = true; };
+		template<> struct _IsUnsignedInt<u16> { const_bool value = true; };
+		template<> struct _IsUnsignedInt<u32> { const_bool value = true; };
+		template<> struct _IsUnsignedInt<u64> { const_bool value = true; }; 
 	}
 
-	template<typename T> struct IsC8 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC8<raw_t>::value; };
-	template<typename T> struct IsC16 { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value; };
-	template<typename T> struct IsChar { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsC16<raw_t>::value || detail::_IsC8<raw_t>::value; };
-	template<typename T> struct IsStrC8 { static constexpr bool value = std::is_convertible<T, char*>::value || std::is_convertible<T, const char*>::value; };
-	template<typename T> struct IsStrC16 { static constexpr bool value = std::is_convertible<T, wchar*>::value || std::is_convertible<T, const wchar*>::value; };
+	template<typename T> struct IsC8 { const_bool value = detail::_IsC8<RawType<T>::type>::value; };
+	template<typename T> struct IsC16 { const_bool value = detail::_IsC16<RawType<T>::type>::value; };
+	template<typename T> struct IsChar { const_bool value = detail::_IsC16<RawType<T>::type>::value || detail::_IsC8<RawType<T>::type>::value; };
+	template<typename T> struct Convert2C8 { const_bool value = std::is_convertible<T, char*>::value || std::is_convertible<T, const char*>::value; };
+	template<typename T> struct Convert2C16 { const_bool value = std::is_convertible<T, wchar*>::value || std::is_convertible<T, const wchar*>::value; };
 
-	template<typename T> struct IsBool { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsBool<raw_t>::value; };
-	template<typename T> struct IsFloat { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsFloat<raw_t>::value; };
+	template<typename T> struct IsBool { const_bool value = detail::_IsBool<RawType<T>::type>::value; };
+	template<typename T> struct IsFloat { const_bool value = detail::_IsFloat<RawType<T>::type>::value; };
 
-	template<typename T> struct IsSignedInt { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsSignedInt<raw_t>::value; };
-	template<typename T> struct IsUnsignedInt { using raw_t = typename RawType<T>::type; static constexpr bool value = detail::_IsUnsignedInt<raw_t>::value; };
-	template<typename T> struct IsInt { static constexpr bool value = IsSignedInt<T>::value || IsUnsignedInt<T>::value; };
+	template<typename T> struct IsSignedInt { const_bool value = detail::_IsSignedInt<RawType<T>::type>::value; };
+	template<typename T> struct IsUnsignedInt { const_bool value = detail::_IsUnsignedInt<RawType<T>::type>::value; };
+	template<typename T> struct IsInt { const_bool value = IsSignedInt<T>::value || IsUnsignedInt<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是数值类型
 	/*#####################################################################################*/
-	template<typename T> struct IsVal { static constexpr bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value || IsChar<T>::value; };
+	template<typename T> struct IsVal { const_bool value = IsBool<T>::value || IsFloat<T>::value || IsInt<T>::value || IsChar<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是指针
 	/*#####################################################################################*/
-	template<typename T> struct IsPtr { static constexpr bool value = RawType<T>::is_ptr; };//{ enum { value = std::is_pointer<T>::value }; };
+	template<typename T> struct IsPtr { const_bool value = RawType<T>::is_ptr; };//{ enum { value = std::is_pointer<T>::value }; };
 
 	/*#####################################################################################*/
 	//判断是否是相同的类型
 	/*#####################################################################################*/
-	template<typename T1, typename T2> struct IsSameType { static constexpr bool value = false; };
-	template<typename T> struct IsSameType<T, T> { static constexpr bool value = true; };
+	template<typename T1, typename T2> struct IsSameType { const_bool value = false; };
+	template<typename T> struct IsSameType<T, T> { const_bool value = true; };
 
 	/*#####################################################################################*/
 	//判断是否是类
 	/*#####################################################################################*/
-	template<typename T> struct IsClass { static constexpr bool value = std::is_class<T>::value; };
+	template<typename T> struct IsClass { const_bool value = std::is_class<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是成员函数
 	/*#####################################################################################*/
-	template<typename T> struct IsClassFun { static constexpr bool value = std::is_member_function_pointer<T>::value; };
+	template<typename T> struct IsClassFun { const_bool value = std::is_member_function_pointer<T>::value; };
 	/*#####################################################################################*/
 	//判断是否右值移动赋值
 	/*#####################################################################################*/
-	template<typename T> struct IsMoveAssignable { static constexpr bool value = std::is_move_assignable<T>::value; };
+	template<typename T> struct IsMoveAssignable { const_bool value = std::is_move_assignable<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否右值构造
 	/*#####################################################################################*/
-	template<typename T> struct IsMoveConstructible { static constexpr bool value = std::is_move_constructible<T>::value; };
+	template<typename T> struct IsMoveConstructible { const_bool value = std::is_move_constructible<T>::value; };
 
 	/*#####################################################################################*/
 	//判断是否是虚基类, 类中有虚函数的类, std::is_abstract是判断是否声明了纯虚函数
 	/*#####################################################################################*/
-	template<typename T> struct IsVirtualClass { static constexpr bool value = std::is_polymorphic<T>::value; };
+	template<typename T> struct IsVirtualClass { const_bool value = std::is_polymorphic<T>::value; };
 	 
 	/*#####################################################################################*/
 	//判断虚基类是否有虚析构函数
 	/*#####################################################################################*/
-	template<typename T> struct HasVirtualDestructor { static constexpr bool value = std::has_virtual_destructor<T>::value; };
+	template<typename T> struct HasVirtualDestructor { const_bool value = std::has_virtual_destructor<T>::value; };
 
 	/*#####################################################################################*/
 	//检查类
 	/*#####################################################################################*/
 	//常规类的右值赋值和右值构造检查
-	template<typename T> struct NormalClassCheck { static constexpr bool value = IsMoveAssignable<T>::value && IsMoveConstructible<T>::value; };
-	template<typename T> struct VirtualClassCheck { static constexpr bool value = IsVirtualClass<T>::value ? HasVirtualDestructor<T>::value : true; };
+	template<typename T> struct NormalClassCheck { const_bool value = IsMoveAssignable<T>::value && IsMoveConstructible<T>::value; };
+	template<typename T> struct VirtualClassCheck { const_bool value = IsVirtualClass<T>::value ? HasVirtualDestructor<T>::value : true; };
 
-	template<typename T> struct MoveCheck { static constexpr bool value = IsClass<T>::value ? NormalClassCheck<T>::value : true; };
-	template<typename T> struct DestructorCheck { static constexpr bool value = IsClass<T>::value ? VirtualClassCheck<T>::value : true; };
+	template<typename T> struct MoveCheck { const_bool value = IsClass<T>::value ? NormalClassCheck<T>::value : true; };
+	template<typename T> struct DestructorCheck { const_bool value = IsClass<T>::value ? VirtualClassCheck<T>::value : true; };
 
 	//static_assert 不能输出中文
 #define  clan_CheckClass(T) \
-static_assert(clan::MoveCheck<T>::value, "class need move assign and construct!");\
-static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destructor!");
+static_assert(cl::MoveCheck<T>::value, "class need move assign and construct!");\
+static_assert(cl::DestructorCheck<T>::value, "virtual class need virtual destructor!");
 
 	/*#####################################################################################*/
 	//选择类型, 等价于 typename std::conditional<bool, Type1, Type2>::type;
@@ -192,7 +193,7 @@ static_assert(clan::DestructorCheck<T>::value, "virtual class need virtual destr
 		template <typename X, X> struct MatchStruct; \
 		template <typename S> static int match_test(MatchStruct<FunType, &S::FunName>*); \
 		template <typename S> static char match_test(...); \
-		static bool const value = sizeof(match_test<T>(0)) == sizeof(int); };
+		const_bool value = sizeof(match_test<T>(0)) == sizeof(int); };
 
 }
 #endif//__clan_base_type_traits__ 

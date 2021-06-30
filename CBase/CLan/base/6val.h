@@ -5,13 +5,13 @@
 
 //if x < y, then -(x < y) will be all ones, so r = y ^ (x ^ y) & ~0 = y ^ x ^ y = x. 
 //Otherwise, if x >= y, then -(x < y) will be all zeros, so r = y ^ ((x ^ y) & 0) = y.
-template<clan::IntType T> inline T cl_max(const T& x, const T& y) { return x ^ ((x ^ y) & -(x < y)); }
-template<clan::IntType T> inline T cl_min(const T& x, const T& y) { return y ^ ((x ^ y) & -(x < y)); }
+template<cl::IntType T> inline T cl_max(const T& x, const T& y) { return x ^ ((x ^ y) & -(x < y)); }
+template<cl::IntType T> inline T cl_min(const T& x, const T& y) { return y ^ ((x ^ y) & -(x < y)); }
 
-template<clan::FloatType T> inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
-template<clan::FloatType T> inline T cl_min(const T& x, const T& y) { return x > y ? y : x; }
+template<cl::FloatType T> inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
+template<cl::FloatType T> inline T cl_min(const T& x, const T& y) { return x > y ? y : x; }
 
-namespace clan
+namespace cl
 {
 	template<IntType T> inline T abs(T val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
 	inline f32 abs(f32 v) { auto tv = *(u32*)&v; tv &= 0x7FFFFFFF; return *(f32*)&tv; }
@@ -117,8 +117,8 @@ namespace clan
 		template<StrType T>
 		u32 _hash(const T& val)
 		{
-			using Type = SelectType<IsStrC8<T>::value, char, wchar>::type;
-			Type* str = (const Type*)val;
+			using Type = SelectType<Convert2C8<T>::value, char, wchar>::type;
+			Type* str = (Type*)val;
 			u32 seed = 1313;
 			u32 ret = 0;
 			while (*str) ret = ret * seed + (*str++);

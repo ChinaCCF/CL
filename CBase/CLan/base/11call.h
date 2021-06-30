@@ -6,7 +6,7 @@
 #include "9obj.h"
 
 
-namespace clan
+namespace cl
 {
 	namespace detail
 	{
