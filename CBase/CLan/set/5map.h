@@ -61,7 +61,11 @@ namespace cl
 		}
 		_SerialHashMap(ThisType&& map) noexcept { _move(&map); }
 
-		~_SerialHashMap() { clear(); if (arr_) A().free(arr_); }
+		~_SerialHashMap() 
+		{
+			clear(); 
+			if (arr_) A().free(arr_); 
+		}
 
 		s32 size() const { return cnt_; }
 
@@ -111,10 +115,23 @@ namespace cl
 			return node != nullptr;
 		}
 
-		using It = typename _List<Node*, A>::It;
+		class It
+		{
+			friend class ThisType;
+			using Org = typename _List<Node*, A>::It;
+			Org it_;
+		public:
+			It(Org it) : it_(it) {}
+			Node& operator*() { return **it_; }
+			Node* operator->() { return *it_; }
 
-		auto begin() const { return list_.begin(); }
-		auto end() const { return list_.end(); }
+			It& operator++() { ++it_; return *this; }
+			bool operator==(const It& it) { return it_ == it.it_; }
+			bool operator!=(const It& it) { return it_ != it.it_; }
+		};
+
+		auto begin() const { return It(list_.begin()); }
+		auto end() const { return  It(list_.end()); }
 	};
 
 

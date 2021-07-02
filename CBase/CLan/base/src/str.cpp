@@ -182,7 +182,7 @@ namespace cl
 		{
 			//返回第一个无法解析的字符位置
 			template<CharType T>
-			inline T* _2uval(const T* str, s64& val)
+			inline T* _2uval(const T* str, u64& val)
 			{
 				val = 0;
 
@@ -198,51 +198,41 @@ namespace cl
 			}
 
 			//返回第一个无法解析的字符位置
-			template<CharType T> 
-			inline T* _2val(const T* str, s64& val)
-			{ 
-				auto p = str; 
-				bool negative = false;
-				if (*p == '-') { negative = true; p++; }
-				 
-				auto end = _2uval(p, val);
-				if (end == p) return nullptr;
-				 
-				if (negative) val = -val;
-				return end;
-			}
-
-			//返回第一个无法解析的字符位置
 			template<CharType T>
-			inline T* _2fval(const T* str, f64& val)
+			inline T* _2fval(const T* str, Str2Val& val)
 			{ 
+				val.is_float_ = false;
+				val.val_ = 0;
+
 				auto p = str;
 
 				bool negative = false;
 				if (*p == '-') { negative = true; p++; }
 				 
-				s64 uval;
+				u64 uval;
 				auto end = _2uval(p, uval);
-				if (end == p) return nullptr;
+				if (end == nullptr) return nullptr;
 
-				val = (f64)uval;
+				val.val_ = (f64)uval; 
 
 				p = end;
 				if (*p == '.')
 				{
 					++p;
 					auto fraction_end = _2uval(p, uval);
-					if (fraction_end != p)
+					if (fraction_end)
 					{//整数变为小数
+
 						f64 fraction_val = (f64)uval;
 						s32 cnt = s32(fraction_end - p);
 						while (cnt--) fraction_val /= 10;
-						val += fraction_val;
+						val.val_ += fraction_val;
+						val.is_float_ = true;
 
 						end = fraction_end;
 					}
 				} 
-				if (negative) val = -val;
+				if (negative) val.val_ = -val.val_;
 				return end;
 			}
 			template<CharType T>
@@ -253,7 +243,7 @@ namespace cl
 					buf[i] = str[i];
 				buf[5] = 0;
 
-				Str::lower(buf);
+				CStr::lower(buf);
 				if (buf[0] == 'f' &&
 					buf[1] == 'a' &&
 					buf[2] == 'l' &&
@@ -273,20 +263,27 @@ namespace cl
 				} 
 				return nullptr;
 			}
-		}
-		char* _str2val(const char* str, s64& val) { return _2val(str, val); }
-		char* _str2val(const char* str, f64& val) { return _2fval(str, val); }
-		char* _str2val(const char* str, bool& val) { return _2bool(str, val); }
+		} 
+		char* _str2val(const char* str, Str2Val& val) { return _2fval(str, val); }
+		wchar* _str2val(const wchar* str, Str2Val& val) { return _2fval(str, val); }
 
-		wchar* _str2val(const wchar* str, s64& val) { return _2val(str, val); } 
-		wchar* _str2val(const wchar* str, f64& val) { return _2fval(str, val); }
+		char* _str2val(const char* str, bool& val) { return _2bool(str, val); } 
 		wchar* _str2val(const wchar* str, bool& val) { return _2bool(str, val); } 
 		 
-		char* _empty(char*) { return (char*)""; }
-		wchar* _empty(wchar*) { return (wchar*)L""; }
+		char* _empty(const char*) { return (char*)""; }
+		wchar* _empty(const wchar*) { return (wchar*)L""; }
+
+		char* _null_str(const char*) { return (char*)"null"; }
+		wchar* _null_str(const wchar*) { return (wchar*)L"null"; }
+
+		char* _false_str(const char*) { return (char*)"false"; }
+		wchar* _false_str(const wchar*) { return (wchar*)L"false"; }
+
+		char* _true_str(const char*) { return (char*)"true"; }
+		wchar* _true_str(const wchar*) { return (wchar*)L"true"; }
 	}
 
-	CharCode Str::judge_char_code(const char* _str)
+	CharCode CStr::judge_char_code(const char* _str)
 	{ 
 		auto str = (const u8*)_str;
 

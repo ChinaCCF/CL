@@ -11,9 +11,12 @@
     <ProjectGuid>{821a1896-4dc8-48bc-9364-4e2c45abb433}</ProjectGuid>
     <RootNamespace>TestMem</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-  </PropertyGroup> 
+  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="TestMem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test_json.h" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\4setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

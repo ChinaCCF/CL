@@ -33,32 +33,42 @@ namespace cl
 	{
 		//返回字符串长度, 调用默认的strcpy是会报错的(从这点来说, 这个手动实现的函数也不安全)
 		template<CharType T>
-		inline s32 _strcpy(T* t1, const T* t2)
+		inline s32 _strcpy(T* dst, const T* src)
 		{
-			auto org = t1;
-			while (*t2) { *t1++ = *t2++; }
-			*t1 = 0;
-			return s32(t1 - org);
+			auto org = dst;
+			while (*src) { *dst++ = *src++; }
+			*dst = 0;
+			return s32(dst - org);
 		}
 
 		//返回拷贝的字节数
 		template<CharType T>
-		inline s32 _strcpy_s(T* t1, s32 size, const T* t2)
+		inline s32 _strcpy_s(T* dst, s32 size, const T* src)
 		{
-			auto org = t1;
-			while (--size && *t2) { *t1++ = *t2++; }
-			*t1 = 0;
-			return s32(t1 - org);
+			auto org = dst;
+			while (--size && *src) { *dst++ = *src++; }
+			*dst = 0;
+			return s32(dst - org);
 		}
 
 		//返回拷贝的字节数
 		template<CharType T>
-		inline s32 _strcpy_ns(T* t1, s32 size, const T* t2, s32 len)
+		inline s32 _strcpy_n(T* dst, const T* src, s32 len)
 		{
-			auto org = t1;
-			while (--size && len-- && *t2) { *t1++ = *t2++; }
-			*t1 = 0;
-			return s32(t1 - org);
+			auto org = dst;
+			while (len-- && *src) { *dst++ = *src++; }
+			*dst = 0;
+			return s32(dst - org);
+		}
+
+		//返回拷贝的字节数
+		template<CharType T>
+		inline s32 _strcpy_ns(T* dst, s32 size, const T* src, s32 len)
+		{
+			auto org = dst;
+			while (--size && len-- && *src) { *dst++ = *src++; }
+			*dst = 0;
+			return s32(dst - org);
 		}
 
 		//反转指定长度字符串
@@ -93,15 +103,6 @@ namespace cl
 			return len;
 		}
 
-		//返回字符串长度, fraction表示小数部分 
-		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction);
-		//返回字符串长度
-		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction);
-		//返回字符串长度,
-		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction);
-		//返回字符串长度,
-		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction);
-
 		//返回字符串长度,
 		template<CharType T, UintType V>
 		inline s32 _val2str(T* buf, s32 size, V val)
@@ -124,6 +125,15 @@ namespace cl
 			return _uval2str(buf, size, val) + len;
 		}
 
+		//返回字符串长度, fraction表示小数部分 
+		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度
+		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction);
+		//返回字符串长度,
+		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度,
+		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction);
+
 		//返回字符串长度,
 		template<CharType T, FloatType V>
 		inline s32 _val2str(T* buf, s32 size, V val, s32 fraction)
@@ -138,27 +148,26 @@ namespace cl
 			}
 			return _ufval2str(buf, size, val, fraction) + len;
 		}
-		/**************************************************************************************************************/
+		/*###################################################################################*/
+		//str 2 val
+		/*###################################################################################*/
+		struct Str2Val
+		{
+			bool is_float_;
+			f64 val_; 
+		}; 
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
-		char* _str2val(const char* str, s64& val);
-		//失败返回nullptr, 否则返回第一个无法解析的字符位置
-		char* _str2val(const char* str, f64& val);
+		char* _str2val(const char* str, Str2Val& val);
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, bool& val);
-
+		 
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
-		wchar* _str2val(const wchar* str, s64& val);
-		//失败返回nullptr, 否则返回第一个无法解析的字符位置
-		wchar* _str2val(const wchar* str, f64& val);
+		wchar* _str2val(const wchar* str, Str2Val& val);
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, bool& val);
 	}
-	enum class CharCode
-	{
-		UTF8,
-		GBK
-	};
-	class Str
+
+	class CStr
 	{
 	public:
 		//这样写非常慢!!!!
@@ -182,13 +191,15 @@ namespace cl
 		static inline bool iequ(const wchar* t1, const wchar* t2) { return ::_wcsicmp(t1, t2) == 0; }
 		static inline bool iequ(const wchar* t1, const wchar* t2, s32 len) { return ::_wcsnicmp(t1, t2, len) == 0; }
 		/**************************************************************************************************************/
-		static inline s32 copy(char* t1, const char* t2) { return detail::_strcpy(t1, t2); }
-		static inline s32 copy(char* t1, s32 size, const char* t2) { return detail::_strcpy_s(t1, size, t2); }
-		static inline s32 copy(char* t1, s32 size, const char* t2, s32 len) { return detail::_strcpy_ns(t1, size, t2, len); }
+		static inline s32 copy(char* dst, const char* src) { return detail::_strcpy(dst, src); }
+		static inline s32 copy(char* dst, const char* src, s32 len) { return detail::_strcpy_n(dst, src, len); }
+		static inline s32 copy(char* dst, s32 size, const char* src) { return detail::_strcpy_s(dst, size, src); }
+		static inline s32 copy(char* dst, s32 size, const char* src, s32 len) { return detail::_strcpy_ns(dst, size, src, len); }
 
-		static inline s32 copy(wchar* t1, const wchar* t2) { return detail::_strcpy(t1, t2); }
-		static inline s32 copy(wchar* t1, s32 size, const wchar* t2) { return detail::_strcpy_s(t1, size, t2); }
-		static inline s32 copy(wchar* t1, s32 size, const wchar* t2, s32 len) { return detail::_strcpy_ns(t1, size, t2, len); }
+		static inline s32 copy(wchar* dst, const wchar* src) { return detail::_strcpy(dst, src); }
+		static inline s32 copy(wchar* dst, const wchar* src, s32 len) { return detail::_strcpy_n(dst, src, len); }
+		static inline s32 copy(wchar* dst, s32 size, const wchar* src) { return detail::_strcpy_s(dst, size, src); }
+		static inline s32 copy(wchar* dst, s32 size, const wchar* src, s32 len) { return detail::_strcpy_ns(dst, size, src, len); }
 		/**************************************************************************************************************/
 		static inline char* find(const char* str, char c) { return (char*)::strchr(str, c); }
 		//从字符串右侧返回第一个查找到指定字符位置
@@ -290,36 +301,31 @@ namespace cl
 			return detail::_val2str(buf, size, val, fraction);
 		}
 		/**************************************************************************************************************/
-		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
-		template<CharType T, BoolType V> static inline T* to(const T* buf, V& val)
+		//字符串=>bool, 返回第一个无法解析的字符位置, 失败返回nullptr
+		template<CharType T, BoolType V> static inline T* to_val(const T* buf, V& val)
 		{
 			return detail::_str2val(buf, val);
 		}
-		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
-		template<CharType T, FloatType V> static inline T* to(const T* buf, V& val)
+		//字符串=>浮点数 或 整型, 返回第一个无法解析的字符位置, 失败返回nullptr
+		template<CharType T, IntAndFloatType V> static inline T* to_val(const T* buf, V& val)
 		{
-			f64 tmp;
-			auto ret = detail::_str2val(buf, tmp);
-			val = (V)tmp;
+			detail::Str2Val s2v; 
+			auto ret = detail::_str2val(buf, s2v); 
+			val = (V)s2v.val_;
 			return ret;
-		}
-		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
-		template<CharType T, IntType V> static inline T* to(const T* buf, V& val)
-		{
-			s64 tmp;
-			auto ret = detail::_str2val(buf, tmp);
-			val = (V)tmp;
-			return ret;
-		}
-		//字符串=>数值, 返回第一个无法解析的字符位置, 失败返回nullptr
-		template<CharType T> static inline T* to(const T* buf, T& val)
-		{
-			s64 tmp;
-			auto ret = detail::_str2val(buf, tmp);
-			val = (T)tmp;
-			return ret;
-		}
+		} 
+
 		/**************************************************************************************************************/
+		//跳过utf8的头部tag
+		char* skip_utf8_bom(const char* buf)
+		{
+			u8* data = (u8*)buf;
+			if (data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
+			{
+				return (char*)(buf + 3);
+			}
+			return nullptr;
+		}
 		//判断多字节字符串是什么编码, utf8还是ASCII(GBK)
 		static inline CharCode judge_char_code(const char* str);
 	};
@@ -334,7 +340,7 @@ namespace cl
 
 		StrView() { clan_CheckClass(StrView); }
 		StrView(const std::nullptr_t&) {}
-		StrView(const T* str) { str_ = str; len_ = Str::len(str); }
+		StrView(const T* str) { str_ = str; len_ = CStr::len(str); }
 		StrView(const StrView& str) { str_ = str.str_; len_ = str.len_; }
 		StrView(const T* str, s32 len) { str_ = str; len_ = len; }
 		/*#######################################################################################*/
@@ -344,33 +350,33 @@ namespace cl
 
 		s32 len() const { return len_; }
 		const T* data() const { return str_; }
-
-		operator const T* () const { return str_; }
 		char operator[](s32 index) const { return str_[index]; }
 
-		template<ValType R>
+		operator T* () const { return str_; }  
+		template<NotCharType R>
 		operator R() const
 		{
 			R val;
-			Str::to(str_, val);
+			auto end = CStr::to_val(str_, val);
+			cl_assert(end != nullptr && *end == 0);
 			return val;
 		}
 
-		bool operator==(const T* t) const { return Str::equ(str_, t) == 0; }
+		bool operator==(const T* t) const { return CStr::equ(str_, t) == 0; }
 		bool operator!=(const T* t) const { return !this->operator==(t); }
 		bool operator==(const std::nullptr_t&) const { return len_ == 0; }
 		bool operator!=(const std::nullptr_t&) const { return len_ != 0; }
 		/*#######################################################################################*/
 		//若查找失败返回-1
-		s32 find(T c) const { auto p = Str::find(str_, c); if (!p) return -1; return s32(p - str_); }
+		s32 find(T c) const { auto p = CStr::find(str_, c); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(s32 index, T c) const { auto p = Str::find(str_ + index, c); if (!p) return -1; return s32(p - str_); }
+		s32 find(s32 index, T c) const { auto p = CStr::find(str_ + index, c); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(const T* str) const { auto p = Str::find(str_, str); if (!p) return -1; return s32(p - str_); }
+		s32 find(const T* str) const { auto p = CStr::find(str_, str); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(s32 index, const T* str) const { auto p = Str::find(str_ + index, str); if (!p) return -1; return s32(p - str_); }
+		s32 find(s32 index, const T* str) const { auto p = CStr::find(str_ + index, str); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 rfind(T c) const { auto p = Str::rfind(str_, c); if (!p) return -1; return s32(p - str_); }
+		s32 rfind(T c) const { auto p = CStr::rfind(str_, c); if (!p) return -1; return s32(p - str_); }
 	};
 
 	namespace detail
@@ -390,7 +396,7 @@ namespace cl
 			void _move(ThisType* str)
 			{
 				len_ = str->len_;
-				Str::copy(str_, str->str_);
+				CStr::copy(str_, str->str_);
 			}
 			s32 _size() const { return N; }
 		};
@@ -435,8 +441,17 @@ namespace cl
 			s32 _size() const { return size_; }
 		};
 
-		char* _empty(char*);
-		wchar* _empty(wchar*);
+		char* _empty(const char*);
+		wchar* _empty(const wchar*);
+
+		char* _null_str(const char*);
+		wchar* _null_str(const wchar*);
+
+		char* _false_str(const char*);
+		wchar* _false_str(const wchar*);
+
+		char* _true_str(const char*);
+		wchar* _true_str(const wchar*);
 	}
 
 	//用于格式化时, 指示浮点数保留多少位小数
@@ -464,7 +479,7 @@ namespace cl
 		{
 			_need(len);
 			len_ = len;
-			Str::copy(str_, str);
+			CStr::copy(str_, str);
 		}
 	public:
 		s32 fraction_ = 2;//默认小数位2位
@@ -473,14 +488,14 @@ namespace cl
 
 		_String() {}
 		_String(const std::nullptr_t&) {}
-		_String(const T* str) { _set(str, Str::len(str)); }
+		_String(const T* str) { _set(str, CStr::len(str)); }
 		_String(const StrView<T>& str) { if (str.str_) _set(str.data(), str.len()); }
 		template<s32 M>
 		_String(const _String<T, A, M>& str) { _set(str.str_, str.len_); } 
 		_String(const ThisType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
 		_String(ThisType&& str) noexcept { _move(&str); }
 		 
-		_String& operator=(const T* str) { if (str == nullptr) _set("", 0); else _set(str, Str::len(str)); return *this; }
+		_String& operator=(const T* str) { if (str == nullptr) _set(detail::_empty(str), 0); else _set(str, CStr::len(str)); return *this; }
 		_String& operator=(const StrView<T>& str) { _set(str.data(), str.len()); return *this; }
 		template<s32 M>
 		_String& operator=(const _String<T, A, M>& str) noexcept { _set(str.str_, str.len_); return *this; }
@@ -491,29 +506,28 @@ namespace cl
 		s32 len() const { return len_; }
 		s32 size() const { return _size(); }
 		void need(s32 len) { _need(len); }
+		void copy(const T* str, s32 len) { _set(str, len); }
 
 		StrView<T> view() const { return StrView<T>(str_, len_); }
 		T& operator[](s32 index) const { return str_[index]; }
 
 		operator StrView<T>() const { return view(); }
-		operator T* () const { return str_ ? str_ : detail::_empty(str_); } 
-		template<ValType R>
-		operator R() const 
-		{ 
-			R val = R();
-			if (len_ != 0)
-			{
-				auto end_str = Str::to(str_, val);
-				cl_assert(end_str != nullptr);
-			} 
-			return val; 
+
+		operator T* () const { return str_ ? str_ : detail::_empty(str_); }  
+		template<NotCharType R>
+		operator R() const
+		{
+			R val;
+			auto end = CStr::to_val(str_, val);
+			cl_assert(end != nullptr && *end == 0);
+			return val;
 		}
 		/*#######################################################################################*/
-		T& back() { return str_[len_ - 1]; }
-		T pop_back() { T c = str_[--len_]; str_[len_] = 0; return c; }
-		_String& push_back(T c) { str_[len_++] = c; return *this; }
+		T& back() { return str_[len_ - 1]; } 
+		void pop(s32 len = 1) { len_ -= len; str_[len_] = 0; }
+		_String& push(T c) { _need(1); str_[len_++] = c; str_[len_] = 0; return *this; }
 
-		_String& push_back(const T* str, s32 len)
+		_String& push(const T* str, s32 len)
 		{
 			_need(len);
 			Byte::copy(str_ + len_, str, len);
@@ -522,18 +536,18 @@ namespace cl
 			return *this;
 		}
 		/*#######################################################################################*/
-		void trim() { len_ = Str::trim(str_, len_); }
+		void trim() { len_ = CStr::trim(str_, len_); }
 		/*#######################################################################################*/
 		//若查找失败返回-1
-		s32 find(T c) const { auto p = Str::find(str_, c); if (!p) return -1; return s32(p - str_); }
+		s32 find(T c) const { auto p = CStr::find(str_, c); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(s32 index, T c) const { auto p = Str::find(str_ + index, c); if (!p) return -1; return s32(p - str_); }
+		s32 find(s32 index, T c) const { auto p = CStr::find(str_ + index, c); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(const T* str) const { auto p = Str::find(str_, str); if (!p) return -1; return s32(p - str_); }
+		s32 find(const T* str) const { auto p = CStr::find(str_, str); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 find(s32 index, const T* str) const { auto p = Str::find(str_ + index, str); if (!p) return -1; return s32(p - str_); }
+		s32 find(s32 index, const T* str) const { auto p = CStr::find(str_ + index, str); if (!p) return -1; return s32(p - str_); }
 		//若查找失败返回-1
-		s32 rfind(T c) const { auto p = Str::rfind(str_, c); if (!p) return -1; return s32(p - str_); }
+		s32 rfind(T c) const { auto p = CStr::rfind(str_, c); if (!p) return -1; return s32(p - str_); }
 		/*###############################################################################*/
 		//移除指定索引开始的指定长度字符串
 		void remove(s32 index, s32 len)
@@ -547,20 +561,20 @@ namespace cl
 		}
 		void remove(const T* str, s32 len)
 		{
-			auto p = Str::find(str_, str);
+			auto p = CStr::find(str_, str);
 			if (p) remove(s32(p - str_), len);
 		}
-		void remove(const T* str) { remove(str, Str::len(str)); }
+		void remove(const T* str) { remove(str, CStr::len(str)); }
 		void remove(const StrView<T>& str) { remove(str.data(), str.len()); }
 		/*###############################################################################*/
-		void replace(T src, T dst) { Str::replace(str_, src, dst); }
+		void replace(T src, T dst) { CStr::replace(str_, src, dst); }
 		/*###############################################################################*/
 		s32 sub(T* buf, s32 start, s32 len) const
 		{
 			cl_assert(len_ >= start);
 			s32 tail = len_ - start;
 			if (len > tail) len = tail;
-			Str::copy(buf, 9999, str_ + start, len);
+			CStr::copy(buf, 9999, str_ + start, len);
 			return len;
 		}
 
@@ -569,25 +583,29 @@ namespace cl
 	public:
 		_String& operator=(const Fraction& f) { fraction_ = f.len_; return *this; }
 		_String& operator<<(const Fraction& f) { fraction_ = f.len_; return *this; }
-		_String& operator<<(const std::nullptr_t&) { return push_back("null", 4); }
+		_String& operator<<(const std::nullptr_t&) { return push(detail::_null_str((const T*)0), 4); }
+		 
+		//char or wchar
+		_String& operator<<(const char& val) { return push((T)val); }
+		_String& operator<<(const wchar& val) { return push((T)val); }
 
-		template<ValExFloatType R>
+		template<NotFloatType R>
 		_String& operator<<(const R& val)
 		{
 			T buf[64];
-			s32 len = Str::convert(buf, 64, val);
-			return push_back((const T*)buf, len);
+			s32 len = CStr::format(buf, 64, val);
+			return push((const T*)buf, len);
 		}
 		template<FloatType R>
 		_String& operator<<(const R& val)
 		{
 			T buf[64];
-			s32 len = Str::convert(buf, 64, val, fraction_);
-			return push_back((const T*)buf, len);
+			s32 len = CStr::format(buf, 64, val, fraction_);
+			return push((const T*)buf, len);
 		}
-		_String& operator<<(const T* str) { return push_back(str, Str::len(str)); }
-		_String& operator<<(const StrView<T>& str) { return push_back(str.data(), str.len()); }
-		template<s32 M> _String& operator<<(const _String<T, A, M>& str) { return push_back(str.data(), str.len()); }
+		_String& operator<<(const T* str) { return push(str, CStr::len(str)); }
+		_String& operator<<(const StrView<T>& str) { return push(str.data(), str.len()); }
+		template<s32 M> _String& operator<<(const _String<T, A, M>& str) { return push(str.data(), str.len()); }
 
 		/*###############################################################################*/
 		bool operator==(const std::nullptr_t&) const { return len_ == 0; }
@@ -596,7 +614,7 @@ namespace cl
 		bool operator==(const T* t) const
 		{
 			auto src = str_ ? str_ : detail::_empty();
-			return Str::equ(src, t);
+			return CStr::equ(src, t);
 		}
 		bool operator==(const StrView<T>& t) const { return operator==(t.data()); }
 		template<s32 M>

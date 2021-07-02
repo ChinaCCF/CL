@@ -233,7 +233,8 @@ namespace cl
             {
                 auto tmp = node;
                 node = (Node*)node->next_;
-                _del<A>(node); 
+
+                _del<A>(tmp); 
             }
         }
         void clear()

@@ -71,6 +71,9 @@
     <ClInclude Include="set\6mix_obj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tool\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="base\src\base.natvis" />

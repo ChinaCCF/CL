@@ -25,11 +25,16 @@ namespace cl
     concept IntType = IsInt<T>::value;
      
     template<typename T>
-    concept ValType = IsVal<T>::value;
-
-    //除了浮点数外, 其他基础值数据
+    concept IntAndFloatType = IsInt<T>::value || IsFloat<T>::value;
+     
     template<typename T>
-    concept ValExFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
+    concept NotFloatType = IsChar<T>::value || IsBool<T>::value || IsInt<T>::value;
+
+    template<typename T>
+    concept NotCharType = IsFloat<T>::value || IsBool<T>::value || IsInt<T>::value;
+
+    template<typename T>
+    concept ValType = IsVal<T>::value;
      
     //字符串数据
     template<typename T>
@@ -38,15 +43,11 @@ namespace cl
     //非字符串数据, concept NotCharsType = !CharsType<T>; 注意这样的写法编译没问题, 但是实际中不起作用
     template<typename T>
     concept NotCharsType = IsNotChars<T>::value;
-
+      
     //是否是指针, 但不包含字符串
     template<typename T>
     concept PtrType = std::is_pointer<T>::value && IsNotChars<T>::value;
-
-    //能够转换位字符串的类型
-    template<typename T>
-    concept StrType = Convert2C8<T>::value || Convert2C16<T>::value;
-     
+      
     template<typename T>
     concept ClassType = IsClass<T>::value;
 
@@ -73,10 +74,11 @@ namespace cl
     //class AllocMem
     //{
     //public:
-    //	char* alloc(s64 size) { return (char*)malloc(size); }
-    //	char* realloc(void* p, s64 size) { return (char*)realloc(p, size); }
-    //	void free(void* p) { ::free(p); }
+    //    char* alloc(s64 size) { return (char*)::malloc(size); }
+    //    char* realloc(void* p, s64 size) { return (char*)::realloc(p, size); }
+    //    void free(void* p) { ::free(p); }
     //};
+
 }
 
 #endif//__clan_base_concept__ 

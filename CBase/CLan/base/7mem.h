@@ -112,8 +112,10 @@ namespace cl
     u8 hex_char_val(wchar c);
 
     //返回字符串长度, 失败返回0
-    s32 hex_mem(char* buf, s32 buf_size, void* data, s32 data_size);
-    s32 hex_mem(wchar* buf, s32 buf_size, void* data, s32 data_size);
+    // buf_len : 不是内存大小, 而是能够存储多少个对应类型的字符
+    // add_pre : add prefix, 表示是否添加前缀 0x
+    s32 hex_mem(char* buf, s32 buf_len, const void* data, s32 data_size, bool add_pre = true);
+    s32 hex_mem(wchar* buf, s32 buf_len, const void* data, s32 data_size, bool add_pre = true);
 
     //返回数据大小, 字符串可能以0x开始也可能不是, 失败返回0
 	s32 unhex_mem(void* data, s32 data_size, const char* str, s32 str_len);

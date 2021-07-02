@@ -88,7 +88,7 @@ namespace cl
 		//ÀàÐÍ×ª»»
 		/*####################################################################################################*/
 		template<BoolType T>
-		operator T()
+		operator T() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Bool)
@@ -99,7 +99,7 @@ namespace cl
 			cl_assert(false);
 			return T();
 		};
-		operator C()
+		operator C() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Int)
@@ -111,7 +111,7 @@ namespace cl
 			return C();
 		};
 		template<IntType T>
-		operator T()
+		operator T() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Int)
@@ -123,7 +123,7 @@ namespace cl
 			return T();
 		};
 		template<FloatType T>
-		operator T()
+		operator T() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Float)
@@ -134,8 +134,8 @@ namespace cl
 			cl_assert(false);
 			return T();
 		};
-		template<StrType T>
-		operator T()
+		template<typename T> requires ToChars<T, C>::value
+		operator T() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Str)
@@ -175,9 +175,9 @@ namespace cl
 		{
 			_release();
 			val_type_ = ValType::Float;
-			val_.sv_ = val;
+			val_.fv_ = val;
 		};
-		template<typename T> requires StrType && !IsSameType<T, ThisType>::value
+		template<typename T> requires ToChars<T, C>::value
 		void operator=(T&& val)
 		{
 			_release();
@@ -231,7 +231,7 @@ namespace cl
 			auto map = val_.map_;
 			return (*map)[key]; 
 		} 
-		template<StrType T>
+		template<typename T> requires ToChars<T, C>::value
 		_MixObj& operator[](const T& key) const { return this->operator[]((const C*)key); } 
 
 		MapValType* map() const
@@ -283,8 +283,8 @@ namespace cl
 						auto& it = *(MapIt*)buf_;
 						++it;
 
-						pair_val_.first = &(*it)->first;
-						pair_val_.second = &(*it)->second;
+						pair_val_.first = &it->first;
+						pair_val_.second = &it->second;
 					} 
 					else
 					{
@@ -336,8 +336,8 @@ namespace cl
 					auto& it = *(MapIt*)ret.buf_;
 					it = val_.map_->begin();
 
-					ret.pair_val_.first = &(*it)->first;
-					ret.pair_val_.second = &(*it)->second;
+					ret.pair_val_.first = &it->first;
+					ret.pair_val_.second = &it->second;
 				}
 				else
 				{  

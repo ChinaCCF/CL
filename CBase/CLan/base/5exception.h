@@ -34,7 +34,7 @@ namespace cl
        
 #define	cl_throw(main_code, sub_code, msg) do{throw cl::Exception(_cl_W(__FILE__), __LINE__, main_code, sub_code, msg);}while(0)
 
-#if defined(XDEBUG)
+#if CL_Version == CL_Version_Debug 
 #   define cl_assert(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else
 #   define cl_assert(x) do{if(!(x)) cl_throw(0, 0, _cl_W(#x)); } while(0)

@@ -17,12 +17,20 @@ namespace cl
 		}
 	};
 
-	template<StrType T>
+	template<typename T> requires ToChars<T, char>::value
 	struct CmpVal<T>
 	{
-		int operator()(const T& k1, const T& k2)
+		int operator()(const char* k1, const char* k2)
 		{
-			return Str::cmp((const char*)k1, (const char*)k2);
+			return CStr::cmp(k1, k2);
+		} 
+	};
+	template<typename T> requires ToChars<T, wchar>::value
+		struct CmpVal<T>
+	{
+		int operator()(const wchar* k1, const wchar* k2)
+		{
+			return CStr::cmp(k1, k2);
 		}
 	};
 	 

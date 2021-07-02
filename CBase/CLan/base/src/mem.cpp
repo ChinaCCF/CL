@@ -44,17 +44,21 @@ namespace cl
 		};
 
 		template<CharType T>
-		inline s32 _hex_mem(T* buf, s32 buf_size, void* data, s32 data_size)
+		inline s32 _hex_mem(T* buf, s32 buf_len, const void* data, s32 data_size, bool add_pre)
 		{
-			auto dst_len = 2 + (data_size << 1);// 0xXXXXXXX
-			if (buf_size < dst_len) return 0;
-			 
-			auto p = (u8*)data;
+			auto dst_len = data_size << 1;
+			if (add_pre) dst_len += 2;//0x
+			if (buf_len < dst_len) return 0;
+
+			auto p = (const u8*)data;
 
 			auto dst = buf;
-			*dst++ = '0'; 
-			*dst++ = 'x';
-
+			if (add_pre)
+			{
+				*dst++ = '0';
+				*dst++ = 'x'; 
+			} 
+			 
 			static const char* letter = "0123456789ABCDEF";
 			while (data_size--)
 			{
@@ -103,8 +107,8 @@ namespace cl
 	}
 	u8 hex_char_val(char c) { return g_hex_char_val[c]; }
 	u8 hex_char_val(wchar c) { return g_hex_char_val[c]; }
-	s32 hex_mem(char* buf, s32 buf_size, void* data, s32 data_size) { return _hex_mem(buf, buf_size, data, data_size); }
-	s32 hex_mem(wchar* buf, s32 buf_size, void* data, s32 data_size) { return _hex_mem(buf, buf_size, data, data_size); }
+	s32 hex_mem(char* buf, s32 buf_len, const void* data, s32 data_size, bool add_pre) { return _hex_mem(buf, buf_len, data, data_size, add_pre); }
+	s32 hex_mem(wchar* buf, s32 buf_len, const void* data, s32 data_size, bool add_pre) { return _hex_mem(buf, buf_len, data, data_size, add_pre); }
 
 	s32 unhex_mem(void* data, s32 data_size, const char* str, s32 str_len) { return _unhex_mem(data, data_size, str, str_len); }
 	s32 unhex_mem(void* data, s32 data_size, const wchar* str, s32 str_len) { return _unhex_mem(data, data_size, str, str_len); }

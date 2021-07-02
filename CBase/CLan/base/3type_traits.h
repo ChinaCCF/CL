@@ -68,14 +68,15 @@ namespace cl
 		template<> struct _IsUnsignedInt<u64> { const_bool value = true; }; 
 	}
 
+	template<typename T> struct IsNull { const_bool value = std::is_null_pointer<T>::value; }; 
+
 	template<typename T> struct IsC8 { const_bool value = detail::_IsC8<RawType<T>::type>::value; };
 	template<typename T> struct IsC16 { const_bool value = detail::_IsC16<RawType<T>::type>::value; };
 	template<typename T> struct IsChar { const_bool value = detail::_IsC16<RawType<T>::type>::value || detail::_IsC8<RawType<T>::type>::value; };
 	template<typename T> struct IsChars {const_bool value = IsSameType<RawType<T>::type, char*>::value || IsSameType<RawType<T>::type, wchar*>::value;};
 	template<typename T> struct IsNotChars { const_bool value = !IsSameType<RawType<T>::type, char*>::value && !IsSameType<RawType<T>::type, wchar*>::value; };
 	
-	template<typename T> struct Convert2C8 { const_bool value = std::is_convertible<T, char*>::value || std::is_convertible<T, const char*>::value; };
-	template<typename T> struct Convert2C16 { const_bool value = std::is_convertible<T, wchar*>::value || std::is_convertible<T, const wchar*>::value; };
+	template<typename T, typename Char> struct ToChars { const_bool value = !IsNull<T>::value && (std::is_convertible<T, Char*>::value || std::is_convertible<T, const Char*>::value); };
 
 	template<typename T> struct IsBool { const_bool value = detail::_IsBool<RawType<T>::type>::value; };
 	template<typename T> struct IsFloat { const_bool value = detail::_IsFloat<RawType<T>::type>::value; };

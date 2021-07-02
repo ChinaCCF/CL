@@ -114,10 +114,10 @@ namespace cl
 			return (u32)(u64)val;
 		};
 		 
-		template<StrType T>
+		template<typename T> requires ToChars<T, char>::value || ToChars<T, wchar>::value
 		u32 _hash(const T& val)
 		{
-			using Type = SelectType<Convert2C8<T>::value, char, wchar>::type;
+			using Type = SelectType<ToChars<T, char>::value, char, wchar>::type;
 			const Type* str = (const Type*)val;
 			u32 seed = 1313;
 			u32 ret = 0;

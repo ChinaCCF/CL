@@ -37,8 +37,7 @@ static constexpr u16 max_u16 = (u16)0xFFFF;
 static constexpr u32 max_u32 = (u32)0xFFFFFFFF;  
 static constexpr u64 max_u64 = (u64)0xFFFFFFFFFFFFFFFF; 
 
-#if defined(__LLP64__) || defined(__LP64__) || defined(_M_X64) || defined(_WIN64)
-#define X64
+#if CL_Bits == CL_Bits_64 
 typedef s64 st;
 typedef u64 ut;
 #else  
@@ -46,18 +45,28 @@ typedef s32 st;
 typedef u32 ut;
 #endif
 
+namespace cl
+{
+	enum class CharCode
+	{
+		Unknow,
+		UTF8,
+		GBK
+	};
+}
+
 //多字节转为宽字节的宏
 #define __cl_W(x) L##x
 #define _cl_W(x) __cl_W(x)
 
 //用来调试代码
-#ifdef XDEBUG 
+#if CL_Version == CL_Version_Debug 
 #define cl_dbg(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else
 #define cl_dbg(x) 
 #endif
 
-#ifdef _MSC_VER
+#if CL_Compiler == CL_Compiler_VC
 #   define cl_thread thread_local
 #else 
 #   define cl_thread

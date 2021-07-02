@@ -37,6 +37,7 @@
     <ClInclude Include="set\4heap.h" />
     <ClInclude Include="set\5map.h" />
     <ClInclude Include="set\6mix_obj.h" />
+    <ClInclude Include="tool\json.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="base\src\base.natvis" />
