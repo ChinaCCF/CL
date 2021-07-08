@@ -33,7 +33,7 @@ namespace cl
 	{
 		//返回字符串长度, 调用默认的strcpy是会报错的(从这点来说, 这个手动实现的函数也不安全)
 		template<CharType T>
-		inline s32 _strcpy(T* dst, const T* src)
+		inline s32 _str_copy(T* dst, const T* src)
 		{
 			auto org = dst;
 			while (*src) { *dst++ = *src++; }
@@ -43,7 +43,7 @@ namespace cl
 
 		//返回拷贝的字节数
 		template<CharType T>
-		inline s32 _strcpy_s(T* dst, s32 size, const T* src)
+		inline s32 _str_copy(T* dst, s32 size, const T* src)
 		{
 			auto org = dst;
 			while (--size && *src) { *dst++ = *src++; }
@@ -53,7 +53,7 @@ namespace cl
 
 		//返回拷贝的字节数
 		template<CharType T>
-		inline s32 _strcpy_n(T* dst, const T* src, s32 len)
+		inline s32 _str_copy(T* dst, const T* src, s32 len)
 		{
 			auto org = dst;
 			while (len-- && *src) { *dst++ = *src++; }
@@ -63,7 +63,7 @@ namespace cl
 
 		//返回拷贝的字节数
 		template<CharType T>
-		inline s32 _strcpy_ns(T* dst, s32 size, const T* src, s32 len)
+		inline s32 _str_copy(T* dst, s32 size, const T* src, s32 len)
 		{
 			auto org = dst;
 			while (--size && len-- && *src) { *dst++ = *src++; }
@@ -73,7 +73,7 @@ namespace cl
 
 		//反转指定长度字符串
 		template<CharType T>
-		inline void _flip(T* str, s32 len)
+		inline void _str_flip(T* str, s32 len)
 		{
 			T* end = str + len - 1;
 			while (str < end) swap(*str++, *end--);
@@ -82,7 +82,7 @@ namespace cl
 		//格式化无符号整型到字符串缓冲区中
 		//返回字符串长度 
 		template<CharType T, IntType V>
-		inline s32 _uval2str(T* buf, s32 size, V val)
+		inline s32 _str_format_uval(T* buf, s32 size, V val)
 		{
 			[[unlikely]]
 			if (size <= 1) { *buf = 0; return 0; }
@@ -98,21 +98,27 @@ namespace cl
 			if (size <= 1) { *buf = 0; return 0; }//缓冲区不足 
 
 			auto len = s32(p - buf);
-			_flip(buf, len);
+			_str_flip(buf, len);
 			*p = 0;
 			return len;
 		}
 
+		//返回字符串长度, fraction表示小数部分 
+		s32 _str_format_ufval(char* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度
+		s32 _str_format_ufval(char* buf, s32 size, f64 fval, s32 dst_fraction);
+		//返回字符串长度,
+		s32 _str_format_ufval(wchar* buf, s32 size, f32 fval, s32 dst_fraction);
+		//返回字符串长度,
+		s32 _str_format_ufval(wchar* buf, s32 size, f64 fval, s32 dst_fraction);
+
 		//返回字符串长度,
 		template<CharType T, UintType V>
-		inline s32 _val2str(T* buf, s32 size, V val)
-		{
-			return _uval2str(buf, size, val);
-		}
+		inline s32 _str_format(T* buf, s32 size, V val) { return _str_format_uval(buf, size, val); }
 
 		//返回字符串长度,
 		template<CharType T, SintType V>
-		inline s32 _val2str(T* buf, s32 size, V val)
+		inline s32 _str_format(T* buf, s32 size, V val)
 		{
 			s32 len = 0;
 			if (val < 0)
@@ -122,21 +128,12 @@ namespace cl
 				size--;
 				len++;
 			}
-			return _uval2str(buf, size, val) + len;
+			return _str_format_uval(buf, size, val) + len;
 		}
-
-		//返回字符串长度, fraction表示小数部分 
-		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction);
-		//返回字符串长度
-		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction);
-		//返回字符串长度,
-		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction);
-		//返回字符串长度,
-		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction);
-
+		 
 		//返回字符串长度,
 		template<CharType T, FloatType V>
-		inline s32 _val2str(T* buf, s32 size, V val, s32 fraction)
+		inline s32 _str_format(T* buf, s32 size, V val, s32 fraction)
 		{
 			s32 len = 0;
 			if (val < 0)
@@ -146,7 +143,7 @@ namespace cl
 				size--;
 				len++;
 			}
-			return _ufval2str(buf, size, val, fraction) + len;
+			return _str_format_ufval(buf, size, val, fraction) + len;
 		}
 		/*###################################################################################*/
 		//str 2 val
@@ -191,15 +188,15 @@ namespace cl
 		static inline bool iequ(const wchar* t1, const wchar* t2) { return ::_wcsicmp(t1, t2) == 0; }
 		static inline bool iequ(const wchar* t1, const wchar* t2, s32 len) { return ::_wcsnicmp(t1, t2, len) == 0; }
 		/**************************************************************************************************************/
-		static inline s32 copy(char* dst, const char* src) { return detail::_strcpy(dst, src); }
-		static inline s32 copy(char* dst, const char* src, s32 len) { return detail::_strcpy_n(dst, src, len); }
-		static inline s32 copy(char* dst, s32 size, const char* src) { return detail::_strcpy_s(dst, size, src); }
-		static inline s32 copy(char* dst, s32 size, const char* src, s32 len) { return detail::_strcpy_ns(dst, size, src, len); }
+		static inline s32 copy(char* dst, const char* src) { return detail::_str_copy(dst, src); }
+		static inline s32 copy(char* dst, const char* src, s32 len) { return detail::_str_copy(dst, src, len); }
+		static inline s32 copy(char* dst, s32 size, const char* src) { return detail::_str_copy(dst, size, src); }
+		static inline s32 copy(char* dst, s32 size, const char* src, s32 len) { return detail::_str_copy(dst, size, src, len); }
 
-		static inline s32 copy(wchar* dst, const wchar* src) { return detail::_strcpy(dst, src); }
-		static inline s32 copy(wchar* dst, const wchar* src, s32 len) { return detail::_strcpy_n(dst, src, len); }
-		static inline s32 copy(wchar* dst, s32 size, const wchar* src) { return detail::_strcpy_s(dst, size, src); }
-		static inline s32 copy(wchar* dst, s32 size, const wchar* src, s32 len) { return detail::_strcpy_ns(dst, size, src, len); }
+		static inline s32 copy(wchar* dst, const wchar* src) { return detail::_str_copy(dst, src); }
+		static inline s32 copy(wchar* dst, const wchar* src, s32 len) { return detail::_str_copy(dst, src, len); }
+		static inline s32 copy(wchar* dst, s32 size, const wchar* src) { return detail::_str_copy(dst, size, src); }
+		static inline s32 copy(wchar* dst, s32 size, const wchar* src, s32 len) { return detail::_str_copy(dst, size, src, len); }
 		/**************************************************************************************************************/
 		//从字符串右侧返回第一个查找到指定字符位置
 		static inline char* find(const char* str, char c) { return (char*)::strchr(str, c); }
@@ -215,7 +212,7 @@ namespace cl
 		//反转字符串
 		template<CharType T> static inline void flip(T* str, s32 len)
 		{
-			detail::_flip(str, len);
+			detail::_str_flip(str, len);
 		}
 		/**************************************************************************************************************/
 		//去掉字符串末端无法显示的字符,返回裁剪后的长度
@@ -289,13 +286,13 @@ namespace cl
 		//返回格式化字符串长度
 		template<CharType T, IntType V> static inline s32 format(T* buf, s32 size, V val)
 		{
-			return detail::_val2str(buf, size, val);
+			return detail::_str_format(buf, size, val);
 		}
 		//格式化数值到字符串缓冲区中
 		//返回格式化字符串长度
 		template<CharType T, FloatType V> static inline s32 format(T* buf, s32 size, V val, s32 fraction = 0)
 		{
-			return detail::_val2str(buf, size, val, fraction);
+			return detail::_str_format(buf, size, val, fraction);
 		}
 		/**************************************************************************************************************/
 		//字符串=>bool, 返回第一个无法解析的字符位置, 失败返回nullptr
@@ -314,7 +311,7 @@ namespace cl
 
 		/**************************************************************************************************************/
 		//跳过utf8的头部tag
-		char* skip_utf8_bom(const char* buf)
+		static inline char* skip_utf8_bom(const char* buf)
 		{
 			u8* data = (u8*)buf;
 			if (data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
@@ -329,7 +326,8 @@ namespace cl
 
 	namespace detail
 	{
-		//这个类是对CStr的扩充, 允许宽字节和多字节之间的比较, 用于库开发
+		//工具类, 用于库开发
+		//这个类是对CStr的扩充, 允许宽字节和多字节之间的比较, 
 		class CStrX
 		{
 		public:
@@ -506,11 +504,11 @@ namespace cl
 			s32 _size() const { return size_; }
 		};
 
-		char* _empty(const char*);
-		wchar* _empty(const wchar*);
+		char* _str_empty(const char*);
+		wchar* _str_empty(const wchar*);
 
-		char* _null_str(const char*);
-		wchar* _null_str(const wchar*);
+		char* _str_null(const char*);
+		wchar* _str_null(const wchar*);
 	}
 
 	//用于格式化时, 指示浮点数保留多少位小数
@@ -554,7 +552,7 @@ namespace cl
 		_String(const ThisType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
 		_String(ThisType&& str) noexcept { _move(&str); }
 
-		_String& operator=(const T* str) { if (str == nullptr) _set(detail::_empty(str), 0); else _set(str, CStr::len(str)); return *this; }
+		_String& operator=(const T* str) { if (str == nullptr) _set(detail::_str_empty(str), 0); else _set(str, CStr::len(str)); return *this; }
 		_String& operator=(const StrView<T>& str) { _set(str.data(), str.len()); return *this; }
 		template<s32 M>
 		_String& operator=(const _String<T, A, M>& str) noexcept { _set(str.str_, str.len_); return *this; }
@@ -572,7 +570,7 @@ namespace cl
 
 		operator StrView<T>() const { return view(); }
 
-		operator T* () const { return str_ ? str_ : detail::_empty(str_); }
+		operator T* () const { return str_ ? str_ : detail::_str_empty(str_); }
 		template<NotCharType R>
 		operator R() const
 		{
@@ -642,7 +640,7 @@ namespace cl
 	public:
 		_String& operator=(const Fraction& f) { fraction_ = f.len_; return *this; }
 		_String& operator<<(const Fraction& f) { fraction_ = f.len_; return *this; }
-		_String& operator<<(const std::nullptr_t&) { return push(detail::_null_str((const T*)0), 4); }
+		_String& operator<<(const std::nullptr_t&) { return push(detail::_str_null((const T*)0), 4); }
 
 		//char or wchar
 		_String& operator<<(const char& val) { return push((T)val); }
@@ -670,7 +668,7 @@ namespace cl
 	private:
 		bool _equ(const T* t) const
 		{
-			auto src = str_ ? str_ : detail::_empty(str_);
+			auto src = str_ ? str_ : detail::_str_empty(str_);
 			return CStr::equ(src, t);
 		}
 	public:
@@ -684,6 +682,17 @@ namespace cl
 		bool operator==(const _String<T, A, M>& t) const { return _equ(t.data()); }
 		template<typename T> bool operator!=(const T& t) const { return !operator==(t); }
 	};
+
+	namespace detail
+	{
+		//工具函数, 用于库开发
+		//允许多字节字符串直接赋值到宽字节, 或反之
+		template<typename T, typename A, s32 N, typename C>
+		void _String_xpush(_String<T, A, N>& str, const C* con)
+		{
+			while (*con) str.push(*con++);
+		}
+	}
 }
 
 #endif//__clan_base_str__ 

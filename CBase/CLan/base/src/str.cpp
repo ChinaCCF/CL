@@ -116,12 +116,12 @@ namespace cl
 		{
 			//返回字符串长度, fraction表示小数部分
 			template<CharType T, FloatType V>
-			inline s32 _do_ufval2str(T* buf, s32 size, V fval, s32 dst_fraction)
+			inline s32 _do_str_format_ufval(T* buf, s32 size, V fval, s32 dst_fraction)
 			{
 				auto p = buf;
 
 				u64 uval = (u64)fval;
-				auto len = _uval2str(p, size, uval);
+				auto len = _str_format_uval(p, size, uval);
 
 				[[unlikely]]
 				if (len == 0) return 0;
@@ -144,7 +144,7 @@ namespace cl
 				fval -= uval;
 				if (fval > 0.5) uval += 1;
 
-				len = _uval2str(p, size, uval);
+				len = _str_format_uval(p, size, uval);
 
 				[[unlikely]]
 				if (len == 0) { *buf = 0; return 0; }
@@ -173,10 +173,10 @@ namespace cl
 			}
 		}
 		 
-		s32 _ufval2str(char* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
-		s32 _ufval2str(char* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
-		s32 _ufval2str(wchar* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
-		s32 _ufval2str(wchar* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_ufval2str(buf, size, fval, dst_fraction); }
+		s32 _str_format_ufval(char* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_str_format_ufval(buf, size, fval, dst_fraction); }
+		s32 _str_format_ufval(char* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_str_format_ufval(buf, size, fval, dst_fraction); }
+		s32 _str_format_ufval(wchar* buf, s32 size, f32 fval, s32 dst_fraction) { return _do_str_format_ufval(buf, size, fval, dst_fraction); }
+		s32 _str_format_ufval(wchar* buf, s32 size, f64 fval, s32 dst_fraction) { return _do_str_format_ufval(buf, size, fval, dst_fraction); }
 
 		namespace
 		{
@@ -270,11 +270,11 @@ namespace cl
 		char* _str2val(const char* str, bool& val) { return _2bool(str, val); } 
 		wchar* _str2val(const wchar* str, bool& val) { return _2bool(str, val); } 
 		 
-		char* _empty(const char*) { return (char*)""; }
-		wchar* _empty(const wchar*) { return (wchar*)L""; }
+		char* _str_empty(const char*) { return (char*)""; }
+		wchar* _str_empty(const wchar*) { return (wchar*)L""; }
 
-		char* _null_str(const char*) { return (char*)"null"; }
-		wchar* _null_str(const wchar*) { return (wchar*)L"null"; } 
+		char* _str_null(const char*) { return (char*)"null"; }
+		wchar* _str_null(const wchar*) { return (wchar*)L"null"; } 
 	}
 
 	CharCode CStr::judge_char_code(const char* _str)

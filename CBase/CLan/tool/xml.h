@@ -118,21 +118,20 @@ namespace cl
 			else
 			{
 				MO tmp;
-				if (last.is_list()) 
-					last.push(std::move(tmp));  
+				if (last.is_list())
+					last.push(std::move(tmp));
 				else
 				{//不是数组  
 					MO arr;
 					arr.push(std::move(last));
 					arr.push(std::move(tmp));
-					last = std::move(arr); 
+					last = std::move(arr);
 				}
 
 				auto list = last.list();
 				obj = &list->back();
 			}
 		}
-
 
 		//1 : <? ... ?>
 		//2 : 注释   
@@ -188,11 +187,11 @@ namespace cl
 					if (node_end) *node_end = 0;
 
 					auto attr = CStr::find(buf_, ' ');
-					if (attr) *attr = 0; 
+					if (attr) *attr = 0;
 
 					auto parent = stack_.back();
 					_get_node(parent, buf_, node, name);
-					if(comment_.is_list())
+					if (comment_.is_list())
 						(*node)[detail::_xml_com_key(buf_)] = std::move(comment_);
 
 					if (attr) _parse_attr(attr + 1, *node);
@@ -206,7 +205,7 @@ namespace cl
 				if (p[1] == '/')
 				{
 					CStr::copy(buf_, str, s32(p - str));
-					(*node)[detail::_xml_text_key(buf_)] = buf_; 
+					(*node)[detail::_xml_text_key(buf_)] = buf_;
 				}
 				else
 				{
@@ -216,9 +215,9 @@ namespace cl
 						str = _parse_node(p, level + 1);
 						p = CStr::find(str, '<');
 						cl_assert(p);
-						if (p[1] == '/') break; 
-					} 
-					stack_.pop(); 
+						if (p[1] == '/') break;
+					}
+					stack_.pop();
 				}
 
 				p += 2; //跳过</
@@ -231,6 +230,13 @@ namespace cl
 				return (C*)_skip_space(bracket_end + 1);
 			} while (true);
 		}
+		/*##############################################################################################*/
+	private:
+		void _pad_prefix(Str& str, s32 level)
+		{
+			for (s32 i = 0; i < level; i++)
+				str.append("    ", 4);
+		};
 	public:
 		_XML() { buf_ = (C*)A().alloc(sizeof(C) * 4096); }
 		~_XML() { A().free(buf_); }
@@ -244,8 +250,13 @@ namespace cl
 
 			stack_.push(&root_);
 			_parse_node(str, 0);
+			cl_assert(stack_.size() == 1);
 		}
-		//string dump(bool format = true);
+		Str dump(bool format = true, s32 fraction = 2)
+		{
+			fraction_ = fraction;
+			format_ = format;
+		}
 	};
 }
 
