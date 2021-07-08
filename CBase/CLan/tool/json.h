@@ -5,19 +5,39 @@
 
 namespace cl
 {
+	namespace detail
+	{
+		s32 json_decode_str(const char* src, s32 len);
+		s32 json_decode_str(const wchar* src, s32 len);
+
+		void json_encode_str(char* dst, s32 size, const char* _src, bool encode_unicode);
+		void json_encode_str(wchar* dst, s32 size, const wchar* _src, bool encode_unicode);
+
+		enum class JsonOtherVal
+		{
+			None,
+			Null,
+			True,
+			False
+		};
+
+		char* json_parse_other_val(const char* str, detail::JsonOtherVal& val);
+		wchar* json_parse_other_val(const wchar* str, detail::JsonOtherVal& val);
+	}
 	//json 解析类, 非常简单明了
 	template<CharType C, AllocMemType A>
 	class _Json
 	{ 
 		C* org_buf_ = nullptr;//解析过程中用到的缓冲
 		C* buf_ = nullptr;//随着递归解析, buf_指针会递增
-		bool format_ = true;
+		bool format_ = true;//是否格式化字符串
+		bool encode_unicode_ = false;//是否加密
 	public:
 		using Str = _String<C, A, 0>;
 		using MO = _MixObj<C, A>;
 		MO root_;
 		s32 fraction_ = 2;//默认小数位2位
-	public:
+	private:   
 		C* _parse_str(const C* p, C* buf, s32& len)
 		{
 			p++;//跳过当前'"' 
@@ -34,6 +54,7 @@ namespace cl
 
 			len = s32(p - start);
 			CStr::copy(buf, start, len);
+			len = detail::json_decode_str(buf, len);
 			return (C*)(p + 1);
 		}
 
@@ -43,46 +64,13 @@ namespace cl
 			cl_assert(ret != nullptr);
 			return ret;
 		}
-
-		enum class OtherVal
-		{
-			None,
-			Null,
-			True,
-			False
-		};
-
-		C* _parse_other_val(const C* str, OtherVal& val)
-		{
-			C buf[6];
-			CStr::copy(buf, 6, str, 6);
-			buf[5] = 0;
-			CStr::lower(buf);
-			if (CStr::equ(buf, "false", 5))
-			{
-				val = OtherVal::False;
-				return (C*)(str + 5);
-			}
-			if (CStr::equ(buf, "true", 4))
-			{
-				val = OtherVal::True;
-				return (C*)(str + 4);
-			}
-			if (CStr::equ(buf, "null", 4))
-			{
-				val = OtherVal::Null;
-				return (C*)(str + 4);
-			}
-			cl_assert(false);
-			return nullptr;
-		}
-
+		   
 		C* _skip_space(const C* str)
 		{
 			while (*str && *str <= 32) ++str;
 			return (C*)str;
 		}
-
+		 
 		C* _parse_arr(const C* str, MO& arr)
 		{
 			bool more_item = false;
@@ -113,7 +101,7 @@ namespace cl
 				}
 			};
 		}
-
+		  
 		C* _parse_map(const C* str, MO& map)
 		{
 			bool more_item = false;
@@ -185,13 +173,13 @@ namespace cl
 					obj = (s64)val.val_;
 				return (C*)str;
 			}
-			OtherVal val;
-			str = _parse_other_val(str, val);
-			if (val == OtherVal::Null)
+			detail::JsonOtherVal val;
+			str = detail::json_parse_other_val(str, val);
+			if (val == detail::JsonOtherVal::Null)
 				obj = nullptr;
-			if (val == OtherVal::False)
+			if (val == detail::JsonOtherVal::False)
 				obj = false;
-			if (val == OtherVal::True)
+			if (val == detail::JsonOtherVal::True)
 				obj = true;
 			return (C*)str;
 		}
@@ -232,7 +220,8 @@ namespace cl
 							{
 								if (obj.is_str())
 								{
-									str << '\"' << (const C*)obj << '\"';
+									detail::json_encode_str(buf_, 4096, (const C*)obj, encode_unicode_);
+									str << '\"' << buf_ << '\"';
 								}
 								else
 									str << nullptr;
@@ -355,9 +344,10 @@ namespace cl
 			cl_assert(*str == 0);
 		}
 		 
-		Str dump(bool format = true)
+		Str dump(bool format = true, bool encode_unicode = false)
 		{
 			format_ = format;
+			encode_unicode_ = encode_unicode;
 
 			Str ret;
 			ret << Fraction(fraction_);

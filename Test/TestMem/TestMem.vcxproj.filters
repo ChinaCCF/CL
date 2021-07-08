@@ -23,5 +23,11 @@
     <ClInclude Include="test_json.h">
       <Filter>源文件</Filter>
     </ClInclude>
+    <ClInclude Include="test_xml.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_mixobj.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

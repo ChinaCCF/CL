@@ -17,6 +17,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test_json.h" />
+    <ClInclude Include="test_mixobj.h" />
+    <ClInclude Include="test_xml.h" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\4setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

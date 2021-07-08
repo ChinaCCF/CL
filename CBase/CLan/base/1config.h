@@ -59,6 +59,8 @@
 #       pragma comment(lib, "CLan.lib")
 #   endif 
 #endif
+
+#pragma warning(disable:6011) //取消引用 NULL 指针
  
 #endif
 

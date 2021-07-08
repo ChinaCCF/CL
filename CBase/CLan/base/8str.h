@@ -154,13 +154,13 @@ namespace cl
 		struct Str2Val
 		{
 			bool is_float_;
-			f64 val_; 
-		}; 
+			f64 val_;
+		};
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, Str2Val& val);
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		char* _str2val(const char* str, bool& val);
-		 
+
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, Str2Val& val);
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
@@ -201,6 +201,7 @@ namespace cl
 		static inline s32 copy(wchar* dst, s32 size, const wchar* src) { return detail::_strcpy_s(dst, size, src); }
 		static inline s32 copy(wchar* dst, s32 size, const wchar* src, s32 len) { return detail::_strcpy_ns(dst, size, src, len); }
 		/**************************************************************************************************************/
+		//从字符串右侧返回第一个查找到指定字符位置
 		static inline char* find(const char* str, char c) { return (char*)::strchr(str, c); }
 		//从字符串右侧返回第一个查找到指定字符位置
 		static inline char* rfind(const char* str, char c) { return (char*)::strrchr(str, c); }
@@ -232,13 +233,9 @@ namespace cl
 			if (len)
 			{
 				T* begin = str;
-				while (len-- && *begin <= 32) ++begin;
-				len = s32(begin - str);
-				if (len <= 0)
-				{
-					str[0] = 0;
-					return 0;
-				}
+				while (len && *begin <= 32) { ++begin; --len; }
+				auto dif = s32(begin - str);
+				if (dif <= 0) return len;
 				for (s32 i = 0; i < len; i++)
 					str[i] = begin[i];
 				str[len] = 0;
@@ -309,11 +306,11 @@ namespace cl
 		//字符串=>浮点数 或 整型, 返回第一个无法解析的字符位置, 失败返回nullptr
 		template<CharType T, IntAndFloatType V> static inline T* to_val(const T* buf, V& val)
 		{
-			detail::Str2Val s2v; 
-			auto ret = detail::_str2val(buf, s2v); 
+			detail::Str2Val s2v;
+			auto ret = detail::_str2val(buf, s2v);
 			val = (V)s2v.val_;
 			return ret;
-		} 
+		}
 
 		/**************************************************************************************************************/
 		//跳过utf8的头部tag
@@ -330,6 +327,74 @@ namespace cl
 		static inline CharCode judge_char_code(const char* str);
 	};
 
+	namespace detail
+	{
+		//这个类是对CStr的扩充, 允许宽字节和多字节之间的比较, 用于库开发
+		class CStrX
+		{
+		public:
+			template<CharType C1, CharType C2>
+			static inline s32 cmp(const C1* t1, const C2* t2)
+			{
+				while (*t1 && *t1 == *t2) { ++t1; ++t2; }
+				if (*t1 < *t2) return -1;
+				if (*t1 == *t2) return 0;
+				return 1;
+			}
+
+			template<CharType C1, CharType C2>
+			static inline s32 cmp(const C1* t1, const C2* t2, s32 len)
+			{
+				while (len && *t1 && *t1 == *t2) { ++t1; ++t2; --len; }
+				if (len == 0 || *t1 == *t2) return 0;
+				if (*t1 < *t2) return -1;
+				return 1;
+			}
+
+			template<CharType C1, CharType C2>
+			static inline C1* find(const C1* str, const C2* sub)
+			{
+				s32 len = CStr::len(sub);
+				while (true)
+				{
+					while (*str && *str != *sub) str++;
+					if (*str == 0) return nullptr;
+					if (CStrX::cmp(str, sub, len) == 0) return (C1*)str;
+					++str;
+				}
+			}
+
+			template<CharType C1, CharType C2>
+			static inline C1* find(const C1* str, const C2* sub, s32 len)
+			{
+				while (true)
+				{
+					while (*str && *str != *sub) str++;
+					if (*str == 0) return nullptr;
+					if (CStrX::cmp(str, sub, len) == 0) return (C1*)str;
+					++str;
+				}
+			}
+
+			template<CharType C1, CharType C2>
+			static inline s32 copy(C1* t1, const C2* t2)
+			{
+				auto org = t1;
+				while (*t2) { *t1++ = *t2++; }
+				*t1 = 0;
+				return s32(t1 - org);
+			}
+
+			template<CharType C1, CharType C2>
+			static inline s32 copy(C1* t1, const C2* t2, s32 len)
+			{
+				auto org = t1;
+				while (len-- && *t2) { *t1++ = *t2++; }
+				*t1 = 0;
+				return s32(t1 - org);
+			}
+		};
+	}
 	//产量字符串视图, 类似标准库的std::string_view 和 win32驱动中的UnicodeString
 	template<CharType T>
 	class StrView
@@ -352,7 +417,7 @@ namespace cl
 		const T* data() const { return str_; }
 		char operator[](s32 index) const { return str_[index]; }
 
-		operator T* () const { return str_; }  
+		operator T* () const { return str_; }
 		template<NotCharType R>
 		operator R() const
 		{
@@ -446,12 +511,6 @@ namespace cl
 
 		char* _null_str(const char*);
 		wchar* _null_str(const wchar*);
-
-		char* _false_str(const char*);
-		wchar* _false_str(const wchar*);
-
-		char* _true_str(const char*);
-		wchar* _true_str(const wchar*);
 	}
 
 	//用于格式化时, 指示浮点数保留多少位小数
@@ -460,7 +519,7 @@ namespace cl
 		s32 len_;//小数部分的长度
 		Fraction(s32 len = 2) : len_(len) {}
 	};
-	 
+
 	//为啥要写这个类呢? 一个很简单的问题 std::string str; str.reserve(4096 * 4096); auto p = (char*)str.data(); do some thing with p, .... then crash
 	//原因是, VS或者GCC实现时, 判断保留的大小超过一定数目就不会申请这么大的内存, 而是等到具体使用时再申请,
 	//然后再一些常规操作, 例如 str = 123;//数值转化为字符串, 或者 int v = str; //字符串转换为数值
@@ -474,7 +533,7 @@ namespace cl
 		using Base::_need;
 		using Base::_move;
 		using Base::_size;//可以存储的字符数目, 非内存大小
-		  
+
 		void _set(const T* str, s32 len)
 		{
 			_need(len);
@@ -491,10 +550,10 @@ namespace cl
 		_String(const T* str) { _set(str, CStr::len(str)); }
 		_String(const StrView<T>& str) { if (str.str_) _set(str.data(), str.len()); }
 		template<s32 M>
-		_String(const _String<T, A, M>& str) { _set(str.str_, str.len_); } 
+		_String(const _String<T, A, M>& str) { _set(str.str_, str.len_); }
 		_String(const ThisType& str) { _set(str.str_, str.len_); } //无法取消,否则会提示调用已删除的函数  
 		_String(ThisType&& str) noexcept { _move(&str); }
-		 
+
 		_String& operator=(const T* str) { if (str == nullptr) _set(detail::_empty(str), 0); else _set(str, CStr::len(str)); return *this; }
 		_String& operator=(const StrView<T>& str) { _set(str.data(), str.len()); return *this; }
 		template<s32 M>
@@ -513,7 +572,7 @@ namespace cl
 
 		operator StrView<T>() const { return view(); }
 
-		operator T* () const { return str_ ? str_ : detail::_empty(str_); }  
+		operator T* () const { return str_ ? str_ : detail::_empty(str_); }
 		template<NotCharType R>
 		operator R() const
 		{
@@ -523,14 +582,14 @@ namespace cl
 			return val;
 		}
 		/*#######################################################################################*/
-		T& back() { return str_[len_ - 1]; } 
+		T& back() { return str_[len_ - 1]; }
 		void pop(s32 len = 1) { len_ -= len; str_[len_] = 0; }
 		_String& push(T c) { _need(1); str_[len_++] = c; str_[len_] = 0; return *this; }
 
 		_String& push(const T* str, s32 len)
 		{
 			_need(len);
-			Byte::copy(str_ + len_, str, len);
+			CStr::copy(str_ + len_, str, len);
 			len_ += len;
 			str_[len_] = 0;
 			return *this;
@@ -555,7 +614,7 @@ namespace cl
 			cl_assert(index + len <= len_);
 
 			s32 tail = len_ - index - len;
-			Byte::copy(str_ + index, str_ + index + len, tail);
+			CStr::copy(str_ + index, str_ + index + len, tail);
 			len_ -= len;
 			str_[len_] = 0;
 		}
@@ -584,7 +643,7 @@ namespace cl
 		_String& operator=(const Fraction& f) { fraction_ = f.len_; return *this; }
 		_String& operator<<(const Fraction& f) { fraction_ = f.len_; return *this; }
 		_String& operator<<(const std::nullptr_t&) { return push(detail::_null_str((const T*)0), 4); }
-		 
+
 		//char or wchar
 		_String& operator<<(const char& val) { return push((T)val); }
 		_String& operator<<(const wchar& val) { return push((T)val); }
@@ -608,17 +667,21 @@ namespace cl
 		template<s32 M> _String& operator<<(const _String<T, A, M>& str) { return push(str.data(), str.len()); }
 
 		/*###############################################################################*/
+	private:
+		bool _equ(const T* t) const
+		{
+			auto src = str_ ? str_ : detail::_empty(str_);
+			return CStr::equ(src, t);
+		}
+	public:
 		bool operator==(const std::nullptr_t&) const { return len_ == 0; }
 		bool operator!=(const std::nullptr_t&) const { return len_ != 0; }
 
-		bool operator==(const T* t) const
-		{
-			auto src = str_ ? str_ : detail::_empty();
-			return CStr::equ(src, t);
-		}
-		bool operator==(const StrView<T>& t) const { return operator==(t.data()); }
+		bool operator==(T* t) const { return _equ(t); }
+		bool operator==(const T* t) const { return _equ(t); }
+		bool operator==(const StrView<T>& t) const { return _equ(t.data()); }
 		template<s32 M>
-		bool operator==(const _String<T, A, M>& t) const { return operator==(t.data()); }
+		bool operator==(const _String<T, A, M>& t) const { return _equ(t.data()); }
 		template<typename T> bool operator!=(const T& t) const { return !operator==(t); }
 	};
 }

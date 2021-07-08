@@ -91,9 +91,10 @@ namespace cl
             Node* next_ = nullptr;
         };
          
-        char buf_[sizeof(HeadNode) * 2];
-        Node* head() const { return (Node*)buf_; }
-        Node* tail() const { return (Node*)(((HeadNode*)buf_) + 1); }
+        HeadNode head_;
+        HeadNode tail_; 
+        Node* head() const { return (Node*)&head_; }
+        Node* tail() const { return (Node*)&tail_; }
 
         s32 cnt_ = 0;
 
@@ -183,18 +184,15 @@ namespace cl
             return p;
         }
     public:
-        _List()
+		_List() { _a2b(head(), tail()); }
+        _List(const ThisType& list) 
         {
             _a2b(head(), tail());
-            head()->pre_ = nullptr;
-            tail()->next_ = nullptr;
-        }
-        _List(const ThisType& list) : _List()
-        {
             _append(list);
         }
-        _List(ThisType&& list) noexcept : _List()
+        _List(ThisType&& list) noexcept 
         {
+            _a2b(head(), tail());
             _move(&list);
         }
         //#############################################

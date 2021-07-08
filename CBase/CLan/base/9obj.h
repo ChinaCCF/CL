@@ -9,7 +9,10 @@ namespace cl
     public:
         NoCopyObj() {}
 
+        NoCopyObj(NoCopyObj&) = delete;
         NoCopyObj(const NoCopyObj&) = delete;
+
+        NoCopyObj& operator=(NoCopyObj&) = delete; 
         NoCopyObj& operator=(const NoCopyObj&) = delete;
      };
 }

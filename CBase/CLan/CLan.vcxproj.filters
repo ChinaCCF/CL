@@ -15,6 +15,8 @@
     <ClCompile Include="base\src\mem.cpp" />
     <ClCompile Include="base\src\time.cpp" />
     <ClCompile Include="base\src\exception.cpp" />
+    <ClCompile Include="tool\src\json.cpp" />
+    <ClCompile Include="tool\src\xml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\1config.h">
@@ -72,6 +74,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tool\json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tool\xml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

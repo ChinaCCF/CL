@@ -10,8 +10,8 @@ namespace cl
 	{
 		enum class MixObjType
 		{ 
-			None,
-			Null,
+			None,//默认值, 初始状态, 表示没有经过赋值
+			Null,//这是一个值, 表示null
 			Bool,
 			Int,
 			Float,
@@ -44,7 +44,7 @@ namespace cl
 			MapValType* map_;
 		};
 		mutable Val val_;
-		mutable ValType val_type_ = ValType::Null;
+		mutable ValType val_type_ = ValType::None;
 
 	private:
 		void _release()
@@ -56,7 +56,7 @@ namespace cl
 			if (val_type_ == ValType::List)
 				_del<A>(val_.list_);
 
-			val_type_ = ValType::Null;
+			val_type_ = ValType::None;
 		}
 	public:
 		_MixObj()
@@ -70,12 +70,15 @@ namespace cl
 			val_type_ = mo.val_type_;
 
 			mo.val_.sv_ = 0;
-			mo.val_type_ = ValType::Null;
+			mo.val_type_ = ValType::None;
 		}
 
-		template<typename T> _MixObj(T&& val) { this->operator=(std::forward<T>(val)); }
+		template<typename T> requires IsNotSameType<T, _MixObj>::value
+		_MixObj(T&& val) { this->operator=(std::forward<T>(val)); }
+
 		~_MixObj() { _release(); }
 
+		bool is_none() const { return val_type_ == ValType::None; }
 		bool is_null() const { return val_type_ == ValType::Null; }
 		bool is_bool() const { return val_type_ == ValType::Bool; }
 		bool is_int() const { return val_type_ == ValType::Int; }
@@ -147,7 +150,7 @@ namespace cl
 		/*####################################################################################################*/
 		//赋值
 		/*####################################################################################################*/
-		void operator=(const std::nullptr_t&) { _release(); }
+		void operator=(const std::nullptr_t&) { _release(); val_type_ = ValType::Null; }
 		void operator=(_MixObj&& mo) noexcept { _release(); new(this)_MixObj(std::move(mo)); }
 
 		template<BoolType T>
@@ -194,7 +197,7 @@ namespace cl
 		} 
 		void push(_MixObj&& obj)
 		{
-			if (val_type_ == ValType::Null)
+			if (val_type_ == ValType::Null || val_type_ == ValType::None)
 			{
 				val_type_ = ValType::List;
 				val_.list_ = _new<A, ListValType>();
@@ -204,8 +207,8 @@ namespace cl
 
 			val_.list_->push_back(std::move(obj));
 		}
-		template<typename T>
-		void push(T&& val)
+		template<typename T> requires IsNotSameType<T, _MixObj>::value
+		void push(const T& val)
 		{
 			_MixObj obj = std::forward<T>(val);
 			push(std::move(obj));
@@ -218,9 +221,10 @@ namespace cl
 		/*####################################################################################################*/
 		//映射
 		/*####################################################################################################*/
-		_MixObj& operator[](const C* key) const
+		template<typename T> requires ToChars<T, C>::value
+		_MixObj& operator[](const T& key) const
 		{
-			if (val_type_ == ValType::Null)
+			if (val_type_ == ValType::Null || val_type_ == ValType::None)
 			{
 				val_type_ = ValType::Map;
 				val_.map_ = _new<A, MapValType>();
@@ -231,19 +235,19 @@ namespace cl
 			auto map = val_.map_;
 			return (*map)[key]; 
 		} 
-		template<typename T> requires ToChars<T, C>::value
-		_MixObj& operator[](const T& key) const { return this->operator[]((const C*)key); } 
 
 		MapValType* map() const
 		{
 			cl_assert(val_type_ == ValType::Map);
 			return val_.map_;
 		}
-		bool find(const C* key)
+
+		template<typename T> requires ToChars<T, C>::value
+		bool contain(const T& key)
 		{
 			cl_assert(val_type_ == ValType::Map);
 			auto map = val_.map_;
-			return map->find(key) != map->end();
+			return map->contain(key);
 		}
 
 		/*####################################################################################################*/

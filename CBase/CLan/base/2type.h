@@ -55,6 +55,9 @@ namespace cl
 	};
 }
 
+// 1个#是转为字符串
+// 2个##是拼接字符串
+
 //多字节转为宽字节的宏
 #define __cl_W(x) L##x
 #define _cl_W(x) __cl_W(x)

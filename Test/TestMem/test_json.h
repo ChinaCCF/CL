@@ -11,6 +11,8 @@
 
 #include <CLan/tool/json.h>
 
+
+#include <locale.h>
 namespace test_json
 {
 
@@ -24,6 +26,8 @@ namespace test_json
 
 	void fun()
 	{
+		setlocale(LC_ALL, "chs");
+
 		//{
 		//	cl::_MixObj<char, AllocMem> mo;
 		//	mo["c"] = 1;
@@ -81,15 +85,26 @@ namespace test_json
 		//	printf("%ws", str.data());
 		//}
 
+		//{
+		//	const char* str = "{\"c\":1,\"b\":true,\"2\":null,\"3\":{\"1\":false,\"2\":2},\"4\":[1,2.3456, \"жа2\\n3\"]}";
+		//	cl::_Json<char, AllocMem> json;
+		//	json.parse(str);
+
+		//	json << cl::Fraction(4);
+		//	auto ret = json.dump(false, false);
+		//	printf("%s", ret.data());
+		//	int i = 0;
+		//}
+
 		{
-			const char* str = "{\"c\":1,\"b\":true,\"2\":null,\"3\":{\"1\":false,\"2\":2},\"4\":[1,2.3456, \"123\"]}";
-			cl::_Json<char, AllocMem> json;
+			const wchar* str = L"{\"c\":1,\"b\":true,\"2\":null,\"3\":{\"1\":false,\"2\":2},\"4\":[1,2.3456, \"жа2\\n3\"]}";
+			cl::_Json<wchar, AllocMem> json;
 			json.parse(str);
 
 			json << cl::Fraction(4);
-			auto ret = json.dump(false);
-			printf("%s", ret.data());
-			int i = 0;
+			auto ret = json.dump(false, false);
+			//wprintf(L"%ws", str);
+			printf("%ws", ret.data());
 		}
 	}
 

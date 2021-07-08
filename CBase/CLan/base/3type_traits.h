@@ -101,6 +101,9 @@ namespace cl
 	template<typename T1, typename T2> struct IsSameType { const_bool value = false; };
 	template<typename T> struct IsSameType<T, T> { const_bool value = true; };
 
+	template<typename T1, typename T2> struct IsNotSameType { const_bool value = true; };
+	template<typename T> struct IsNotSameType<T, T> { const_bool value = false; };
+
 	/*#####################################################################################*/
 	//判断是否是类
 	/*#####################################################################################*/
@@ -159,6 +162,20 @@ static_assert(cl::DestructorCheck<T>::value, "virtual class need virtual destruc
 	struct SelectType<false, Type1, Type2>
 	{
 		using type = Type2;
+	};
+	/*#####################################################################################*/
+	//选择相同大小的类型
+	/*#####################################################################################*/
+	template<typename T1, typename T2, typename ... Args>
+	struct SameSizeType
+	{
+		using type = typename SelectType < sizeof(T1) == sizeof(T2), T2, typename SameSizeType<T1, Args ...>::type>::type; 
+	};
+
+	template<typename T1, typename T2>
+	struct SameSizeType<T1, T2> 
+	{
+		using type = typename SelectType < sizeof(T1) == sizeof(T2), T2, void > ::type; 
 	};
 	/*#####################################################################################*/
 	//选择2个类型中存储空间大的一种,例如s8和s16,会选择s16 

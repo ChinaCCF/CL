@@ -10,6 +10,63 @@
 
 namespace cl
 {
+	template<typename T, s32 N>
+	class FixedArr : NoCopyObj
+	{
+		using ThisType = FixedArr<T, N>;
+		T arr_[N];
+		s32 cnt_ = 0;
+	public:
+		FixedArr() { clear(); }
+
+		s32 size() const noexcept { return cnt_; }
+		T& operator[](s32 index) const { return arr_[index]; }
+
+		void clear() 
+		{
+			for (s32 i = 0; i < cnt_; i++)
+				(arr_ + i)->~T();
+			cnt_ = 0;
+		}
+
+		template<typename ... Args>
+		void push(Args&& ... val)
+		{ 
+			new(arr_ + cnt_)T(std::forward<Args>(val)...);
+			cnt_++;
+		}
+
+		T pop()
+		{
+			cnt_--;
+			T tmp = std::move(arr_[cnt_]);
+			(arr_ + cnt_)->~T();
+			return tmp;
+		}
+		T& back() { return arr_[cnt_ - 1]; }
+
+		class It
+		{
+			s32 index_ = 0;
+			T* arr_ = nullptr;
+			friend class ThisType;
+		public:
+			It(T* arr, s32 index) : arr_(arr), index_(index) {}
+
+			T& operator*() { return arr_[index_]; }
+			T* operator->() { return arr_ + index_; }
+
+			It& operator++() { index_++; return *this; }
+			//不支持后递增
+			//It operator++(int) { It it = *this; operator++(); return it; }
+			bool operator==(const It& it) { return index_ == it.index_; }
+			bool operator!=(const It& it) { return index_ != it.index_; }
+		};
+
+		It begin() const { return It(arr_, 0); }
+		It end() const { return It(arr_, cnt_); }
+	};
+
 	template<typename T, AllocMemType A>
 	class _Array
 	{
@@ -127,14 +184,14 @@ namespace cl
 		 
 		/*########################################################################################*/ 
 		template<typename ... Args>
-		void push_back(Args&& ... val)
+		void push(Args&& ... val)
 		{
 			need(1); 
 			new(arr_ + cnt_)T(std::forward<Args>(val)...);
 			cnt_++;
 		}
 
-		T pop_back()
+		T pop()
 		{
 			cnt_--;
 			T tmp = std::move(arr_[cnt_]);
@@ -159,7 +216,7 @@ namespace cl
 		{
 			s32 index_ = 0;
 			T* arr_ = nullptr;
-			friend class _Array<T, A>;
+			friend class ThisType;
 		public:
 			It(T* arr, s32 index) : arr_(arr), index_(index) {}
 

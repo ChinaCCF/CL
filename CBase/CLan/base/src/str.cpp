@@ -274,13 +274,7 @@ namespace cl
 		wchar* _empty(const wchar*) { return (wchar*)L""; }
 
 		char* _null_str(const char*) { return (char*)"null"; }
-		wchar* _null_str(const wchar*) { return (wchar*)L"null"; }
-
-		char* _false_str(const char*) { return (char*)"false"; }
-		wchar* _false_str(const wchar*) { return (wchar*)L"false"; }
-
-		char* _true_str(const char*) { return (char*)"true"; }
-		wchar* _true_str(const wchar*) { return (wchar*)L"true"; }
+		wchar* _null_str(const wchar*) { return (wchar*)L"null"; } 
 	}
 
 	CharCode CStr::judge_char_code(const char* _str)

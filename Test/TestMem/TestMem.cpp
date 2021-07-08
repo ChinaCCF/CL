@@ -2,7 +2,9 @@
 //
 
 #include <stdio.h>   
+#include "test_mixobj.h"
 #include "test_json.h"
+#include "test_xml.h"
 
 #include <string>
 
@@ -19,8 +21,11 @@
 	 
  
 int main()
-{      
+{   
+	
+	test_mixobj::fun();
 	test_json::fun();
+	test_xml::fun();
 	return 0;
 }
 

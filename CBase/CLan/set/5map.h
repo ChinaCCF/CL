@@ -23,11 +23,20 @@ namespace cl
 	protected:
 		using ThisType = _SerialHashMap<Key, Val, A>;
 		using Node = detail::HashMapNode<Key, Val>; 
+		
+		template<typename F, typename S>
+		struct _ListNode
+		{
+			F& first;
+			S& second; 
+			_ListNode(Key& key, Val& val) : first(key), second(val) {}
+		};
+		using ListNode = _ListNode<Key, Val>;
 
 		Node** arr_ = nullptr;
 		s32 size_ = 0;
 		s32 cnt_ = 0;
-		_List<Node*, A> list_;
+		_List<ListNode, A> list_;
 
 		template<typename R>
 		inline Node* _find(const R& key, s32 index) const
@@ -41,7 +50,7 @@ namespace cl
 			cnt_++;
 			node->next_ = arr_[index];
 			arr_[index] = node; 
-			list_.push_back(node);
+			list_.push_back(ListNode(node->first, node->second));
 		}
 		inline void _move(ThisType* map)
 		{
@@ -93,45 +102,53 @@ namespace cl
 		}
 
 		template<typename R>
-		Val& operator[](const R& key)
+		bool contain(const R& key)
+		{
+			s32 index = hash(key) % size_;
+			auto node = _find(key, index); 
+			return node != nullptr;
+		}
+
+		template<typename R>
+		auto get(const R& key)
 		{
 			s32 index = hash(key) % size_;
 			auto node = _find(key, index);
 			if (!node)
 			{
 				node = _new<A, Node>();
-				node->first = key; 
-				_add_to_list(node, index); 
+				node->first = key;
+				_add_to_list(node, index);
 			}
-			return node->second;
+			return node;
 		}
 
 		template<typename R>
-		bool find(const R& key) const
+		Val& operator[](const R& key)
 		{
-			s32 index = hash(key) % size_;
-			Node* node = _find(key, index);
-
-			return node != nullptr;
+			return get(key)->second;
 		}
-
+		  
 		class It
 		{
 			friend class ThisType;
-			using Org = typename _List<Node*, A>::It;
+			using Org = typename _List<ListNode, A>::It;
 			Org it_;
 		public:
 			It(Org it) : it_(it) {}
-			Node& operator*() { return **it_; }
-			Node* operator->() { return *it_; }
+			ListNode& operator*() { return *it_; }
+			ListNode* operator->() { return it_; }
 
 			It& operator++() { ++it_; return *this; }
 			bool operator==(const It& it) { return it_ == it.it_; }
 			bool operator!=(const It& it) { return it_ != it.it_; }
 		};
 
+
 		auto begin() const { return It(list_.begin()); }
-		auto end() const { return  It(list_.end()); }
+		auto end() const { return It(list_.end()); }
+		 
+		void push_order(Key& key, Val& val) { list_.push_back(ListNode(key, val)); }
 	};
 
 

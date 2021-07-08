@@ -17,6 +17,8 @@
     <ClCompile Include="base\src\mem.cpp" />
     <ClCompile Include="base\src\str.cpp" />
     <ClCompile Include="base\src\time.cpp" />
+    <ClCompile Include="tool\src\json.cpp" />
+    <ClCompile Include="tool\src\xml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base\12time.h" />
@@ -38,6 +40,7 @@
     <ClInclude Include="set\5map.h" />
     <ClInclude Include="set\6mix_obj.h" />
     <ClInclude Include="tool\json.h" />
+    <ClInclude Include="tool\xml.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="base\src\base.natvis" />

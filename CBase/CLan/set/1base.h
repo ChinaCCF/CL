@@ -42,6 +42,7 @@ namespace cl
 		Pair() : first(Key()), second(Val()) {}
 		Pair(Pair&& p) noexcept : first(std::move(p.first)), second(std::move(p.second)) {}
 		Pair(const Pair& p) : first(p.first), second(p.second) {}
+		Pair(const Key& key, const Val& val) : first(key), second(val) {}
 
 		Pair& operator=(const Pair& p)
 		{
