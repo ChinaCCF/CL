@@ -123,17 +123,17 @@ namespace cl
 			CStr::copy(buf, 6, str, 6);
 			buf[5] = 0;
 			CStr::lower(buf);
-			if (CStrX::cmp(buf, "false", 5) == 0)
+			if (detail::_str_equ(buf, "false", 5))
 			{
 				val = detail::JsonOtherVal::False;
 				return (C*)(str + 5);
 			}
-			if (CStrX::cmp(buf, "true", 4) == 0)
+			if (detail::_str_equ(buf, "true", 4))
 			{
 				val = detail::JsonOtherVal::True;
 				return (C*)(str + 4);
 			}
-			if (CStrX::cmp(buf, "null", 4) == 0)
+			if (detail::_str_equ(buf, "null", 4))
 			{
 				val = detail::JsonOtherVal::Null;
 				return (C*)(str + 4);

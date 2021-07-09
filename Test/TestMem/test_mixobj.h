@@ -33,77 +33,91 @@ namespace test_mixobj
 
 	void fun()
 	{
-		{
-			cl::_Array<int, AllocMem> arr;
-			arr.push(1);
-			arr.push(2);
-			arr.push(3);
+		//{
+		//	cl::_Array<int, AllocMem> arr;
+		//	arr.push(1);
+		//	arr.push(2);
+		//	arr.push(3);
 
-			auto it = arr.begin();
-			++it;
-			int i = 0;
-		}
+		//	auto it = arr.begin();
+		//	++it;
+		//	int i = 0;
+		//}
 
-		{
-			cl::_List<int, AllocMem> list;
-			list.push_back(1);
-			list.push_back(2);
-			list.push_back(3);
+		//{
+		//	cl::_List<int, AllocMem> list;
+		//	list.push_back(1);
+		//	list.push_back(2);
+		//	list.push_back(3);
 
-			auto it = list.begin();
-			++it;
-			int i = 0;
-		}
+		//	auto it = list.begin();
+		//	++it;
+		//	int i = 0;
+		//}
 
-		{
-			cl::_SerialHashMap<cl::_String<char, AllocMem, 0>, int, AllocMem> map;
-			map["a"] = 1;
-			map["b"] = 2;
+		//{
+		//	cl::_SerialHashMap<cl::_String<char, AllocMem, 0>, int, AllocMem> map;
+		//	map["a"] = 1;
+		//	map["b"] = 2;
 
-			auto it = map.begin();
-			++it;
-			int i = 0;
-		}
+		//	auto it = map.begin();
+		//	++it;
+		//	int i = 0;
+		//}
 
-		{
-			cl::_HashMap<cl::_String<char, AllocMem, 0>, int, AllocMem> map;
-			map["a"] = 1;
-			map["b"] = 2;
+		//{
+		//	cl::_HashMap<cl::_String<char, AllocMem, 0>, int, AllocMem> map;
+		//	map["a"] = 1;
+		//	map["b"] = 2;
 
-			auto it = map.begin();
-			++it;
-			int i = 0;
-		}
-		{
-			cl::_String<char, AllocMem, 0> key = "c";
-			A a;
-			auto p = &a;
-			{
-				cl::_SerialHashMap<cl::_String<char, AllocMem, 0>, A, AllocMem> map;
-				{
-					map["a"] = A();
-				}
+		//	auto it = map.begin();
+		//	++it;
+		//	int i = 0;
+		//}
+		//{
+		//	cl::_String<char, AllocMem, 0> key = "c";
+		//	A a;
+		//	auto p = &a;
+		//	{
+		//		cl::_SerialHashMap<cl::_String<char, AllocMem, 0>, A, AllocMem> map;
+		//		{
+		//			map["a"] = A();
+		//		}
 
-				int j = 0;
-				{
-					map["b"] = A();
-				}
-				int j2 = 0;
+		//		int j = 0;
+		//		{
+		//			map["b"] = A();
+		//		}
+		//		int j2 = 0;
 
-				map.push_order(key, a);
-				for (auto& p : map)
-				{
-					int i = 0;
-				}
-			}
-		}
+		//		map.push_order(key, a);
+		//		for (auto& p : map)
+		//		{
+		//			int i = 0;
+		//		}
+		//	}
+		//}
 		
 		{
 			cl::_MixObj<char, AllocMem> mo;
+			//auto it = mo.end();
+
 			mo["a"] = 1;
 			mo["b"] = 2;
 
-			bool is = mo.contain("b");
+			//bool is = mo.contain("b");
+
+			//auto it = mo.begin();
+			//while (it != mo.end())
+			//{
+			//	printf("%s : %d\n", it->first.data(), (int)it->second);
+			//	++it;
+			//	int i = 0;
+			//}
+			for (auto& p : mo)
+			{
+				printf("%s : %d\n", p.first.data(), (int)p.second);
+			}
 			int i = 0;
 		}
 		 

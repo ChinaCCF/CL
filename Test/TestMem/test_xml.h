@@ -60,6 +60,9 @@ namespace test_xml
 		{
 			cl::_XML<char, AllocMem> xml;
 			xml.parse("<?xml version=\"1.0\" encoding=\"UTF-8\"?><node name=\"ccf\"><!-- comment --><val>123</val><item>str</item><item/></node>");
+			 
+			auto str = xml.dump(true);
+
 			int i = 0;
 		}
 	} 

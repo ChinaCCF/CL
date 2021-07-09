@@ -66,6 +66,7 @@ namespace cl
 		template<> struct _IsUnsignedInt<u16> { const_bool value = true; };
 		template<> struct _IsUnsignedInt<u32> { const_bool value = true; };
 		template<> struct _IsUnsignedInt<u64> { const_bool value = true; }; 
+
 	}
 
 	template<typename T> struct IsNull { const_bool value = std::is_null_pointer<T>::value; }; 
@@ -162,6 +163,14 @@ static_assert(cl::DestructorCheck<T>::value, "virtual class need virtual destruc
 	struct SelectType<false, Type1, Type2>
 	{
 		using type = Type2;
+	};
+	/*#####################################################################################*/
+	//选择类型, 等价于 typename std::conditional<bool, Type1, Type2>::type;
+	/*#####################################################################################*/
+	template<typename T>
+	struct SelectCharType
+	{
+		using type = SelectType<ToChars<T, char>::value, char, wchar>::type;
 	};
 	/*#####################################################################################*/
 	//选择相同大小的类型

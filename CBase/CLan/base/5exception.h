@@ -11,10 +11,10 @@ namespace cl
     //由于跨语言需要, 基本大部分的编程环境都已经转换为wchar编码, window的底层驱动强制所有字符串必须是wchar
     class Exception : public std::exception
     {
-        wchar msg_[256];//存放原始信息
-        wchar file_[256];
         s32 line_ = 0;
         s32 code_ = 0; //高16位为主代码, 低16位为次代码
+        wchar msg_[256];//存放原始信息
+        wchar file_[256]; 
     public: 
         Exception() { msg_[0] = 0; file_[0] = 0; } 
         Exception(const Exception& e); 

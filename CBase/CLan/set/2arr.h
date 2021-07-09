@@ -14,8 +14,8 @@ namespace cl
 	class FixedArr : NoCopyObj
 	{
 		using ThisType = FixedArr<T, N>;
-		T arr_[N];
 		s32 cnt_ = 0;
+		T arr_[N]; 
 	public:
 		FixedArr() { clear(); }
 
@@ -71,10 +71,10 @@ namespace cl
 	class _Array
 	{
 		using ThisType = _Array<T, A>;
-		T* arr_ = nullptr; 
 		s32 cnt_ = 0;//当前存储的对象数
 		s32 size_ = 0;//可以存储的对象的数目
-
+		T* arr_ = nullptr; 
+		 
 		void _copy(const ThisType& arr)
 		{
 			cl_assert(size_ - cnt_ >= arr.cnt_);

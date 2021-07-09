@@ -13,19 +13,7 @@ namespace cl
 		s32 xml_decode_str(wchar* dst, const wchar* src);
 
 		s32 xml_encode_str(char* dst, s32 size, const char* src);
-		s32 xml_encode_str(wchar* dst, s32 size, const wchar* src);
-
-#define _CL_XML_Attr "_cl_xml_attr"
-		static inline char* _xml_attr_key(const char*) { return (char*)_CL_XML_Attr; }
-		static inline wchar* _xml_attr_key(const wchar*) { return (wchar*)_cl_W(_CL_XML_Attr); }
-
-#define _CL_XML_Text "_cl_xml_text"
-		static inline char* _xml_text_key(const char*) { return (char*)_CL_XML_Text; }
-		static inline wchar* _xml_text_key(const wchar*) { return (wchar*)_cl_W(_CL_XML_Text); }
-
-#define _CL_XML_Com "_cl_xml_com"
-		static inline char* _xml_com_key(const char*) { return (char*)_CL_XML_Com; }
-		static inline wchar* _xml_com_key(const wchar*) { return (wchar*)_cl_W(_CL_XML_Com); }
+		s32 xml_encode_str(wchar* dst, s32 size, const wchar* src); 
 	}
 
 	// 大小写敏感
@@ -34,6 +22,9 @@ namespace cl
 	template<CharType C, AllocMemType A>
 	class _XML
 	{
+		static constexpr const char* _xml_com = "_cl_xml_com";
+		static constexpr const char* _xml_attr = "_cl_xml_attr";
+		static constexpr const char* _xml_txt = "_cl_xml_txt";
 	public:
 		using Str = _String<C, A, 0>;
 		using MO = _MixObj<C, A>;
@@ -56,7 +47,7 @@ namespace cl
 		//解析属性
 		void _parse_attr(C* str, MO& obj)
 		{
-			auto& attr = obj[detail::_xml_attr_key(str)];
+			auto& attr = obj[_xml_attr];
 			while (true)
 			{
 				str = _skip_space(str);
@@ -75,7 +66,7 @@ namespace cl
 				cl_assert(start_c == '\'' || start_c == '"');
 				while (true)
 				{
-					end = CStr::find(str, start_c);
+					end = detail::_str_find(str, start_c);
 					cl_assert(end != nullptr);
 					if (*(end - 1) != '\\') break;
 					str = end + 1;
@@ -151,7 +142,7 @@ namespace cl
 					cl_assert(level == 0);//<?xml ...?>, 必定是在最顶层, 同root同级别
 
 					p += 1; //跳过?
-					auto pe = detail::CStrX::find(p, "?>");
+					auto pe = detail::_str_find(p, "?>");
 					cl_assert(pe + 1 == bracket_end);
 
 					auto len = s32(pe - p);
@@ -165,7 +156,7 @@ namespace cl
 				if (p[0] == '!' && p[1] == '-' && p[2] == '-')
 				{
 					p += 3; //跳过注释!--
-					auto pe = detail::CStrX::find(p, "-->");
+					auto pe = detail::_str_find(p, "-->");
 					cl_assert(pe + 2 == bracket_end);
 
 					CStr::copy(buf_, p, s32(pe - p));
@@ -192,7 +183,7 @@ namespace cl
 					auto parent = stack_.back();
 					_get_node(parent, buf_, node, name);
 					if (comment_.is_list())
-						(*node)[detail::_xml_com_key(buf_)] = std::move(comment_);
+						(*node)[_xml_com] = std::move(comment_);
 
 					if (attr) _parse_attr(attr + 1, *node);
 
@@ -205,7 +196,7 @@ namespace cl
 				if (p[1] == '/')
 				{
 					CStr::copy(buf_, str, s32(p - str));
-					(*node)[detail::_xml_text_key(buf_)] = buf_;
+					(*node)[_xml_txt] = buf_;
 				}
 				else
 				{
@@ -213,8 +204,8 @@ namespace cl
 					while (true)
 					{
 						str = _parse_node(p, level + 1);
-						p = CStr::find(str, '<');
-						cl_assert(p);
+						p = _skip_space(str);
+						cl_assert(p[0] == '<');
 						if (p[1] == '/') break;
 					}
 					stack_.pop();
@@ -235,8 +226,114 @@ namespace cl
 		void _pad_prefix(Str& str, s32 level)
 		{
 			for (s32 i = 0; i < level; i++)
-				str.append("    ", 4);
-		};
+				detail::_xString_push(str, "  ");
+		}
+
+		void _dump_node(Str& str, const MO& obj, const C* name, s32 level)
+		{ 
+			do
+			{
+				if (obj.is_list())
+				{
+					auto list = obj.list();
+					for (auto& node : *list)
+					{
+						_dump_node(str, node, name, level); 
+					} 
+					return;
+				}
+				 
+				if (obj.is_map())
+				{  
+					auto map = obj.map();
+				  
+					auto coms = map->get(_xml_com);
+					if (coms->second.is_list())
+					{
+						//auto it = coms->second.begin();
+						//auto end = coms->second.end(); 
+						//while (it != end)
+						for (auto& p : coms->second)
+						{ 
+							if (format_) _pad_prefix(str, level); 
+							detail::_xString_push(str, "<!--");
+							str << (const C*)p.second;
+							detail::_xString_push(str, "-->"); 
+							if (format_) str << '\n';
+						}
+					}
+
+					if (format_) _pad_prefix(str, level);
+					str << '<' << name << '>';
+					if (format_) str << '\n';
+
+					for (auto& p : *map)
+					{ 
+						auto dst = p.first.data(); 
+
+						if (detail::_str_equ(dst, _xml_com) ||
+							detail::_str_equ(dst, _xml_attr) ||
+							detail::_str_equ(dst, _xml_txt)) continue;
+						 
+						_dump_node(str, p.second, p.first, level + 1);
+					}
+
+					if (format_)  _pad_prefix(str, level);
+
+					str << "</" << name << '>';
+					if (format_) str << '\n';
+					return;
+				}
+
+				if (format_) _pad_prefix(str, level);
+
+				if (obj.is_none())
+				{
+					str << '<' << name << '/' << '>';
+					if (format_) str << '\n';
+					return;
+				}
+
+				str << '<' << name << '>';
+
+				if (obj.is_null())
+				{
+					detail::_xString_push(str, "null");
+					break;
+				}
+
+				if (obj.is_bool())
+				{
+					bool val = obj;
+					if (val) detail::_xString_push(str, "true");
+					else detail::_xString_push(str, "false");
+					break;
+				}
+
+				if (obj.is_int())
+				{
+					s64 val = obj;
+					str << val;
+					break;
+				}
+
+				if (obj.is_float())
+				{
+					f64 val = obj;
+					str << val;
+					break;
+				}
+
+				if (obj.is_str())
+				{
+					str << (const C*)obj;
+					break;
+				}
+			} while (false);
+			 
+			str << '<' << '/' << name << '>';
+			if (format_) str << '\n';
+		}
 	public:
 		_XML() { buf_ = (C*)A().alloc(sizeof(C) * 4096); }
 		~_XML() { A().free(buf_); }
@@ -256,6 +353,9 @@ namespace cl
 		{
 			fraction_ = fraction;
 			format_ = format;
+			Str ret;
+			_dump_node(ret, root_, "root", 0);
+			return ret;
 		}
 	};
 }

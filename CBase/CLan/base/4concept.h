@@ -40,6 +40,10 @@ namespace cl
     template<typename T>
     concept CharsType = IsChars<T>::value;
 
+    //字符串数据
+    template<typename T>
+    concept ToCharsType = ToChars<T, char>::value || ToChars<T, wchar>::value;
+
     //非字符串数据, concept NotCharsType = !CharsType<T>; 注意这样的写法编译没问题, 但是实际中不起作用
     template<typename T>
     concept NotCharsType = IsNotChars<T>::value;

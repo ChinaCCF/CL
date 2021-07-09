@@ -12,35 +12,35 @@ namespace cl
 			{
 				if (*src == '&')
 				{
-					if (CStrX::cmp(src, "&lt;", 4) == 0)
+					if (_str_equ(src, "&lt;", 4))
 					{
 						*dst++ = '<';
 						src += 4;
 						continue;
 					}
 
-					if (CStrX::cmp(src, "&gt;", 4) == 0)
+					if (_str_equ(src, "&gt;", 4))
 					{
 						*dst++ = '>';
 						src += 4;
 						continue;
 					}
 
-					if (CStrX::cmp(src, "&amp;", 5) == 0)
+					if (_str_equ(src, "&amp;", 5))
 					{
 						*dst++ = '&';
 						src += 5;
 						continue;
 					}
 
-					if (CStrX::cmp(src, "&apos;", 6) == 0)
+					if (_str_equ(src, "&apos;", 6))
 					{
 						*dst++ = '\'';//µ¥ÒýºÅ
 						src += 6;
 						continue;
 					}
 
-					if (CStrX::cmp(src, "&quot;", 6) == 0)
+					if (_str_equ(src, "&quot;", 6))
 					{
 						*dst++ = '\"';//Ë«ÒýºÅ
 						src += 6;
@@ -69,35 +69,35 @@ namespace cl
                     case '<':
                     {
                         if (size <= 4) return 0;
-                        CStrX::copy(dst, "&lt;", 4);
+                        _str_copy(dst, "&lt;");
                         dst += 4;
                         size -= 4;
                     }break;
                     case '>':
                     {
                         if (size <= 4) return 0;
-                        CStrX::copy(dst, "&gt;", 4);
+                        _str_copy(dst, "&gt;");
                         dst += 4;
                         size -= 4;
                     }break;
                     case '&':
                     {
                         if (size <= 5) return 0;
-                        CStrX::copy(dst, "&amp;", 5);
+                        _str_copy(dst, "&amp;");
                         dst += 5;
                         size -= 5;
                     }break;
                     case '\'':
                     {
                         if (size <= 6) return 0;
-                        CStrX::copy(dst, "&apos;", 6);
+                        _str_copy(dst, "&apos;");
                         dst += 6;
                         size -= 6;
                     }break;
                     case '\"':
                     {
                         if (size <= 6) return 0;
-                        CStrX::copy(dst, "&quot;", 6);
+                        _str_copy(dst, "&quot;");
                         dst += 6;
                         size -= 6;
                     }break;

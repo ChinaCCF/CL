@@ -30,10 +30,16 @@ namespace cl
 	u8 char_upper(u8 c);
 
 	namespace detail
-	{
+	{ 
+		inline s32 _str_len(const char* str) { return (s32)::strlen(str); }
+		inline s32 _str_len(const wchar* str) { return (s32)::wcslen(str); }
+		  
+		/**************************************************************************************************************/
+		//为啥要重复造这个轮子呢??? 
+		/**************************************************************************************************************/
 		//返回字符串长度, 调用默认的strcpy是会报错的(从这点来说, 这个手动实现的函数也不安全)
-		template<CharType T>
-		inline s32 _str_copy(T* dst, const T* src)
+		template<CharType C1, CharType C2>
+		inline s32 _str_copy(C1* dst, const C2* src)
 		{
 			auto org = dst;
 			while (*src) { *dst++ = *src++; }
@@ -42,8 +48,8 @@ namespace cl
 		}
 
 		//返回拷贝的字节数
-		template<CharType T>
-		inline s32 _str_copy(T* dst, s32 size, const T* src)
+		template<CharType C1, CharType C2>
+		inline s32 _str_copy(C1* dst, s32 size, const C2* src)
 		{
 			auto org = dst;
 			while (--size && *src) { *dst++ = *src++; }
@@ -52,8 +58,8 @@ namespace cl
 		}
 
 		//返回拷贝的字节数
-		template<CharType T>
-		inline s32 _str_copy(T* dst, const T* src, s32 len)
+		template<CharType C1, CharType C2>
+		inline s32 _str_copy(C1* dst, const C2* src, s32 len)
 		{
 			auto org = dst;
 			while (len-- && *src) { *dst++ = *src++; }
@@ -62,15 +68,103 @@ namespace cl
 		}
 
 		//返回拷贝的字节数
-		template<CharType T>
-		inline s32 _str_copy(T* dst, s32 size, const T* src, s32 len)
+		template<CharType C1, CharType C2>
+		inline s32 _str_copy(C1* dst, s32 size, const C2* src, s32 len)
 		{
 			auto org = dst;
 			while (--size && len-- && *src) { *dst++ = *src++; }
 			*dst = 0;
 			return s32(dst - org);
 		}
+		/**************************************************************************************************************/
+		/**************************************************************************************************************/
+		template<CharType C1, CharType C2>
+		static inline s32 _str_cmp(const C1* t1, const C2* t2)
+		{
+			while (*t1 && *t1 == *t2) { ++t1; ++t2; }
 
+			if (*t1 == *t2) return 0;
+			if (*t1 < *t2) return -1; 
+			return 1;
+		}
+
+		template<CharType C1, CharType C2>
+		static inline s32 _str_cmp(const C1* t1, const C2* t2, s32 len)
+		{
+			while (len && *t1 && *t1 == *t2) { ++t1; ++t2; --len; }
+
+			if (len == 0 || *t1 == *t2) return 0;
+			if (*t1 < *t2) return -1;
+			return 1;
+		}
+
+		template<CharType C1, CharType C2>
+		static inline s32 _str_icmp(const C1* t1, const C2* t2)
+		{
+			while (*t1 && char_lower(*t1) == char_lower(*t2)) { ++t1; ++t2; }
+
+			auto c1 = char_lower(*t1);
+			auto c2 = char_lower(*t2);
+
+			if (c1 == c2) return 0;
+			if (c1 < c2) return -1; 
+			return 1;
+		}
+
+		template<CharType C1, CharType C2>
+		static inline s32 _str_icmp(const C1* t1, const C2* t2, s32 len)
+		{
+			while (len && *t1 && char_lower(*t1) == char_lower(*t2)) { ++t1; ++t2; --len; }
+
+			auto c1 = char_lower(*t1);
+			auto c2 = char_lower(*t2);
+
+			if (len == 0 || c1 == c2) return 0;
+			if (c1 < c2) return -1; 
+			return 1;
+		}
+
+		/**************************************************************************************************************/
+		template<CharType C1, CharType C2>
+		static inline bool _str_equ(const C1* t1, const C2* t2)
+		{
+			return _str_cmp(t1, t2) == 0;
+		}
+
+		template<CharType C1, CharType C2>
+		static inline bool _str_equ(const C1* t1, const C2* t2, s32 len)
+		{
+			return _str_cmp(t1, t2, len) == 0;
+		}
+		 
+		/**************************************************************************************************************/
+		template<CharType C1, typename C2>
+		static inline C1* _str_find(const C1* str, C2 c)
+		{
+			while (*str && *str != c) str++;
+			if (*str == 0) return nullptr;
+			return (C1*)str;
+		}
+
+		template<CharType C1, CharType C2>
+		static inline C1* _str_find(const C1* str, const C2* sub, s32 len)
+		{
+			while (true)
+			{
+				while (*str && *str != *sub) str++;
+				if (*str == 0) return nullptr;
+				if (_str_cmp(str, sub, len) == 0) return (C1*)str;
+				++str;
+			}
+		}
+
+		template<CharType C1, CharType C2>
+		static inline C1* _str_find(const C1* str, const C2* sub)
+		{ 
+			return _str_find(str, sub, _str_len(sub));
+		}
+		 
+		/**************************************************************************************************************/
 		//反转指定长度字符串
 		template<CharType T>
 		inline void _str_flip(T* str, s32 len)
@@ -130,10 +224,10 @@ namespace cl
 			}
 			return _str_format_uval(buf, size, val) + len;
 		}
-		 
+
 		//返回字符串长度,
 		template<CharType T, FloatType V>
-		inline s32 _str_format(T* buf, s32 size, V val, s32 fraction)
+		inline s32 _str_format(T* buf, s32 size, V val, s32 fraction = 0)
 		{
 			s32 len = 0;
 			if (val < 0)
@@ -161,7 +255,7 @@ namespace cl
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
 		wchar* _str2val(const wchar* str, Str2Val& val);
 		//失败返回nullptr, 否则返回第一个无法解析的字符位置
-		wchar* _str2val(const wchar* str, bool& val);
+		wchar* _str2val(const wchar* str, bool& val); 
 	}
 
 	class CStr
@@ -172,42 +266,30 @@ namespace cl
 		template<CharType T> static inline void lower(T* str) { while (*str) { *str = char_lower((u8)*str); ++str; } }
 		template<CharType T> static inline void upper(T* str) { while (*str) { *str = char_upper((u8)*str); ++str; } }
 		/**************************************************************************************************************/
-		static inline s32 len(const char* str) { return (s32)::strlen(str); }
-		static inline s32 cmp(const char* t1, const char* t2) { return ::strcmp(t1, t2); }
-		static inline s32 cmp(const char* t1, const char* t2, s32 len) { return ::strncmp(t1, t2, len); }
-		static inline bool equ(const char* t1, const char* t2) { return strcmp(t1, t2) == 0; }
-		static inline bool equ(const char* t1, const char* t2, s32 len) { return ::strncmp(t1, t2, len) == 0; }
-		static inline bool iequ(const char* t1, const char* t2) { return ::_stricmp(t1, t2) == 0; }//忽略大小写进行比较 
-		static inline bool iequ(const char* t1, const char* t2, s32 len) { return ::_strnicmp(t1, t2, len) == 0; }
+		template<CharType T> static inline s32 len(const T* str) { return (s32)detail::_str_len(str); }
 		/**************************************************************************************************************/
-		static inline s32 len(const wchar* str) { return (s32)::wcslen(str); }
-		static inline s32 cmp(const wchar* t1, const wchar* t2) { return ::wcscmp(t1, t2); }
-		static inline s32 cmp(const wchar* t1, const wchar* t2, s32 len) { return ::wcsncmp(t1, t2, len); }
-		static inline bool equ(const wchar* t1, const wchar* t2) { return wcscmp(t1, t2) == 0; }
-		static inline bool equ(const wchar* t1, const wchar* t2, s32 len) { return ::wcsncmp(t1, t2, len) == 0; }
-		static inline bool iequ(const wchar* t1, const wchar* t2) { return ::_wcsicmp(t1, t2) == 0; }
-		static inline bool iequ(const wchar* t1, const wchar* t2, s32 len) { return ::_wcsnicmp(t1, t2, len) == 0; }
+		template<CharType T> static inline s32 copy(T* dst, const T* src) { return detail::_str_copy(dst, src); }
+		template<CharType T> static inline s32 copy(T* dst, const T* src, s32 len) { return detail::_str_copy(dst, src, len); }
+		template<CharType T> static inline s32 copy(T* dst, s32 size, const T* src) { return detail::_str_copy(dst, size, src); }
+		template<CharType T> static inline s32 copy(T* dst, s32 size, const T* src, s32 len) { return detail::_str_copy(dst, size, src, len); } 
 		/**************************************************************************************************************/
-		static inline s32 copy(char* dst, const char* src) { return detail::_str_copy(dst, src); }
-		static inline s32 copy(char* dst, const char* src, s32 len) { return detail::_str_copy(dst, src, len); }
-		static inline s32 copy(char* dst, s32 size, const char* src) { return detail::_str_copy(dst, size, src); }
-		static inline s32 copy(char* dst, s32 size, const char* src, s32 len) { return detail::_str_copy(dst, size, src, len); }
-
-		static inline s32 copy(wchar* dst, const wchar* src) { return detail::_str_copy(dst, src); }
-		static inline s32 copy(wchar* dst, const wchar* src, s32 len) { return detail::_str_copy(dst, src, len); }
-		static inline s32 copy(wchar* dst, s32 size, const wchar* src) { return detail::_str_copy(dst, size, src); }
-		static inline s32 copy(wchar* dst, s32 size, const wchar* src, s32 len) { return detail::_str_copy(dst, size, src, len); }
+		template<CharType T> static inline s32 cmp(const T* t1, const T* t2) { return detail::_str_cmp(t1, t2); }
+		template<CharType T> static inline s32 cmp(const T* t1, const T* t2, s32 len) { return detail::_str_cmp(t1, t2, len); }
 		/**************************************************************************************************************/
+		template<CharType T> static inline bool equ(const T* t1, const T* t2) { return cmp(t1, t2) == 0; }
+		template<CharType T> static inline bool equ(const T* t1, const T* t2, s32 len) { return cmp(t1, t2, len) == 0; }
+		/**************************************************************************************************************/
+		template<CharType T> static inline bool iequ(const T* t1, const T* t2) { return detail::_str_icmp(t1, t2) == 0; }//忽略大小写进行比较 
+		template<CharType T> static inline bool iequ(const T* t1, const T* t2, s32 len) { return detail::_str_icmp(t1, t2, len) == 0; }
+		/**************************************************************************************************************/ 
+		//返回第一个查找到指定字符位置, 否则返回nullptr
+		template<CharType T>  static inline T* find(const T* str, T c) { return detail::_str_find(str, c); }
+		//返回第一个查找到指定字符串的位置, 否则返回nullptr
+		template<CharType T>  static inline T* find(const T* str, const T* sub) { return detail::_str_find(str, sub); }
 		//从字符串右侧返回第一个查找到指定字符位置
-		static inline char* find(const char* str, char c) { return (char*)::strchr(str, c); }
+		static inline char* rfind(const char* str, char c) { return (char*)::strrchr(str, c); } 
 		//从字符串右侧返回第一个查找到指定字符位置
-		static inline char* rfind(const char* str, char c) { return (char*)::strrchr(str, c); }
-		static inline char* find(const char* str, const char* dst) { return (char*)::strstr(str, dst); }
-
-		static inline wchar* find(const wchar* str, wchar c) { return (wchar*)::wcschr(str, c); }
-		//从字符串右侧返回第一个查找到指定字符位置
-		static inline wchar* rfind(const wchar* str, wchar c) { return (wchar*)::wcsrchr(str, c); }
-		static inline wchar* find(const wchar* str, const wchar* dst) { return (wchar*)::wcsstr(str, dst); }
+		static inline wchar* rfind(const wchar* str, wchar c) { return (wchar*)::wcsrchr(str, c); } 
 		/**************************************************************************************************************/
 		//反转字符串
 		template<CharType T> static inline void flip(T* str, s32 len)
@@ -258,20 +340,11 @@ namespace cl
 			if (val)
 			{
 				if (size < 4) { *buf = 0; return 0; }
-				buf[0] = 't';
-				buf[1] = 'r';
-				buf[2] = 'u';
-				buf[3] = 'e';
-				buf[4] = 0;
+				detail::_str_copy(buf, "true", 4); 
 				return 4;
 			}
 			if (size < 5) { *buf = 0; return 0; }
-			buf[0] = 'f';
-			buf[1] = 'a';
-			buf[2] = 'l';
-			buf[3] = 's';
-			buf[4] = 'e';
-			buf[5] = 0;
+			detail::_str_copy(buf, "false", 5);
 			return 5;
 		}
 		//格式化数值到字符串缓冲区中
@@ -324,83 +397,14 @@ namespace cl
 		static inline CharCode judge_char_code(const char* str);
 	};
 
-	namespace detail
-	{
-		//工具类, 用于库开发
-		//这个类是对CStr的扩充, 允许宽字节和多字节之间的比较, 
-		class CStrX
-		{
-		public:
-			template<CharType C1, CharType C2>
-			static inline s32 cmp(const C1* t1, const C2* t2)
-			{
-				while (*t1 && *t1 == *t2) { ++t1; ++t2; }
-				if (*t1 < *t2) return -1;
-				if (*t1 == *t2) return 0;
-				return 1;
-			}
-
-			template<CharType C1, CharType C2>
-			static inline s32 cmp(const C1* t1, const C2* t2, s32 len)
-			{
-				while (len && *t1 && *t1 == *t2) { ++t1; ++t2; --len; }
-				if (len == 0 || *t1 == *t2) return 0;
-				if (*t1 < *t2) return -1;
-				return 1;
-			}
-
-			template<CharType C1, CharType C2>
-			static inline C1* find(const C1* str, const C2* sub)
-			{
-				s32 len = CStr::len(sub);
-				while (true)
-				{
-					while (*str && *str != *sub) str++;
-					if (*str == 0) return nullptr;
-					if (CStrX::cmp(str, sub, len) == 0) return (C1*)str;
-					++str;
-				}
-			}
-
-			template<CharType C1, CharType C2>
-			static inline C1* find(const C1* str, const C2* sub, s32 len)
-			{
-				while (true)
-				{
-					while (*str && *str != *sub) str++;
-					if (*str == 0) return nullptr;
-					if (CStrX::cmp(str, sub, len) == 0) return (C1*)str;
-					++str;
-				}
-			}
-
-			template<CharType C1, CharType C2>
-			static inline s32 copy(C1* t1, const C2* t2)
-			{
-				auto org = t1;
-				while (*t2) { *t1++ = *t2++; }
-				*t1 = 0;
-				return s32(t1 - org);
-			}
-
-			template<CharType C1, CharType C2>
-			static inline s32 copy(C1* t1, const C2* t2, s32 len)
-			{
-				auto org = t1;
-				while (len-- && *t2) { *t1++ = *t2++; }
-				*t1 = 0;
-				return s32(t1 - org);
-			}
-		};
-	}
 	//产量字符串视图, 类似标准库的std::string_view 和 win32驱动中的UnicodeString
 	template<CharType T>
 	class StrView
 	{
 	public:
-		const T* str_ = nullptr;
 		s32 len_ = 0;
-
+		const T* str_ = nullptr;
+		 
 		StrView() { clan_CheckClass(StrView); }
 		StrView(const std::nullptr_t&) {}
 		StrView(const T* str) { str_ = str; len_ = CStr::len(str); }
@@ -449,9 +453,9 @@ namespace cl
 		{
 			using ThisType = _StrBuf<T, A, N>;
 		public:
-			T str_[N];
 			s32 len_ = 0;
-
+			T str_[N];
+			 
 			_StrBuf() { str_[0] = 0; }
 			~_StrBuf() {}
 		protected:
@@ -468,11 +472,11 @@ namespace cl
 		template<CharType T, AllocMemType A> class _StrBuf<T, A, 0>
 		{
 			using ThisType = _StrBuf<T, A, 0>;
-			s32 size_ = 0; //可以存储的字符数目, 非内存大小
 		public:
+			s32 size_ = 0; //可以存储的字符数目, 非内存大小
+			s32 len_ = 0; 
 			T* str_ = nullptr;
-			s32 len_ = 0;
-
+		 
 			_StrBuf() {}
 			~_StrBuf() { if (str_) A().free(str_); }
 		protected:
@@ -688,7 +692,7 @@ namespace cl
 		//工具函数, 用于库开发
 		//允许多字节字符串直接赋值到宽字节, 或反之
 		template<typename T, typename A, s32 N, typename C>
-		void _String_xpush(_String<T, A, N>& str, const C* con)
+		void _xString_push(_String<T, A, N>& str, const C* con)
 		{
 			while (*con) str.push(*con++);
 		}

@@ -116,7 +116,7 @@ namespace cl
 		{
 			//返回字符串长度, fraction表示小数部分
 			template<CharType T, FloatType V>
-			inline s32 _do_str_format_ufval(T* buf, s32 size, V fval, s32 dst_fraction)
+			inline s32 _do_str_format_ufval(T* buf, s32 size, V fval, s32 dst_fraction_cnt)
 			{
 				auto p = buf;
 
@@ -126,47 +126,48 @@ namespace cl
 				[[unlikely]]
 				if (len == 0) return 0;
 
-				s32 fraction = 2;
-				if (dst_fraction != 0) fraction = dst_fraction;
+				s32 fraction_cnt = 2;
+				if (dst_fraction_cnt != 0) fraction_cnt = dst_fraction_cnt;
 
 				[[unlikely]]
-				if (size < 1 + fraction + 1) { *buf = 0; return 0; }//'.' + 小数 + 0 
+				if (size < 1 + fraction_cnt + 1) { *buf = 0; return 0; }//'.' + 小数 + 0 
 
 				fval -= uval;
 				p += len;
 				size -= len + 1;//+1是因为下面一行的'.' 
 				*p++ = '.';
 
-				auto cnt = fraction;
+				auto cnt = fraction_cnt;
 				while (cnt--) fval *= 10;
 
 				uval = (u64)fval;
 				fval -= uval;
 				if (fval > 0.5) uval += 1;
 
+				//从这里开始 p指向 '.'之后, 即小数部分
 				len = _str_format_uval(p, size, uval);
 
 				[[unlikely]]
-				if (len == 0) { *buf = 0; return 0; }
+				if (len == 0) { *buf = 0; return 0; } //缓存不足
 
-				if (len < fraction) //1.003 到这里是 1.3, 需要在3前面补0
+				if (len < fraction_cnt) //1.003 到这里是 1.3, 需要在3前面补0
 				{
-					auto dst = p + fraction - 1;
+					auto dst = p + fraction_cnt - 1;
 					auto src = p + len - 1;
-					auto dif = fraction - len;
+					auto dif = fraction_cnt - len;
 					while (len--) *dst-- = *src--;
 					while (dif--) *dst-- = '0';
 
-					if (dst_fraction == 0) //没有指定小数位, 则裁剪后面的0
+					if (dst_fraction_cnt == 0) //没有指定小数位, 则裁剪后面的0
 					{
-						auto end = p + fraction - 1;
+						auto end = p + fraction_cnt - 1;
 						while (*end == '0') --end;
-						if (*end == '.') end += 1;
+						if (*end == '.') end += 1;//防止生成 0.这样的格式
 
-						fraction = s32(end + 1 - p);
+						fraction_cnt = s32(end + 1 - p);
 					}
 				}
-				p += fraction;
+				p += fraction_cnt;
 				p[0] = 0;
 
 				return s32(p - buf);

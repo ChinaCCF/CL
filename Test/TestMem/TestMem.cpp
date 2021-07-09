@@ -22,7 +22,8 @@
  
 int main()
 {   
-	
+	char buf[256];
+	cl::detail::_str_format(buf, 256, 0.0);
 	test_mixobj::fun();
 	test_json::fun();
 	test_xml::fun();

@@ -22,10 +22,10 @@ namespace cl
 	{
 		using ThisType = _HeapArr<T, A, type>;
 
-		T* arr_ = nullptr;
 		s32 size_ = 0;
 		s32 cnt_ = 0;
-
+		T* arr_ = nullptr;
+		 
 		//数组的索引是从1开始的, 第0个元素不使用
 		//返回父节点的索引
 		s32 top_i(s32 i) { return i / 2; }

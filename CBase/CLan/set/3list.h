@@ -90,13 +90,12 @@ namespace cl
             Node* pre_ = nullptr;
             Node* next_ = nullptr;
         };
-         
+
+        s32 cnt_ = 0;
         HeadNode head_;
         HeadNode tail_; 
         Node* head() const { return (Node*)&head_; }
         Node* tail() const { return (Node*)&tail_; }
-
-        s32 cnt_ = 0;
 
         inline void _a2b(Node* a, Node* b)
         {
@@ -315,12 +314,12 @@ namespace cl
             friend class _List;
         public:
             It(Node* cur = nullptr) : node_(cur) {}
-
+             
             T& operator*() { return node_->val_; }
             T* operator->() { return &node_->val_; }
 
             It& operator++() { node_ = (Node*)node_->next_; return *this; }
-            bool operator==(const It& it) { return node_ == it.node_; }
+			bool operator==(const It& it) { return node_ == it.node_; }
             bool operator!=(const It& it) { return node_ != it.node_; }
         };
 

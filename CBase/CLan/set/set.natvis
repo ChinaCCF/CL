@@ -35,7 +35,8 @@
   <Type Name="cl::_List&lt;*,*&gt;::It">
     <DisplayString>{node_->val_}</DisplayString>
     <Expand>
-      <Item Name="value">node_->val_</Item>
+      <Item Name="Value">node_->val_</Item>
+      <Item Name="Node">node_</Item>
     </Expand>
   </Type>
   
@@ -131,11 +132,12 @@
   <Type Name="cl::_MixObj&lt;*,*&gt;">
     <DisplayString Condition="val_type_ == cl::detail::MixObjType::Map">{*val_.map_} </DisplayString>
     <DisplayString Condition="val_type_ == cl::detail::MixObjType::List">{*val_.list_} </DisplayString>
-    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Str">{*val_.str_} </DisplayString>
-    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Int">{val_.sv_} </DisplayString>
-    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Float">{val_.fv_} </DisplayString>
-    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Bool">{val_.bv_} </DisplayString>
-    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Null">null</DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Str">String : {*val_.str_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Int">Int : {val_.sv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Float">Float : {val_.fv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Bool">Bool : {val_.bv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::None">None</DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Null">Null</DisplayString>
     <Expand>
       <LinkedListItems Condition="val_type_ == cl::detail::MixObjType::Map">
         <Size>val_.map_->list_.cnt_</Size>
@@ -155,6 +157,8 @@
       <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Int">val_.sv_</Item>
       <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Float">val_.fv_</Item>
       <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Bool">val_.bv_</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::None">0</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Null">0</Item>
     </Expand>
   </Type>
 </AutoVisualizer>

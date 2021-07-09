@@ -189,7 +189,7 @@ namespace cl
 		void _pad_prefix(Str& str, s32 level)
 		{
 			for (s32 i = 0; i < level; i++)
-				detail::_String_xpush(str, "  ");
+				detail::_xString_push(str, "  ");
 		}
 
 		void _dump_obj(Str& str, const MO& obj, s32 level)
@@ -236,13 +236,13 @@ namespace cl
 				{
 					if (format_)
 					{
-						detail::_String_xpush(str, "\r\n");
+						detail::_xString_push(str, "\r\n");
 						_pad_prefix(str, level);
 					}
 
 					str.push('[');
 
-					if (format_) detail::_String_xpush(str, "\r\n");
+					if (format_) detail::_xString_push(str, "\r\n");
 				}
 
 				for (auto& item : *list)
@@ -250,7 +250,7 @@ namespace cl
 					if (format_) _pad_prefix(str, level + 1);
 					_dump_obj(str, item, level + 1);
 
-					if (format_) detail::_String_xpush(str, ",\r\n");
+					if (format_) detail::_xString_push(str, ",\r\n");
 					else str.push(',');
 				}
 
@@ -258,7 +258,7 @@ namespace cl
 					if (format_)
 					{
 						str.pop(3);//,\r\n 
-						detail::_String_xpush(str, "\r\n");
+						detail::_xString_push(str, "\r\n");
 						_pad_prefix(str, level);
 						str.push(']');
 					}
@@ -270,7 +270,7 @@ namespace cl
 				}
 			}
 			else
-				detail::_String_xpush(str, "[]");
+				detail::_xString_push(str, "[]");
 		}
 
 		void _dump_map(Str& str, const MO& obj, s32 level)
@@ -281,13 +281,13 @@ namespace cl
 				{
 					if (format_)
 					{
-						detail::_String_xpush(str, "\r\n");
+						detail::_xString_push(str, "\r\n");
 						_pad_prefix(str, level);
 					}
 
 					str.push('{');
 
-					if (format_) detail::_String_xpush(str, "\r\n");
+					if (format_) detail::_xString_push(str, "\r\n");
 				}
 
 				for (auto& item : *map)
@@ -297,14 +297,14 @@ namespace cl
 					str << '\"' << item.first << '\"' << ':';
 					_dump_obj(str, item.second, level + 1);
 
-					if (format_) detail::_String_xpush(str, ",\r\n");
+					if (format_) detail::_xString_push(str, ",\r\n");
 					else str.push(',');
 				}
 				{
 					if (format_)
 					{
 						str.pop(3);//,\r\n 
-						detail::_String_xpush(str, "\r\n");
+						detail::_xString_push(str, "\r\n");
 						_pad_prefix(str, level);
 						str.push('}');
 					}
@@ -316,7 +316,7 @@ namespace cl
 				}
 			}
 			else
-				detail::_String_xpush(str, "{}");
+				detail::_xString_push(str, "{}");
 		}
 	public:
 		_Json() { org_buf_ = buf_ = (C*)A().alloc(sizeof(C) * 4096); }

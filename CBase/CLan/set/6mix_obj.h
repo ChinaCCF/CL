@@ -1,15 +1,19 @@
 #ifndef __clan_set_mix_obj__
 #define __clan_set_mix_obj__
 
+#ifdef XDEBUG
+#include <windows.h>
+#endif
+
 #include "../base/8str.h" 
 #include "5map.h"
-
+ 
 namespace cl
 {
 	namespace detail
 	{
 		enum class MixObjType
-		{ 
+		{
 			None,//默认值, 初始状态, 表示没有经过赋值
 			Null,//这是一个值, 表示null
 			Bool,
@@ -36,16 +40,15 @@ namespace cl
 	public:
 		union Val
 		{
-			f64 fv_;
+			bool bv_; 
 			s64 sv_;
-			bool bv_;
+			f64 fv_;
 			StrValType* str_;
 			ListValType* list_;
 			MapValType* map_;
 		};
-		mutable Val val_;
 		mutable ValType val_type_ = ValType::None;
-
+		mutable Val val_;  
 	private:
 		void _release()
 		{
@@ -61,12 +64,12 @@ namespace cl
 	public:
 		_MixObj()
 		{
-			static_assert(sizeof(s64) >= sizeof(StrValType*) || sizeof(f64) >= sizeof(StrValType*), "s64 or f64 size is smaller than pointer!");
+			static_assert(sizeof(s64) >= sizeof(StrValType*) && sizeof(f64) >= sizeof(StrValType*), "s64 or f64 size is smaller than pointer!");
 			val_.sv_ = 0;
 		}
 		_MixObj(_MixObj&& mo) noexcept
 		{
-			val_ = mo.val_;
+			val_.sv_ = mo.val_.sv_;
 			val_type_ = mo.val_type_;
 
 			mo.val_.sv_ = 0;
@@ -74,9 +77,15 @@ namespace cl
 		}
 
 		template<typename T> requires IsNotSameType<T, _MixObj>::value
-		_MixObj(T&& val) { this->operator=(std::forward<T>(val)); }
+			_MixObj(T&& val) { this->operator=(std::forward<T>(val)); }
 
-		~_MixObj() { _release(); }
+		~_MixObj() 
+		{
+#ifdef XDEBUG
+			OutputDebugStringA("~_MixObj\n");
+#endif
+			_release();
+		}
 
 		bool is_none() const { return val_type_ == ValType::None; }
 		bool is_null() const { return val_type_ == ValType::Null; }
@@ -87,6 +96,12 @@ namespace cl
 		bool is_list() const { return val_type_ == ValType::List; }
 		bool is_map() const { return val_type_ == ValType::Map; }
 
+		s32 size() const
+		{
+			if (val_type_ == ValType::None || val_type_ == ValType::Null) return 0;
+			if (val_type_ == ValType::List) return val_.list_->size();
+			if (val_type_ == ValType::Map) return val_.map_->size();
+		}
 		/*####################################################################################################*/
 		//类型转换
 		/*####################################################################################################*/
@@ -138,7 +153,7 @@ namespace cl
 			return T();
 		};
 		template<typename T> requires ToChars<T, C>::value
-		operator T() const
+			operator T() const
 		{
 			[[likely]]
 			if (val_type_ == ValType::Str)
@@ -181,7 +196,7 @@ namespace cl
 			val_.fv_ = val;
 		};
 		template<typename T> requires ToChars<T, C>::value
-		void operator=(T&& val)
+			void operator=(T&& val)
 		{
 			_release();
 			val_type_ = ValType::Str;
@@ -194,7 +209,7 @@ namespace cl
 		{
 			cl_assert(val_type_ == ValType::List);
 			return &val_.list_->operator[](index);
-		} 
+		}
 		void push(_MixObj&& obj)
 		{
 			if (val_type_ == ValType::Null || val_type_ == ValType::None)
@@ -208,7 +223,7 @@ namespace cl
 			val_.list_->push_back(std::move(obj));
 		}
 		template<typename T> requires IsNotSameType<T, _MixObj>::value
-		void push(const T& val)
+			void push(const T& val)
 		{
 			_MixObj obj = std::forward<T>(val);
 			push(std::move(obj));
@@ -222,7 +237,7 @@ namespace cl
 		//映射
 		/*####################################################################################################*/
 		template<typename T> requires ToChars<T, C>::value
-		_MixObj& operator[](const T& key) const
+			_MixObj& operator[](const T& key) const
 		{
 			if (val_type_ == ValType::Null || val_type_ == ValType::None)
 			{
@@ -233,8 +248,8 @@ namespace cl
 				cl_assert(val_type_ == ValType::Map);
 
 			auto map = val_.map_;
-			return (*map)[key]; 
-		} 
+			return (*map)[key];
+		}
 
 		MapValType* map() const
 		{
@@ -243,8 +258,9 @@ namespace cl
 		}
 
 		template<typename T> requires ToChars<T, C>::value
-		bool contain(const T& key)
+			bool contain(const T& key)
 		{
+			if (val_type_ == ValType::None || val_type_ == ValType::Null) return false;
 			cl_assert(val_type_ == ValType::Map);
 			auto map = val_.map_;
 			return map->contain(key);
@@ -252,129 +268,149 @@ namespace cl
 
 		/*####################################################################################################*/
 		//It
-		/*####################################################################################################*/ 
+		/*####################################################################################################*/
 		class It
 		{
-			friend class ThisType;
-			using PairType = Pair<StrValType*, ThisType*>;
-	 
-			u8 buf_[32];//用来保存各个类型的It值
-			ValType pair_val_type_ = ValType::None;
-			PairType pair_val_;
-		public:
-			It()
+			friend class _MixObj<C, A>; 
+
+			template<typename _K, typename _V>
+			struct _ItPair
 			{
-				buf_[0] = 0;
-				static_assert(sizeof(buf_) > sizeof(ListIt) || sizeof(buf_) > sizeof(MapIt), "It buf over!");
+				_K& first;
+				_V& second;
+				_ItPair() : first(*(_K*)nullptr), second(*(_V*)nullptr) {}
+				_ItPair(_K& key, _V& val) : first(key), second(val) {}
+			};
+			using ItPair = _ItPair<StrValType, ThisType>;
+			  
+			ValType it_type_ = ValType::None;
+			ItPair it_val_;
+
+			static constexpr s32 Buf_Size = 32;
+			u8 it_buf_[Buf_Size];//用来保存各个类型的It值, 注意这个值要放在最后, 否则会出现奇怪的内存越界问题 
+		public:
+			It()  
+			{ 
+				it_buf_[0] = 0; 
+				static_assert(Buf_Size > sizeof(ListIt) && Buf_Size > sizeof(MapIt), "It buf over!");
+			}
+			It(const It& it)  
+			{
+				memcpy(this, &it, sizeof(it));
 			}
 
-			PairType& operator*() { return pair_val_; }
-			PairType* operator->() { return &pair_val_; }
-			It& operator++()
-			{
-				if (pair_val_type_ == ValType::List)
-				{
-					auto& it = *(ListIt*)buf_;
-					++it;
+#ifdef XDEBUG
+			u64 _over_flow_ = 0;
+			~It() { cl_assert(_over_flow_ == 0); }
+#endif
 
-					pair_val_.first = nullptr;
-					pair_val_.second = &*it;
+			void update_it_val(const ThisType* self = nullptr)
+			{
+				if (it_type_ == ValType::List)
+				{
+					auto& it = *(ListIt*)it_buf_;
+					new(&it_val_)ItPair(*(StrValType*)nullptr, *it);
 				}
 				else
 				{
-					if (pair_val_type_ == ValType::Map)
+					if (it_type_ == ValType::Map)
 					{
-						auto& it = *(MapIt*)buf_;
-						++it;
-
-						pair_val_.first = &it->first;
-						pair_val_.second = &it->second;
-					} 
+						auto& it = *(MapIt*)it_buf_;
+						new(&it_val_)ItPair(it->first, it->second);
+					}
 					else
 					{
-						pair_val_type_ = ValType::None; 
+						new(&it_val_)ItPair(*(StrValType*)nullptr, *(ThisType*)self);
 					}
 				}
+			}
+
+			ItPair& operator*() 
+			{
+				return it_val_;
+			}
+			ItPair* operator->() { return &it_val_; }
+			It& operator++()
+			{
+				if (it_type_ == ValType::List)
+				{
+					auto& it = *(ListIt*)it_buf_;
+					++it;
+				}
+				else
+				{
+					if (it_type_ == ValType::Map)
+					{
+						auto& it = *(MapIt*)it_buf_;
+						++it;
+					}
+					else
+					{
+						it_type_ = ValType::None;
+					}
+				}
+				update_it_val();
 				return *this;
 			}
-			bool operator==(const It& it)
+			bool operator==(const It& it) const
 			{
-				if (pair_val_type_ == ValType::List)
-				{
-					auto p1 = (ListIt*)buf_;
-					auto p2 = (ListIt*)it.buf_;
+				if (it_type_ == ValType::List)
+				{ 
+					auto p1 = (ListIt*)it_buf_;
+					auto p2 = (ListIt*)it.it_buf_;
 					return *p1 == *p2;
 				}
 				else
 				{
-					if (pair_val_type_ == ValType::Map)
+					if (it_type_ == ValType::Map)
 					{
-						auto p1 = (MapIt*)buf_;
-						auto p2 = (MapIt*)it.buf_;
+						auto p1 = (MapIt*)it_buf_;
+						auto p2 = (MapIt*)it.it_buf_;
 						return *p1 == *p2;
 					}
 					else
-						return pair_val_type_ == it.pair_val_type_;
+						return it_type_ == it.it_type_;
 				}
 			}
-			bool operator!=(const It& it) { return !this->operator==(it); }
+			bool operator!=(const It& it) const { return !operator==(it); }
 		};
 
 		It begin() const
 		{
 			It ret;
-			ret.pair_val_type_ = val_type_;
+			ret.it_type_ = val_type_;
 
 			if (val_type_ == ValType::List)
-			{
-				auto& it = *(ListIt*)ret.buf_;
-				it = val_.list_->begin();
-
-				ret.pair_val_.first = nullptr;
-				ret.pair_val_.second = &*it;
-			}
+				*(ListIt*)(ret.it_buf_) = val_.list_->begin();
 			else
 			{
 				if (val_type_ == ValType::Map)
-				{
-					auto& it = *(MapIt*)ret.buf_;
-					it = val_.map_->begin();
-
-					ret.pair_val_.first = &it->first;
-					ret.pair_val_.second = &it->second;
-				}
-				else
-				{  
-					ret.pair_val_.first = nullptr;
-					ret.pair_val_.second = (ThisType*)this;
-				}
+					*(MapIt*)(ret.it_buf_) = val_.map_->begin(); 
 			}
+			ret.update_it_val(this);
 			return ret;
 		}
 		It end() const
 		{
 			It ret;
-			ret.pair_val_type_ = val_type_;
+			ret.it_type_ = val_type_;
 
 			if (val_type_ == ValType::List)
 			{
-				auto& it = *(ListIt*)ret.buf_;
-				it = val_.list_->end();
+				auto end = val_.list_->end();
+				*(ListIt*)(ret.it_buf_) = end;
 			}
 			else
 			{
 				if (val_type_ == ValType::Map)
-				{
-					auto& it = *(MapIt*)ret.buf_;
-					it = val_.map_->end();
-				}
+					*(MapIt*)(ret.it_buf_) = val_.map_->end();
 				else
 				{
-					ret.pair_val_type_ = ValType::None;
-				}
+					ret.it_type_ = ValType::None; 
+				} 
 			}
 			return ret;
 		}
-	}; 
+	};
 }
 #endif//__clan_set_mix_obj__

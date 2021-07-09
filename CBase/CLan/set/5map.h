@@ -9,10 +9,10 @@ namespace cl
 	namespace detail
 	{
 		template<typename Key, typename Val>
-		struct HashMapNode : public Pair<Key, Val>
+		struct MapNode : public Pair<Key, Val>
 		{
-			HashMapNode* next_ = nullptr;
-			HashMapNode() {}
+			MapNode* next_ = nullptr;
+			MapNode() {}
 		};
 	}
 
@@ -22,27 +22,27 @@ namespace cl
 	{
 	protected:
 		using ThisType = _SerialHashMap<Key, Val, A>;
-		using Node = detail::HashMapNode<Key, Val>; 
+		using Node = detail::MapNode<Key, Val>; 
 		
-		template<typename F, typename S>
+		template<typename _K, typename _V>
 		struct _ListNode
 		{
-			F& first;
-			S& second; 
-			_ListNode(Key& key, Val& val) : first(key), second(val) {}
+			_K& first;
+			_V& second; 
+			_ListNode(_K& key, _V& val) : first(key), second(val) {}
 		};
 		using ListNode = _ListNode<Key, Val>;
 
-		Node** arr_ = nullptr;
 		s32 size_ = 0;
 		s32 cnt_ = 0;
+		Node** arr_ = nullptr; 
 		_List<ListNode, A> list_;
 
 		template<typename R>
 		inline Node* _find(const R& key, s32 index) const
 		{
 			auto node = arr_[index];
-			while (node && CmpVal<Key>()(node->first, key) != 0) node = node->next_;
+			while (node && CmpVal<Key, R>()(node->first, key) != 0) node = node->next_;
 			return node;
 		}
 		inline void _add_to_list(Node* node, s32 index)
@@ -137,7 +137,7 @@ namespace cl
 		public:
 			It(Org it) : it_(it) {}
 			ListNode& operator*() { return *it_; }
-			ListNode* operator->() { return it_; }
+			ListNode* operator->() { return &*it_; }
 
 			It& operator++() { ++it_; return *this; }
 			bool operator==(const It& it) { return it_ == it.it_; }
@@ -159,12 +159,12 @@ namespace cl
 	protected:
 		friend class It;
 		using ThisType = _HashMap<Key, Val, A>;
-		using Node = detail::HashMapNode<Key, Val>;
+		using Node = detail::MapNode<Key, Val>;
 
-		Node** arr_ = nullptr;
 		s32 size_ = 0;
 		s32 cnt_ = 0;
-
+		Node** arr_ = nullptr;
+		 
 		template<typename R>
 		inline Node* _find(const R& key, s32 index) const
 		{

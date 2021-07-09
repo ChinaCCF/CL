@@ -5,11 +5,11 @@
 #include "../base/8str.h"
 
 namespace cl
-{
-	template<typename T>
-	struct CmpVal
+{  
+	template<typename T, typename R>
+	struct CmpVal 
 	{
-		int operator()(const T& k1, const T& k2)
+		int operator()(const T& k1, const R& k2)
 		{
 			if (k1 < k2) return -1;
 			if (k1 == k2) return 0;
@@ -17,20 +17,14 @@ namespace cl
 		}
 	};
 
-	template<typename T> requires ToChars<T, char>::value
-	struct CmpVal<T>
+	template<ToCharsType T1, ToCharsType T2>
+	struct CmpVal<T1, T2>
 	{
-		int operator()(const char* k1, const char* k2)
+		int operator()(const T1& k1, const T2& k2)
 		{
-			return CStr::cmp(k1, k2);
-		} 
-	};
-	template<typename T> requires ToChars<T, wchar>::value
-		struct CmpVal<T>
-	{
-		int operator()(const wchar* k1, const wchar* k2)
-		{
-			return CStr::cmp(k1, k2);
+			using ct1 = SelectCharType<T1>::type;
+			using ct2 = SelectCharType<T2>::type;
+			return CStr::cmp((const ct1*)k1, (const ct2*)k2);
 		}
 	};
 	 
