@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build"
+	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="$(SolutionDir)\_self_dir.props"/>
+	<PropertyGroup Label="UserMacros">
+		<UM_inc_Dir>$(UM_Self_inc_Dir);</UM_inc_Dir>
+		<UM_lib_Dir>$(UM_Self_lib_Dir);</UM_lib_Dir>
+	</PropertyGroup>
+</Project>

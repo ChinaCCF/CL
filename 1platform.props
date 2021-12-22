@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release|x64">
+			<Configuration>Release</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Condition|x64">
+			<Configuration>Condition</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+
+	<PropertyGroup Label="UserMacros">
+		<UM_VC>16.0</UM_VC>		<!--VCProjectVersion-->
+		<UM_SDK>10.0</UM_SDK>		<!--WindowsTargetPlatformVersion-->
+		<UM_ToolSet>v143</UM_ToolSet>		<!--PlatformToolset 142 2019, 143 2022-->
+	</PropertyGroup>
+</Project>

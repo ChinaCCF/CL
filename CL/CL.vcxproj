@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>lib</UM_Proj_Type>
+    <!--MT, MTd, MDd, MD-->
+    <UM_MT_Type>true</UM_MT_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\1platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>$(UM_VC)</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{3deb14c6-1481-4fb1-ae28-88af41005a80}</ProjectGuid>
+    <RootNamespace>CL</RootNamespace>
+    <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="base\1cfg.h" />
+    <ClInclude Include="base\2type.h" />
+    <ClInclude Include="base\3type_traits.h" />
+    <ClInclude Include="base\4val.h" />
+    <ClInclude Include="base\5mem.h" />
+    <ClInclude Include="base\6ptr.h" />
+    <ClInclude Include="base\7call.h" />
+    <ClInclude Include="base\8cstr.h" />
+    <ClInclude Include="base\9str.h" />
+    <ClInclude Include="base\_exception_code.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="base\src\2type.cpp" />
+    <ClCompile Include="base\src\5mem.cpp" />
+    <ClCompile Include="base\src\8cstr.cpp" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\3setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
