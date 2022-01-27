@@ -1,5 +1,7 @@
 ﻿#include <Windows.h>
-#include <iostream> 
+#include <iostream>
+
+#pragma warning(disable:4996)
 #include <CL/base/2type.h>
 #include <CL/base/8cstr.h>
 
@@ -11,6 +13,10 @@
 
 int main()
 {     
+    auto f = fopen("C:\\Users\\ccf\\Desktop\\cc\\1.txt", "wb");
+    fwrite(L"陈成发", 2 * 4, 1, f);
+    fclose(f);
+
     CL_Throw(0,0, "ccf");
     uc16 buf[32];
     cl::scopy(buf, 32, "123");

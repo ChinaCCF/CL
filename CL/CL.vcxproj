@@ -30,6 +30,7 @@
     <ClCompile Include="base\src\2type.cpp" />
     <ClCompile Include="base\src\5mem.cpp" />
     <ClCompile Include="base\src\8cstr.cpp" />
+    <ClCompile Include="note.cpp" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\3setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

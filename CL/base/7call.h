@@ -33,7 +33,7 @@ namespace cl
 		};
 
 		//类成员函数
-		template <typename Obj, typename Return, typename... Args> 
+		template <typename Obj, typename Return, typename... Args> requires std::is_class_v<Obj>
 		class ClassMemFun : public iCall<Return, Args...>
 		{
 		public:
@@ -53,7 +53,7 @@ namespace cl
 		};
 
 		//仿函数对象
-		template <typename Obj, typename Return, typename... Args>
+		template <typename Obj, typename Return, typename... Args> requires std::is_class_v<Obj>
 		class ObjFun : public iCall<Return, Args...>
 		{
 		public:
@@ -77,7 +77,7 @@ namespace cl
 	{
 		using iCall = lib::iCall<Return, Args...>;
 		//lamda捕捉的对象尽量少, 否则超过这个缓存... 
-		uv64 buf_[16];
+		uv64 buf_[8];
 		iCall* call_ = nullptr;
 	public:
 		~Call() { if (call_) call_->~iCall(); }
@@ -96,7 +96,8 @@ namespace cl
 		}
 		 
 		//类成员函数指针
-		template<typename Obj, typename Fun> Call(Obj* obj, Fun fun) : Call()
+		template<typename Obj, typename Fun> requires std::is_class_v<Obj>
+		Call(Obj* obj, Fun fun) : Call()
 		{
 			static_assert(std::is_class_v<Obj>, "must be class!");
 			static_assert(std::is_member_function_pointer_v<Fun>, "must be class funtion!");
@@ -110,7 +111,8 @@ namespace cl
 		}
 
 		//仿函数
-		template<typename Obj> Call(Obj&& obj) : Call()
+		template<typename Obj> requires std::is_class_v<Obj>
+		Call(Obj&& obj) : Call()
 		{
 			static_assert(std::is_class_v<Obj>, "must be object!");
 			static_assert(sizeof(Obj) <= sizeof(buf_), "lambda buf overflow!");
@@ -134,9 +136,13 @@ namespace cl
 		operator bool() const { return valid(); }
 		Return operator()(Args... args) const { return call_->call(std::forward<Args>(args)...); }
 
+		//普通call复制
 		Call& operator=(const Call& c) { this->~Call(); new(this)Call(c); return *this; }
+		//函数指针赋值
 		Call& operator=(Return(*fun)(Args...)) { this->~Call(); new(this)Call(fun); return *this; }
-		template<typename Obj>	Call& operator=(Obj&& obj) { this->~Call(); new(this)Call(std::forward<Obj>(obj)); return *this; }
+		//仿函数, lambda表达式赋值
+		template<typename Obj> requires std::is_class_v<Obj>
+		Call& operator=(Obj&& obj) { this->~Call(); new(this)Call(std::forward<Obj>(obj)); return *this; }
 
 		//类成员函数指针
 		template<typename Obj, typename Fun>

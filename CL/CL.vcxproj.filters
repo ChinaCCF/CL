@@ -52,5 +52,8 @@
     <ClCompile Include="base\src\2type.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="note.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -5,12 +5,10 @@
 
 //if x < y, then -(x < y) will be all ones, so r = y ^ (x ^ y) & ~0 = y ^ x ^ y = x. 
 //Otherwise, if x >= y, then -(x < y) will be all zeros, so r = y ^ ((x ^ y) & 0) = y.
-template<typename T>
-	requires cl::IsInt_v<T> || cl::IsChar_v<T>
+template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 static inline T cl_max(const T & x, const T & y) { return x ^ ((x ^ y) & -(x < y)); }
 
-template<typename T>
-	requires cl::IsInt_v<T> || cl::IsChar_v<T>
+template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 static inline T cl_min(const T & x, const T & y) { return y ^ ((x ^ y) & -(x < y)); }
 
 template<cl::FloatType T> static inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
@@ -18,8 +16,7 @@ template<cl::FloatType T> static inline T cl_min(const T& x, const T& y) { retur
 
 namespace cl
 {
-	template<typename T>
-		requires cl::IsInt_v<T> || cl::IsChar_v<T>
+	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 	static inline T abs(const T & val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
 
 	static inline fv32 abs(fv32 v) { auto tv = *(uv32*)&v; tv &= 0x7FFFFFFF; return *(fv32*)&tv; }
@@ -46,10 +43,12 @@ namespace cl
 	/*############################################################################################*/
 	//纳秒
 	consteval uv64 operator "" _ns(uv64 val) { return val; }
+
+	consteval uv64 operator "" _us(uv64 val) { return val * 1000; }
 	//毫秒
-	consteval uv64 operator "" _ms(uv64 val) { return val * 1000; }
+	consteval uv64 operator "" _ms(uv64 val) { return val * 1000 * 1000; }
 	//秒
-	consteval uv64 operator "" _s(uv64 val) { return val * 1000 * 1000; }
+	consteval uv64 operator "" _s(uv64 val) { return val * 1000 * 1000 * 1000; }
 
 	/*############################################################################################*/
 	//显示时间字面量
@@ -75,9 +74,9 @@ namespace cl
 		uv32 val_;
 #if CL_Version == CL_Version_Debug
 		T* eval_;//方便调试
-		EnumType() { eval_ = (T*)&val_; } 
+		EnumType() { eval_ = (T*)&val_; }
 #else
-		EnumType() { } 
+		EnumType() {}
 #endif 
 		EnumType(const T& t) :EnumType() { val_ = (uv32)t; }
 		EnumType(const EnumType& e) :EnumType() { val_ = e.val_; }
@@ -87,7 +86,7 @@ namespace cl
 		operator bool() { return (uv32)val_ != 0; }
 
 	private:
-		template<IntType R> 
+		template<IntType R>
 		uv32 _get_u32(const R& val) const { return (uv32)val; }
 		uv32 _get_u32(const T& val) const { return (uv32)val; }
 		uv32 _get_u32(const EnumType<T>& val) const { return val.val_; }
@@ -106,7 +105,7 @@ namespace cl
 		/*############################################################################################*/
 		template<typename E> inline void operator&= (E v) { val_ &= _get_u32(v); }
 		template<typename E> inline void operator|= (E v) { val_ |= _get_u32(v); }
-		template<typename E> inline void operator^= (E v) { val_ ^= _get_u32(v); } 
+		template<typename E> inline void operator^= (E v) { val_ ^= _get_u32(v); }
 	};
 
 	//2的指数都是最高为1,后面都是0,那么减一就变成 011...
@@ -126,33 +125,30 @@ namespace cl
 	static inline sv32 align_power2(sv32 v) { return (sv32)align_power2((uv32)v); }
 	static inline sv64 align_power2(sv64 v) { return (sv64)align_power2((uv64)v); }
 
-	template<typename T>
-		requires cl::IsInt_v<T> || cl::IsChar_v<T>
+	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 	static inline T align(T val, T align) { T n = align - 1; return (val + n) & ~n; }
 	//求2的几多次方才能大于或等于某个数, 例如log2(8) = 3
-	template<typename T>
-		requires cl::IsInt_v<T> || cl::IsChar_v<T>
-	static inline sv32 log2(T val) { sv32 index = 0; while (val >>= 1) index++; return index; }
+	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
+	static inline sv32 log2(T val) { sv32 index = 0; while(val >>= 1) index++; return index; }
 
 	namespace lib
 	{//togood 后面要修改为 Google 的 cityhash 
 		template<FloatType T> static inline uv32 _hash(T val) { auto f = (uv32*)&val; return f[0]; };
 
-		template<typename T>
-			requires cl::IsInt_v<T> || cl::IsChar_v<T>
+		template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 		static inline uv32 _hash(T val) { return (uv32)(uvt)val; };
 
 		template<PtrType T> static inline uv32 _hash(T val) { return (uv32)(uvt)val; };
 
 		template<typename T>
-		requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
-		static inline uv32 _hash(const T& val) //BKDRHash
+			requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
+		static inline uv32 _hash(const T & val) //BKDRHash
 		{
 			using Type = SelectType_t<ToC8Ptr<T>::value, uc8, uc16>;
 			const Type* str = (const Type*)val;
 			uv32 seed = 1313;
 			uv32 ret = 0;
-			while (*str) ret = ret * seed + (*str++);
+			while(*str) ret = ret * seed + (*str++);
 			return ret & 0x7FFFFFFF;
 		};
 	}

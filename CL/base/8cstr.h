@@ -17,10 +17,11 @@ namespace cl
 	static inline uv32 slen(const uc16* str) { return (uv32)::wcslen((wchar_t*)str); }
 
 	/*############################################################################################*/
-	//sshift
+	//srshift
+	//指定长度len的字符串向右移动cnt个字符
 	/*############################################################################################*/
 	template<CharType C>
-	static inline void sshift(C* buf, uv32 len, uv32 cnt)
+	static inline void srshift(C* buf, uv32 len, uv32 cnt)
 	{
 		buf += len;
 		for (sv32 i = 0; i < (sv32)cnt; i++)
@@ -289,7 +290,7 @@ namespace cl
 
 			cnt = _2s(p, size - ret.number_ - 1, uval);
 			auto dif = fraction - cnt;
-			sshift(p, cnt, dif);
+			srshift(p, cnt, dif);
 			  
 			for (uv32 i = 0; i < dif; i++)
 				p[i] = '0';

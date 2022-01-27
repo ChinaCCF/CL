@@ -44,11 +44,13 @@ namespace cl
 	template<CharType T>
 	inline uv32 _unhex_mem(void* data, uv32 size, const T* src, uv32 len)
 	{
+		[[unlikely]]
 		if (size < (len >> 1)) return 0;
 
 		auto dst = (uv8*)data;
 
 		//skip 0x
+		[[likely]]
 		if (src[0] == '0')
 		{
 			if (src[1] == 'x' || src[1] == 'X')

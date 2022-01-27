@@ -5,7 +5,7 @@
 #include "4val.h"
 
 namespace cl
-{ 
+{
 	/*#####################################################################################*/
 	//默认内存申请对象
 	/*#####################################################################################*/
@@ -16,10 +16,10 @@ namespace cl
 			requires IsSame_v<decltype(a->alloc(1)), uv8*>;//确保申请函数返回uv8* 指针 
 	};
 	struct MemAllocator
-	{ 
+	{
 		uv8* alloc(uvt size) { return (uv8*)malloc(size); }
 		void free(void* p) { ::free(p); }
-	}; 
+	};
 
 	/*#####################################################################################*/
 	//默认对象申请对象
@@ -93,8 +93,7 @@ namespace cl
 		}
 	public:
 		//改变当前值为另一端, 大端变小端 或 小端变大端
-		template<typename T>
-			requires cl::IsInt_v<T> || cl::IsChar_v<T>
+		template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 		static inline T change(T val)
 		{
 			static_assert(sizeof(T) >= 2, "can't change one byte endian!");

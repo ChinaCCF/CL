@@ -58,7 +58,7 @@ namespace cl
 			template<CharType C> sv32 find(uv32 index, const C* sub) const { return _find_ret(sfind(str_ + index, sub)); }  
 		};
 	} 
-	using StrView = lib::_StrView<ch8>;
+	using StrView = lib::_StrView<uc8>;
 	using StrViewW = lib::_StrView<uc16>;
 
 	template<CharType T, MemAllocType MA = DefaultMemAlloc>

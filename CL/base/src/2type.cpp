@@ -17,19 +17,21 @@ namespace cl
 		main_code_ = main_code;
 		sub_code_ = sub_code;
 
-		file_ = buf_; 
+		file_ = buf_;
 		auto len = wcslen((wchar_t*)file);
-		if (len >= 512) return; 
+		[[unlikely]]
+		if(len >= 512) return;
 		scopy(file_, file);
-		
+
 		msg_ = file_ + len;
 		auto remain = 512 - len;
 		len = wcslen((wchar_t*)msg);
-		if (len >= remain)
+		[[unlikely]]
+		if(len >= remain)
 		{
 			msg_[0] = 0;
 			return;
-		} 
+		}
 		scopy(msg_, msg);
 	}
 }

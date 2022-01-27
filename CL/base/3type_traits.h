@@ -38,9 +38,11 @@ namespace cl
 	template<typename T> cl_const_bool IsVirtualClass_v = IsVirtualClass<T>::value;
 
 	//选择类型, if Test == true, type == Type1, else type == Type2 
-	template<bool Test, typename Type1, typename Type2> struct SelectType
-	{ using type = typename std::conditional<Test, Type1, Type2>::type; };
-	template<bool Test, typename Type1, typename Type2> using SelectType_t = typename SelectType<Test, Type1, Type2>::type;
+	template<bool Test, typename Type1, typename Type2> 
+	struct SelectType { using type = typename std::conditional<Test, Type1, Type2>::type; };
+
+	template<bool Test, typename Type1, typename Type2> 
+	using SelectType_t = typename SelectType<Test, Type1, Type2>::type;
 
 	//判断能否转换到指定类型
 	template<typename Src, typename Dst> struct _To { cl_const_bool value = std::is_convertible_v<Src, Dst>; };
@@ -103,7 +105,7 @@ namespace cl
 	template<typename T> cl_const_bool IsChar_v = IsChar<T>::value;
 
 	template<typename T> struct IsC8Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc8*> || IsSame_v<RawType_t<T>, ac8*>; };
-	template<typename T> struct IsC16Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc16*>; };
+	template<typename T> struct IsC16Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc16*> || IsSame_v<RawType_t<T>, wchar_t*>; };
 	template<typename T> struct IsCharPtr { cl_const_bool value = IsC8Ptr<T>::value || IsC16Ptr<T>::value; };
 
 	template<typename T> cl_const_bool IsC8Ptr_v = IsC8Ptr<T>::value;
@@ -126,15 +128,13 @@ namespace cl
 	namespace lib
 	{
 		//空指针能够转换成字符串指针 整形也是能够转换为字符指针
-		template<typename T, typename CharT> struct _2CxxPtr
-		{
-			cl_const_bool value = !IsNull_v<T> && !IsInt_v<T> && (_To_v<T, CharT*> || _To_v<T, const CharT*>);
-		};
+		template<typename T, typename CharT> struct _2CxxPtr 
+		{ cl_const_bool value = !IsNull_v<T> && !IsInt_v<T> && (_To_v<T, CharT*> || _To_v<T, const CharT*>); };
 		template<typename T, typename CharT> cl_const_bool _2CxxPtr_v = _2CxxPtr<T, CharT>::value;
 	}
 
 	template<typename T> struct ToC8Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc8> || lib::_2CxxPtr_v<RawType_t<T>, ac8>; };
-	template<typename T> struct ToC16Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc16>; }; 
+	template<typename T> struct ToC16Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc16> || lib::_2CxxPtr_v<RawType_t<T>, wchar_t>; };
 	template<typename T> cl_const_bool ToC8Ptr_v = ToC8Ptr<T>::value;
 	template<typename T> cl_const_bool ToC16Ptr_v = ToC16Ptr<T>::value;
 
@@ -142,8 +142,8 @@ namespace cl
 	template<typename T> concept C16Type = IsC16_v<T>;
 	template<typename T> concept CharType = IsChar_v<T>;
 
-	template<typename T> concept C8PtrType = ToC8Ptr_v<T>;
-	template<typename T> concept C16PtrType = ToC16Ptr_v<T>;
+	template<typename T> concept ToC8PtrType = ToC8Ptr_v<T>;
+	template<typename T> concept ToC16PtrType = ToC16Ptr_v<T>;
 
 	template<typename T> concept BoolType = IsBool_v<T>;
 	template<typename T> concept FloatType = IsFloat_v<T>;
@@ -157,35 +157,30 @@ namespace cl
 	/*#####################################################################################*/
 	//根据传递进来的类型能否转为不同的字符串,进而选择字符类型
 	/*#####################################################################################*/
-	template<typename T, typename DefaultC8Type = uc8> struct GetCharType
-	{
-		using type = typename SelectType<ToC16Ptr_v<T>, uc16, DefaultC8Type>::type;
-	};
-	template<typename T, typename DefaultC8Type = uc8> using GetCharType_t = typename GetCharType<T, DefaultC8Type>::type;
+	template<typename T, typename DefaultC8Type = uc8> 
+	struct GetCharType { using type = SelectType_t<ToC16Ptr_v<T>, uc16, DefaultC8Type>; };
+
+	template<typename T, typename DefaultC8Type = uc8> 
+	using GetCharType_t = typename GetCharType<T, DefaultC8Type>::type;
 	 
 	/*#####################################################################################*/
 	//选择相同大小的类型
 	/*#####################################################################################*/
-	template<typename Org, typename ChoiceType, typename ... Args>
-	struct SameSizeType
-	{
-		using type = typename SelectType < sizeof(Org) == sizeof(ChoiceType), ChoiceType, typename SameSizeType<Org, Args ...>::type>::type;
-	};
-	template<typename Org, typename ChoiceType>
-	struct SameSizeType<Org, ChoiceType>
-	{
-		using type = typename SelectType < sizeof(Org) == sizeof(ChoiceType), ChoiceType, void > ::type;
-	};
-	template<typename Org, typename ChoiceType, typename ... Args> using SameSizeType_t = typename SameSizeType<Org, ChoiceType, Args ...>::type;
+	template<typename Org, typename ChoiceType, typename ... Args>	struct SameSizeType
+	{ using type = SelectType_t<sizeof(Org) == sizeof(ChoiceType), ChoiceType, typename SameSizeType<Org, Args ...>::type>; };
+
+	template<typename Org, typename ChoiceType>	struct SameSizeType<Org, ChoiceType>
+	{ using type = SelectType_t<sizeof(Org) == sizeof(ChoiceType), ChoiceType, void>; };
+
+	template<typename Org, typename ChoiceType, typename ... Args> 
+	using SameSizeType_t = typename SameSizeType<Org, ChoiceType, Args ...>::type;
 	/*#####################################################################################*/
 	//选择2个类型中存储空间大的一种,例如sv8和sv16,会选择sv16 
 	/*#####################################################################################*/
-	template<typename T1, typename ... Args>
-	struct MaxType
+	template<typename T1, typename ... Args> struct MaxType
 	{
-		using T2 = typename MaxType<Args ...>::type;
-
-		using type = typename SelectType < sizeof(T1) < sizeof(T2), T2, T1 > ::type;
+		using T2 = typename MaxType<Args ...>::type; 
+		using type = SelectType_t<sizeof(T1) < sizeof(T2), T2, T1>;
 		enum { size = sizeof(type) };
 	};
 	template<typename T> struct MaxType<T> { using type = T; enum { size = sizeof(T) }; };
@@ -197,8 +192,7 @@ namespace cl
 	struct MinType
 	{
 		using T2 = typename MinType<Args ...>::type;
-
-		using type = typename SelectType < sizeof(T1) < sizeof(T2), T1, T2 > ::type;
+		using type = SelectType_t<sizeof(T1) < sizeof(T2), T1, T2>;
 		enum { size = sizeof(type) };
 	};
 	template<typename T> struct MinType<T> { using type = T; enum { size = sizeof(T) }; };
@@ -208,13 +202,13 @@ namespace cl
 	/*#####################################################################################*/
 	namespace lib
 	{
-		template<typename T> struct _CheckClassMove { cl_const_bool value = HasMoveSet<T>::value && HasMoveConstruct<T>::value; };
-		template<typename T> struct _CheckVirtualClass { cl_const_bool value = IsVirtualClass<T>::value ? std::has_virtual_destructor<T>::value : true; };
+		template<typename T> struct _CheckClassMove { cl_const_bool value = HasMoveSet_v<T> && HasMoveConstruct_v<T>; };
+		template<typename T> struct _CheckVirtualClass { cl_const_bool value = IsVirtualClass_v<T> ? std::has_virtual_destructor<T>::value : true; };
 	}
 	//检查类是否定义了移动语义
-	template<typename T> struct CheckClassMove { cl_const_bool value = std::is_class<T>::value ? lib::_CheckClassMove<T>::value : true; };
+	template<typename T> struct CheckClassMove { cl_const_bool value = std::is_class_v<T> ? lib::_CheckClassMove<T>::value : true; };
 	//检查类的是否定义了虚析构函数
-	template<typename T> struct CheckVirtualClass { cl_const_bool value = std::is_class<T>::value ? lib::_CheckVirtualClass<T>::value : true; };
+	template<typename T> struct CheckVirtualClass { cl_const_bool value = std::is_class_v<T> ? lib::_CheckVirtualClass<T>::value : true; };
 
 	//检查类的定义详情,是否定义了移动语义, 虚类是否定义了虚析构函数
 #define CL_Check_Class_Def(T) \
@@ -229,7 +223,7 @@ static_assert(cl::CheckVirtualClass<T>::value, "virtual class need virtual destr
 
 #define CL_Check_Class_Fun(Name, Return, ...) namespace cl{\
 	template <typename Obj> class Check_Class_##Name{\
-		template <typename T, Return(T::*)(__VA_ARGS__) = &T::Name>\
+		template <typename T, Return(T::* mem_fun)(__VA_ARGS__) = &T::Name>\
 		cl_const_bool _check(T*) { return true; };\
 		cl_const_bool _check(...) { return false; };\
 	public: cl_const_bool value = _check((Obj*)0); };}

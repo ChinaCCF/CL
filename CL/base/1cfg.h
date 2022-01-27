@@ -65,10 +65,10 @@
 //编译器
 #if defined(_MSC_VER)   
 #	if _MSC_VER < 1929 //vs2019
-static_assert(false, "Not Support Previous VS!");
+#		error "Not Support Previous VS!" 
 #	endif 
 #   undef CL_Compiler
-#	define CL_Compiler   CL_Compiler_VC  
+#	define CL_Compiler   CL_Compiler_VC   
 #endif
 
 //平台位数
