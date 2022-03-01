@@ -18,10 +18,13 @@
     <ClCompile Include="CCF.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="test_cl\3type_traits.h" />
     <ClInclude Include="test_cl\4val.h" />
     <ClInclude Include="test_cl\5mem.h" />
     <ClInclude Include="test_cl\6ptr.h" />
+    <ClInclude Include="test_cl\7call.h" />
     <ClInclude Include="test_cl\8cstr.h" />
+    <ClInclude Include="test_cl\9str.h" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\3setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

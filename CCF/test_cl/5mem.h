@@ -2,7 +2,7 @@
 
 namespace test
 {
-    namespace mem
+    namespace ntest_mem
     {
         class A
         {
@@ -33,6 +33,6 @@ namespace test
     }
     void test_mem()
     {
-        mem::B<> b;
+        ntest_mem::B<> b;
     }
 }

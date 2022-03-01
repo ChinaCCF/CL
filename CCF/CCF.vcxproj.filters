@@ -28,5 +28,14 @@
     <ClInclude Include="test_cl\8cstr.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="test_cl\7call.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_cl\9str.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_cl\3type_traits.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

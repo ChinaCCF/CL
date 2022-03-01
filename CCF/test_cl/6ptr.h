@@ -2,7 +2,7 @@
 
 namespace test
 {
-    namespace ptr
+    namespace ntest_ptr
     {
         class A
         {
@@ -23,16 +23,16 @@ namespace test
     void test_ptr()
     {
         {
-            //cl::Ptr<ptr::A> ptr = cl::ObjAllocator<ptr::A>().alloc();
+            //cl::Ptr<ntest_ptr::A> ptr = cl::ObjAllocator<ntest_ptr::A>().alloc();
         }
         {
-            //cl::PtrCnt<ptr::A> ptr = cl::ObjAllocator<ptr::A>().alloc();
+            //cl::PtrCnt<ntest_ptr::A> ptr = cl::ObjAllocator<ntest_ptr::A>().alloc();
         }
         {
-            //cl::PtrCnt<ptr::A> ptr = cl::PtrCnt<ptr::A>::make();
+            //cl::PtrCnt<ntest_ptr::A> ptr = cl::PtrCnt<ntest_ptr::A>::make();
         }
         {
-            cl::PtrCnt<ptr::A> ptr = cl::PtrCnt<ptr::A>::make();
+            cl::PtrCnt<ntest_ptr::A> ptr = cl::PtrCnt<ntest_ptr::A>::make();
             auto ptr2 = ptr;
         }
     }

@@ -3,142 +3,143 @@
 
 namespace test
 {    
+	namespace cs = cl::cstr;
 	void test_cstr()
 	{
 		{
 			uc16 buf[32];
-			cl::scopy(buf, 32, u"123");
+			cs::copy(buf, 32, u"123");
 		}
 		{//tos
 			char buf[256];
 
 			{
-				auto len = cl::tos(buf, 256, 123);
-				CL_DBG(cl::sequ(buf, "123"));
+				auto len = cs::from_val (buf, 256, 123);
+				CL_DBG(cs::equ(buf, "123"));
 				CL_DBG(len == 3);
 			}
 
 			{
-				auto len = cl::tos(buf, 256, 0);
-				CL_DBG(cl::sequ(buf, "0"));
+				auto len = cs::from_val(buf, 256, 0);
+				CL_DBG(cs::equ(buf, "0"));
 				CL_DBG(len == 1);
 			}
 
 			{
-				auto len = cl::tos(buf, 256, 100);
-				CL_DBG(cl::sequ(buf, "100"));
+				auto len = cs::from_val(buf, 256, 100);
+				CL_DBG(cs::equ(buf, "100"));
 				CL_DBG(len == 3);
 			}
 			{
-				auto len = cl::tos(buf, 256, -100);
-				CL_DBG(cl::sequ(buf, "-100"));
+				auto len = cs::from_val(buf, 256, -100);
+				CL_DBG(cs::equ(buf, "-100"));
 				CL_DBG(len == 4);
 			}
 
 			{
-				auto len = cl::tos(buf, 256, 0.0, 1);
-				CL_DBG(cl::sequ(buf, "0.0"));
+				auto len = cs::from_val(buf, 256, 0.0, 1);
+				CL_DBG(cs::equ(buf, "0.0"));
 				CL_DBG(len == 3);
 			}
 			{
-				auto len = cl::tos(buf, 256, 12.34, 2);
-				CL_DBG(cl::sequ(buf, "12.34"));
+				auto len = cs::from_val(buf, 256, 12.34, 2);
+				CL_DBG(cs::equ(buf, "12.34"));
 				CL_DBG(len == 5);
 			}
 			{
-				auto len = cl::tos(buf, 256, 0.003, 3);
-				CL_DBG(cl::sequ(buf, "0.003"));
+				auto len = cs::from_val(buf, 256, 0.003, 3);
+				CL_DBG(cs::equ(buf, "0.003"));
 				CL_DBG(len == 5);
 			}
 			{
-				auto len = cl::tos(buf, 256, -1.0, 4);
-				CL_DBG(cl::sequ(buf, "-1.0000"));
+				auto len = cs::from_val(buf, 256, -1.0, 4);
+				CL_DBG(cs::equ(buf, "-1.0000"));
 				CL_DBG(len == 7);
 			}
 			{
-				auto len = cl::tos(buf, 256, false);
-				CL_DBG(cl::sequ(buf, "false"));
+				auto len = cs::from_val(buf, 256, false);
+				CL_DBG(cs::equ(buf, "false"));
 				CL_DBG(len == 5);
 			}
 			{
-				auto len = cl::tos(buf, 256, true);
-				CL_DBG(cl::sequ(buf, "true"));
+				auto len = cs::from_val(buf, 256, true);
+				CL_DBG(cs::equ(buf, "true"));
 				CL_DBG(len == 4);
 			}
 		}
 		/*########################################################################*/
 		/*########################################################################*/
-		{ //tov
+		{ //str_2_val
 			{
 				bool val;
-				auto p = cl::tov("true", val);
+				auto p = cs::to_val("true", val);
 				CL_DBG(val == true);
 				CL_DBG(*p == 0);
 			}
 			{
 				bool val;
-				auto p = cl::tov("false", val);
+				auto p = cs::to_val("false", val);
 				CL_DBG(val == false);
 				CL_DBG(*p == 0);
 			}
 			{
 				int val;
-				auto p = cl::tov("0", val);
+				auto p = cs::to_val("0", val);
 				CL_DBG(val == 0);
 				CL_DBG(*p == 0);
 			}
 			{
 				int val;
-				auto p = cl::tov("12300", val);
+				auto p = cs::to_val("12300", val);
 				CL_DBG(val == 12300);
 				CL_DBG(*p == 0);
 			}
 			{
 				int val;
-				auto p = cl::tov("-12300", val);
+				auto p = cs::to_val("-12300", val);
 				CL_DBG(val == -12300);
 				CL_DBG(*p == 0);
 			}
 			{
 				fv64 val;
-				auto p = cl::tov("0", val);
+				auto p = cs::to_val("0", val);
 				CL_DBG(val == 0);
 				CL_DBG(*p == 0);
 			} 
 			{
 				fv64 val;
-				auto p = cl::tov("0.01", val);
+				auto p = cs::to_val("0.01", val);
 				CL_DBG(cl::abs(val - 0.01) < 0.000001);
 				CL_DBG(*p == 0);
 			}
 			{
 				fv64 val;
-				auto p = cl::tov("-0.01", val);
+				auto p = cs::to_val("-0.01", val);
 				CL_DBG(cl::abs(val + 0.01) < 0.000001);
 				CL_DBG(*p == 0);
 			} 
 			{
 				fv64 val;
-				auto p = cl::tov("0.100", val);
+				auto p = cs::to_val("0.100", val);
 				CL_DBG(cl::abs(val - 0.1) < 0.000001);
 				CL_DBG(*p == 0);
 			}
 			 
 			{
 				fv64 val;
-				auto p = cl::tov("-1.20001e2", val);
+				auto p = cs::to_val("-1.20001e2", val);
 				CL_DBG(cl::abs(val + 120.001) < 0.000001);
 				CL_DBG(*p == 0);
 			}
 			{
 				fv64 val;
-				auto p = cl::tov("-1.20001e-2", val);
+				auto p = cs::to_val("-1.20001e-2", val);
 				CL_DBG(cl::abs(val + 0.0120001) < 0.000001);
 				CL_DBG(*p == 0);
 			}
 			{
 				fv64 val;
-				auto p = cl::tov("-1.20001eabc", val);
+				auto p = cs::to_val("-1.20001eabc", val);
 				CL_DBG(cl::abs(val + 1.20001) < 0.000001);
 				CL_DBG(*p == 'e');
 			}
@@ -157,7 +158,7 @@ namespace test
 
 		//	start = time_point();
 		//	for (sv32 i = 0; i < cnt; i++)
-		//		cl::tos(buf, 128, -123.456);
+		//		cs::val_2_str(buf, 128, -123.456);
 		//	end = time_point();
 		//	auto self_dif = end - start;
 		//	//def_dif  = 8038726700
@@ -179,7 +180,7 @@ namespace test
 
 		//	start = time_point();
 		//	for (sv32 i = 0; i < cnt; i++)
-		//		cl::tov(buf, val);
+		//		cs::str_2_val(buf, val);
 		//	end = time_point();
 
 		//	auto self_dif = end - start;

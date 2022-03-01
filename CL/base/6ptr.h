@@ -83,15 +83,13 @@ namespace cl
 	}
 
 	//对象的申请器, 和容器的申请器可以不一致
-	template<typename T,
-		template<typename> class AllocatorHolder = ObjAllocator,
-		template<typename> class AllocatorT = ObjAllocator>
-		requires ObjAllocType<AllocatorHolder, lib::iHolder<T>>&& ObjAllocType<AllocatorT, T>
+	template<typename T,template<typename> class Allocator = ObjAllocator>
+		requires ObjAllocType<Allocator, lib::iHolder<T>> && ObjAllocType<Allocator, T>
 	class PtrCnt
 	{
 	public:
 		using iHolder = lib::iHolder<T>;
-		using HoldPtr = lib::HoldPtr<T, AllocatorT>;
+		using HoldPtr = lib::HoldPtr<T, Allocator>;
 	private:
 		iHolder* iholder_ = nullptr;
 
@@ -109,18 +107,19 @@ namespace cl
 		PtrCnt(const std::nullptr_t&) {}
 		PtrCnt(T* p)
 		{
-			iholder_ = AllocatorHolder<HoldPtr>().alloc();
+			iholder_ = Allocator<HoldPtr>().alloc();
 			iholder_->ptr_ = p;
 			iholder_->cnt_ = 1;
 		}
-		PtrCnt& operator=(T* p) { release(); new(this)PtrCnt(p); return *this; }
 		PtrCnt(const PtrCnt& p) { retain(p.iholder_); }
+		PtrCnt& operator=(T* p) { release(); new(this)PtrCnt(p); return *this; }
 
-		template<typename R, template<typename> class AllocatorT2 = ObjAllocator> requires ObjAllocType<AllocatorT2, R>
-		PtrCnt(const PtrCnt<R, AllocatorHolder, AllocatorT2>& p) { retain(p.iholder_); }
 
-		template<typename R, template<typename> class AllocatorT2 = ObjAllocator> requires ObjAllocType<AllocatorT2, R>
-		PtrCnt& operator=(const PtrCnt<R, AllocatorHolder, AllocatorT2>& p) { release(); new(this)PtrCnt(p); return *this; }
+		template<typename T2> 
+		PtrCnt(const PtrCnt<T2, Allocator>& p) { retain(p.iholder_); }
+
+		template<typename T2> 
+		PtrCnt& operator=(const PtrCnt<T2, Allocator>& p) { release(); retain(p.iholder_); return *this; }
 
 		~PtrCnt() { release(); }
 
@@ -129,7 +128,7 @@ namespace cl
 			if(iholder_)
 			{
 				--iholder_->cnt_;
-				if(iholder_->cnt_ == 0) AllocatorHolder<iHolder>().free(iholder_);
+				if(iholder_->cnt_ == 0) Allocator<iHolder>().free(iholder_);
 				iholder_ = nullptr;
 			}
 		}
@@ -152,7 +151,7 @@ namespace cl
 		bool operator==(T* p) const { return iholder_->ptr_ == p; }
 		bool operator!=(T* p) const { return iholder_->ptr_ != p; }
 
-		static inline auto make() { return PtrCnt(AllocatorHolder<lib::HoldObj<T>>().alloc()); }
+		static inline auto make() { return PtrCnt(Allocator<lib::HoldObj<T>>().alloc()); }
 	};
 }
 

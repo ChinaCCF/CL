@@ -43,7 +43,7 @@ namespace cl
 	/*############################################################################################*/
 	//ƒ…√Î
 	consteval uv64 operator "" _ns(uv64 val) { return val; }
-
+	//Œ¢√Î
 	consteval uv64 operator "" _us(uv64 val) { return val * 1000; }
 	//∫¡√Î
 	consteval uv64 operator "" _ms(uv64 val) { return val * 1000 * 1000; }
@@ -140,15 +140,14 @@ namespace cl
 
 		template<PtrType T> static inline uv32 _hash(T val) { return (uv32)(uvt)val; };
 
-		template<typename T>
-			requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
+		template<typename T> requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
 		static inline uv32 _hash(const T & val) //BKDRHash
 		{
-			using Type = SelectType_t<ToC8Ptr<T>::value, uc8, uc16>;
+			using Type = SelectType_t<ToC8Ptr_v<T>, uc8, uc16>;
 			const Type* str = (const Type*)val;
 			uv32 seed = 1313;
 			uv32 ret = 0;
-			while(*str) ret = ret * seed + (*str++);
+			while (*str) ret = ret * seed + (*str++);
 			return ret & 0x7FFFFFFF;
 		};
 	}

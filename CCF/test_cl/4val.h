@@ -2,7 +2,7 @@
 
 namespace test
 {  
-	namespace eval
+	namespace ntest_val
 	{
 		enum class MyCode
 		{
@@ -12,9 +12,9 @@ namespace test
 	}
 	void test_val()
 	{
-		cl::EnumType<eval::MyCode> e = eval::MyCode::Code1;
+		cl::EnumType<ntest_val::MyCode> e = ntest_val::MyCode::Code1;
 		//bool val2 = e == 1.0;
-		bool val = e == eval::MyCode::Code1;
+		bool val = e == ntest_val::MyCode::Code1;
 		uv32 v = e;
 	}
 }

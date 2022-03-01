@@ -7,15 +7,15 @@
 #include "1cfg.h"
 #include "_exception_code.h"
 
-typedef int8_t   sv8;
-typedef int16_t  sv16;
-typedef int32_t  sv32;
-typedef int64_t  sv64;
-
 typedef uint8_t  uv8;
 typedef uint16_t uv16;
 typedef uint32_t uv32;
 typedef uint64_t uv64;
+
+typedef int8_t   sv8;
+typedef int16_t  sv16;
+typedef int32_t  sv32;
+typedef int64_t  sv64;
 
 typedef float    fv32;
 typedef double   fv64;
@@ -57,6 +57,37 @@ static constexpr svt max_svt = max_sv32;
 
 namespace cl
 {
+	//用于自定义序列化和反序列化
+	enum class TypeId
+	{
+		None = 0,//没有任何值, 通常用来表示序列化结束
+		Null,//表有这个变量, 但是是一个空值
+		Bool,
+		Uv8,
+		Uv16,
+		Uv32,
+		Uv64,
+		Uv128,
+		Sv8,
+		Sv16,
+		Sv32,
+		Sv64,
+		Sv128,
+		C8,//字符
+		C16,
+		C32,
+		ACs8,//ac8字符串, typeid + 16位长度 + "String", 16位长度不包括字符串空结尾
+		UCs8,//同上
+		Cs16,//同上
+		Cs32,//同上
+		Fv32,
+		Fv64,
+		Fv128, 
+		Arr,//数组  typeid + 元素个数 + [(Type), (Type), ...]
+		Map,//映射  typeid + 元素个数 + { (UCs8) : (Type), (UCs8) : (Type), ...}
+		Bin,//表示二进制数据  typeid + 32位长度 + bin_data
+		TypeIdEnd,
+	};
 	/*#####################################################################################*/
 	//定义 不能拷贝构造, 不能拷贝赋值的对象 
 	/*#####################################################################################*/
@@ -85,7 +116,7 @@ namespace cl
 		uc16 buf_[512];
 	public:
 		Exception() { buf_[0] = 0; }
-		Exception(const uc16* file, uv32 line, uv16 main_code, uv16 sub_code, const uc16* msg);
+		Exception(_in const uc16* file, _in uv32 line, _in uv16 main_code, _in uv16 sub_code, _in const uc16* msg);
 
 		Exception(const Exception& e) = delete;
 		Exception& operator=(const Exception& e) = delete;

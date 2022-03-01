@@ -21,7 +21,9 @@ namespace cl
 	template<typename T1, typename T2> struct IsSame { cl_const_bool value = std::is_same<T1, T2>::value; };
 	template<typename T1, typename T2> cl_const_bool IsSame_v = IsSame<T1, T2>::value;
 
+	/*######################################################################################*/
 	//判断是否是成员函数
+	/*######################################################################################*/
 	template<typename T> struct IsClassMemFun { cl_const_bool value = std::is_member_function_pointer_v<T>; };
 	template<typename T> cl_const_bool IsClassMemFun_v = IsClassMemFun<T>::value;
 
@@ -37,13 +39,17 @@ namespace cl
 	template<typename T> struct IsVirtualClass { cl_const_bool value = std::is_polymorphic_v<T>; };
 	template<typename T> cl_const_bool IsVirtualClass_v = IsVirtualClass<T>::value;
 
+	/*######################################################################################*/
 	//选择类型, if Test == true, type == Type1, else type == Type2 
+	/*######################################################################################*/
 	template<bool Test, typename Type1, typename Type2> 
 	struct SelectType { using type = typename std::conditional<Test, Type1, Type2>::type; };
 
 	template<bool Test, typename Type1, typename Type2> 
 	using SelectType_t = typename SelectType<Test, Type1, Type2>::type;
 
+	/*######################################################################################*/
+	/*######################################################################################*/
 	//判断能否转换到指定类型
 	template<typename Src, typename Dst> struct _To { cl_const_bool value = std::is_convertible_v<Src, Dst>; };
 	template<typename Src, typename Dst> cl_const_bool _To_v = _To<Src, Dst>::value;
@@ -223,8 +229,7 @@ static_assert(cl::CheckVirtualClass<T>::value, "virtual class need virtual destr
 
 #define CL_Check_Class_Fun(Name, Return, ...) namespace cl{\
 	template <typename Obj> class Check_Class_##Name{\
-		template <typename T, Return(T::* mem_fun)(__VA_ARGS__) = &T::Name>\
-		cl_const_bool _check(T*) { return true; };\
+		template <typename T, Return(T::*)(__VA_ARGS__) = &T::Name> cl_const_bool _check(T*) { return true; };\
 		cl_const_bool _check(...) { return false; };\
 	public: cl_const_bool value = _check((Obj*)0); };}
 	  
