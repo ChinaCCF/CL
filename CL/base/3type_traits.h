@@ -51,8 +51,8 @@ namespace cl
 	/*######################################################################################*/
 	/*######################################################################################*/
 	//判断能否转换到指定类型
-	template<typename Src, typename Dst> struct _To { cl_const_bool value = std::is_convertible_v<Src, Dst>; };
-	template<typename Src, typename Dst> cl_const_bool _To_v = _To<Src, Dst>::value;
+	template<typename Src, typename Dst> struct _TypeConvert { cl_const_bool value = std::is_convertible_v<Src, Dst>; };
+	template<typename Src, typename Dst> cl_const_bool _TypeConvert_v = _TypeConvert<Src, Dst>::value;
 
 	//std::remove_all_extents 是获取数组的元素类型
 	//std::decay 有个毛病, const ch8 * 不会再退化, 这本身逻辑是没错
@@ -70,53 +70,72 @@ namespace cl
 	{
 		template<typename T> struct _IsBool { cl_const_bool value = false; };
 		template<> struct _IsBool<bool> { cl_const_bool value = true; };
-		template<typename T> cl_const_bool _IsBool_v = _IsBool<T>::value;
+
 		/*######################################################################################*/
 		template<typename T> struct _IsC8 { cl_const_bool value = false; };
 		template<> struct _IsC8<uc8> { cl_const_bool value = true; };
-		template<> struct _IsC8<ac8> { cl_const_bool value = true; };
-		template<typename T> cl_const_bool _IsC8_v = _IsC8<T>::value;
+		template<> struct _IsC8<ac8> { cl_const_bool value = true; }; 
+
 		/*######################################################################################*/
 		template<typename T> struct _IsC16 { cl_const_bool value = false; };
 		template<> struct _IsC16<uc16> { cl_const_bool value = true; };
-		template<> struct _IsC16<wchar_t> { cl_const_bool value = true; };
-		template<typename T> cl_const_bool _IsC16_v = _IsC16<T>::value;
+		template<> struct _IsC16<wchar> { cl_const_bool value = true; }; 
+
+		/*######################################################################################*/
+		template<typename T> struct _IsC32 { cl_const_bool value = false; };
+		template<> struct _IsC16<uc32> { cl_const_bool value = true; };  
+
 		/*######################################################################################*/
 		template<typename T> struct _IsUint { cl_const_bool value = false; };
 		template<> struct _IsUint<uv8> { cl_const_bool value = true; };
 		template<> struct _IsUint<uv16> { cl_const_bool value = true; };
 		template<> struct _IsUint<uv32> { cl_const_bool value = true; };
 		template<> struct _IsUint<uv64> { cl_const_bool value = true; };
-		template<typename T> cl_const_bool _IsUint_v = _IsUint<T>::value;
+		
 		/*######################################################################################*/
 		template<typename T> struct _IsSint { cl_const_bool value = false; };
 		template<> struct _IsSint<sv8> { cl_const_bool value = true; };
 		template<> struct _IsSint<sv16> { cl_const_bool value = true; };
 		template<> struct _IsSint<sv32> { cl_const_bool value = true; };
 		template<> struct _IsSint<sv64> { cl_const_bool value = true; };
-		template<typename T> cl_const_bool _IsSint_v = _IsSint<T>::value;
+		
 		/*######################################################################################*/
 		template<typename T> struct _IsFloat { cl_const_bool value = false; };
 		template<> struct _IsFloat<fv32> { cl_const_bool value = true; };
 		template<> struct _IsFloat<fv64> { cl_const_bool value = true; };
+		
+		/*######################################################################################*/
+		template<typename T> cl_const_bool _IsBool_v = _IsBool<T>::value;
+
+		template<typename T> cl_const_bool _IsC8_v = _IsC8<T>::value;
+		template<typename T> cl_const_bool _IsC16_v = _IsC16<T>::value;
+		template<typename T> cl_const_bool _IsC32_v = _IsC32<T>::value;
+
+		template<typename T> cl_const_bool _IsUint_v = _IsUint<T>::value;
+		template<typename T> cl_const_bool _IsSint_v = _IsSint<T>::value;
+
 		template<typename T> cl_const_bool _IsFloat_v = _IsFloat<T>::value;
 	}
 
 	template<typename T> struct IsC8 { cl_const_bool value = lib::_IsC8_v<RawType_t<T>>; };
 	template<typename T> struct IsC16 { cl_const_bool value = lib::_IsC16_v<RawType_t<T>>; };
-	template<typename T> struct IsChar { cl_const_bool value = IsC8<T>::value || IsC16<T>::value; };
+	template<typename T> struct IsC32 { cl_const_bool value = lib::_IsC32_v<RawType_t<T>>; };
+	template<typename T> struct IsChar { cl_const_bool value = IsC8<T>::value || IsC16<T>::value || IsC32<T>::value; };
 
 	template<typename T> cl_const_bool IsC8_v = IsC8<T>::value;
 	template<typename T> cl_const_bool IsC16_v = IsC16<T>::value;
+	template<typename T> cl_const_bool IsC32_v = IsC32<T>::value;
 	template<typename T> cl_const_bool IsChar_v = IsChar<T>::value;
 
 	template<typename T> struct IsC8Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc8*> || IsSame_v<RawType_t<T>, ac8*>; };
-	template<typename T> struct IsC16Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc16*> || IsSame_v<RawType_t<T>, wchar_t*>; };
-	template<typename T> struct IsCharPtr { cl_const_bool value = IsC8Ptr<T>::value || IsC16Ptr<T>::value; };
+	template<typename T> struct IsC16Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc16*> || IsSame_v<RawType_t<T>, wchar*>; };
+	template<typename T> struct IsC32Ptr { cl_const_bool value = IsSame_v<RawType_t<T>, uc32*>; };
+	template<typename T> struct IsCharPtr { cl_const_bool value = IsC8Ptr<T>::value || IsC16Ptr<T>::value || IsC32Ptr<T>::value; };
 
 	template<typename T> cl_const_bool IsC8Ptr_v = IsC8Ptr<T>::value;
 	template<typename T> cl_const_bool IsC16Ptr_v = IsC16Ptr<T>::value;
-	template<typename T> cl_const_bool IsCharPtr_v = IsC16Ptr<T>::value;
+	template<typename T> cl_const_bool IsC32Ptr_v = IsC32Ptr<T>::value;
+	template<typename T> cl_const_bool IsCharPtr_v = IsCharPtr<T>::value;
 
 	template<typename T> struct IsBool { cl_const_bool value = lib::_IsBool_v<RawType_t<T>>; };
 	template<typename T> struct IsFloat { cl_const_bool value = lib::_IsFloat_v<RawType_t<T>>; };
@@ -131,31 +150,40 @@ namespace cl
 	template<typename T> cl_const_bool IsInt_v = IsInt<T>::value;
 
 	/*#####################################################################################*/
-	namespace lib
-	{
-		//空指针能够转换成字符串指针 整形也是能够转换为字符指针
-		template<typename T, typename CharT> struct _2CxxPtr 
-		{ cl_const_bool value = !IsNull_v<T> && !IsInt_v<T> && (_To_v<T, CharT*> || _To_v<T, const CharT*>); };
-		template<typename T, typename CharT> cl_const_bool _2CxxPtr_v = _2CxxPtr<T, CharT>::value;
-	}
-
-	template<typename T> struct ToC8Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc8> || lib::_2CxxPtr_v<RawType_t<T>, ac8>; };
-	template<typename T> struct ToC16Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc16> || lib::_2CxxPtr_v<RawType_t<T>, wchar_t>; };
-	template<typename T> cl_const_bool ToC8Ptr_v = ToC8Ptr<T>::value;
-	template<typename T> cl_const_bool ToC16Ptr_v = ToC16Ptr<T>::value;
-
 	template<typename T> concept C8Type = IsC8_v<T>;
 	template<typename T> concept C16Type = IsC16_v<T>;
+	template<typename T> concept C32Type = IsC32_v<T>;
 	template<typename T> concept CharType = IsChar_v<T>;
-
-	template<typename T> concept ToC8PtrType = ToC8Ptr_v<T>;
-	template<typename T> concept ToC16PtrType = ToC16Ptr_v<T>;
 
 	template<typename T> concept BoolType = IsBool_v<T>;
 	template<typename T> concept FloatType = IsFloat_v<T>;
 	template<typename T> concept UintType = IsUint_v<T>;
 	template<typename T> concept SintType = IsSint_v<T>;
 	template<typename T> concept IntType = IsInt_v<T>;
+
+	namespace lib
+	{
+		//空指针能够转换成字符串指针 整形也是能够转换为字符指针
+		template<typename T, typename CharT> struct _2CxxPtr 
+		{ cl_const_bool value = !IsNull_v<T> && !IsInt_v<T> && (_TypeConvert_v<T, CharT*> || _TypeConvert_v<T, const CharT*>); };
+		template<typename T, typename CharT> cl_const_bool _2CxxPtr_v = _2CxxPtr<T, CharT>::value;
+
+		template<typename T> struct _ToC8Ptr { cl_const_bool value = lib::_2CxxPtr_v<T, uc8> || lib::_2CxxPtr_v<T, ac8>; };
+		template<typename T> struct _ToC16Ptr { cl_const_bool value = lib::_2CxxPtr_v<T, uc16> || lib::_2CxxPtr_v<T, wchar>; };
+	}
+
+	template<typename T> struct ToC8Ptr { cl_const_bool value = lib::_ToC8Ptr<RawType_t<T>>::value; };
+	template<typename T> struct ToC16Ptr { cl_const_bool value = lib::_ToC16Ptr<RawType_t<T>>::value; };
+	template<typename T> struct ToC32Ptr { cl_const_bool value = lib::_2CxxPtr_v<RawType_t<T>, uc32>; };
+	template<typename T> cl_const_bool ToC8Ptr_v = ToC8Ptr<T>::value;
+	template<typename T> cl_const_bool ToC16Ptr_v = ToC16Ptr<T>::value;
+	template<typename T> cl_const_bool ToC32Ptr_v = ToC32Ptr<T>::value;
+	  
+	template<typename T> concept ToC8PtrType = ToC8Ptr_v<T>;
+	template<typename T> concept ToC16PtrType = ToC16Ptr_v<T>;
+	template<typename T> concept ToC32PtrType = ToC32Ptr_v<T>;
+
+	template<typename T> concept ToCharPtrType = ToC8Ptr_v<T> || ToC16Ptr_v<T> || ToC32Ptr_v<T>;
 	 
 	template<typename T> concept ClassMemFunType = IsClassMemFun_v<T>;
 	template<typename T> concept PtrType = IsPtr_v<T>;

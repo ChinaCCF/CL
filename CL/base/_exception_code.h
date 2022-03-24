@@ -6,7 +6,10 @@ namespace cl
 	enum class ExceptionCode
 	{
 		Debug,
-		Buffer_OverFlow,
+		Memory_Alloc_Fail,
+		Buffer_OverRead,
+		Buffer_OverWrite,
+
 		Float_Format_Error,
 		Convert_Error,
 	};

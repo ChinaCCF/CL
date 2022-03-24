@@ -25,7 +25,14 @@ namespace cl
 	static inline sv64 mul(sv32 x, sv32 y) { return sv64(x) * sv64(y); }
 	static inline fv64 mul(fv32 x, fv32 y) { return fv64(x) * fv64(y); }
 
-	template<typename T> static inline void swap(T& a, T& b) { T tmp = std::move(a); a = std::move(b); b = std::move(tmp); }
+	template<typename T> static inline void swap(T& a, T& b)
+	{ 
+		T tmp = std::move(a); a = std::move(b); b = std::move(tmp);
+	}
+	template<typename T> static inline void swap(T* p, uv32 i, uv32 j) 
+	{
+		T tmp = std::move(p[i]); p[i] = std::move(p[j]); p[j] = std::move(tmp);
+	}
 
 	/*############################################################################################*/
 	//memory size
@@ -125,14 +132,14 @@ namespace cl
 	static inline sv32 align_power2(sv32 v) { return (sv32)align_power2((uv32)v); }
 	static inline sv64 align_power2(sv64 v) { return (sv64)align_power2((uv64)v); }
 
-	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-	static inline T align(T val, T align) { T n = align - 1; return (val + n) & ~n; }
+	template<typename T, typename T2> requires (cl::IsInt_v<T> || cl::IsChar_v<T>) && (cl::IsInt_v<T2> || cl::IsChar_v<T2>)
+	static inline T align(T val, T2 align) { T n = align - 1; return (val + n) & ~n; }
 	//求2的几多次方才能大于或等于某个数, 例如log2(8) = 3
 	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
 	static inline sv32 log2(T val) { sv32 index = 0; while(val >>= 1) index++; return index; }
 
 	namespace lib
-	{//togood 后面要修改为 Google 的 cityhash 
+	{//todo 后面要修改为 Google 的 cityhash 
 		template<FloatType T> static inline uv32 _hash(T val) { auto f = (uv32*)&val; return f[0]; };
 
 		template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>

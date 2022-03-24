@@ -6,29 +6,57 @@
 
 namespace cl
 {
+	//所有内存申请操作, 若失败, 抛出异常
 	/*#####################################################################################*/
 	//一些基础的内存函数
 	/*#####################################################################################*/
 	namespace mem
 	{
-		static inline void zero(_in void* _p, _in uv32 size)
+		static inline void zero(void* _p, uv32 size)
 		{
 			auto p = (uv8*)_p;
 			while (size--)  *p++ = 0;
 		}
 
-		static inline void copy(_out void* _dst, _in const void* _src, _in uv32 size)
+		static inline void copy(_out void* _dst, const void* _src, uv32 size)
 		{
 			auto dst = (uv8*)_dst; auto src = (uv8*)_src;
 			for (uv32 i = 0; i < size; i++) dst[i] = src[i]; 
 		}
 		  
-		static inline void rshift(_in_out void* _buf, uv32 buf_size, uv32 shift_size)
+		static inline void rshift(_out void* _buf, uv32 buf_size, uv32 shift_size)
 		{
 			auto buf = (uv8*)_buf; buf += buf_size - 1;
 			for (sv32 i = 0; i < (sv32)shift_size; i++)
 				buf[shift_size - i] = buf[-i];
 		}
+
+		/*#####################################################################################*/
+		//hex and unhex
+		/*#####################################################################################*/
+		//返回字符串长度, 失败返回0 
+		template<CharType T>
+		static inline uv32 hex(_out T* buf, uv32 size, const void* data, uv32 len)
+		{
+			if (size < (len << 1)) return 0;
+
+			auto src = (const uv8*)data;
+			auto dst = buf;
+
+			static const uc8* arr = "0123456789ABCDEF";
+			while (len--)
+			{
+				uv8 val = *src++;
+				*dst++ = arr[(val & 0xF0) >> 4];
+				*dst++ = arr[val & 0xF];
+			}
+			*dst = 0;
+			return len << 1;
+		}
+
+		//成功返回数据大小, 否则返回0
+		uv32 unhex(_out void* data, uv32 size, const uc8* str, uv32 len);
+		uv32 unhex(_out void* data, uv32 size, const uc16* str, uv32 len);
 	}
 
 	/*#####################################################################################*/
@@ -43,55 +71,85 @@ namespace cl
 	};
 	struct MemAllocator
 	{
-		uv8* alloc(_in uvt size) { return (uv8*)malloc(size); }
-		void free(_in void* p) { ::free(p); }
+		uv8* alloc(uvt size)
+		{
+			auto p = (uv8*)malloc(size);
+			if (p == nullptr)
+				CL_Throw(ExceptionCode::Memory_Alloc_Fail, 0, "");
+			return p;
+		}
+		void free(void* p) { ::free(p); }
 	};
 
+	template<class MA, typename T, typename ... Args>
+	T* alloc_obj(Args&& ... args)
+	{
+		auto p = (T*)MA().alloc(sizeof(T));
+		new(p)T(std::forward<Args>(args)...);
+		return p;
+	}
+	template<class MA, typename T>
+	void free_obj(T*& p)
+	{
+		if (p == nullptr) return;
+		p->~T();
+		MA().free(p);
+		p = nullptr;
+	}
+
+	template<class MA, typename T>
+	T* alloc_objs(uv32 n)
+	{
+		auto p = (T*)MA().alloc(sizeof(T) * n);
+		for (uv32 i = 0; i < n; i++)
+			new(p + i)T();
+		return p;
+	}
+	template<class MA, typename T>
+	void free_objs(T*& p, uv32 n)
+	{
+		if (p == nullptr) return; 
+		for (uv32 i = 0; i < n; i++)
+			(p + i)->~T();
+		MA().free(p);
+		p = nullptr;
+	}
 	/*#####################################################################################*/
 	//默认对象申请对象
 	/*#####################################################################################*/
-	template<template<typename> class Allocator, typename Obj> 
-	concept ObjAllocType = requires(Allocator<Obj> a, Obj * p)
+	/*template<template<typename> class Allocator, typename Obj> 
+	concept ObjAllocType = requires(Allocator<Obj> a, Obj* p)
 	{
 		a.alloc();
 		a.free(p);
+		a.alloc_n(2);
+		a.free_n(p, 3);
 			requires IsSame_v<decltype(a.alloc()), Obj*>;
+			requires IsSame_v<decltype(a.alloc_n(2)), Obj*>;
 	};
 
 	template<typename T>
 	struct ObjAllocator
 	{
 		T* alloc() { return new T(); }
-		void free(_in T* p) { delete p; }
-	};
+		void free( T* p) { delete p; }
 
-	/*#####################################################################################*/
-	//hex and unhex
-	/*#####################################################################################*/
-	//返回字符串长度, 失败返回0 
-	template<CharType T>
-	static inline uv32 hex_mem(_out T* buf, _in uv32 size, _in const void* data, _in uv32 len)
-	{
-		if (size < (len << 1)) return 0;
-
-		auto src = (const uv8*)data;
-		auto dst = buf;
-
-		static const uc8* arr = "0123456789ABCDEF";
-		while (len--)
+		T* alloc_n(uv32 cnt) 
 		{
-			uv8 val = *src++;
-			*dst++ = arr[(val & 0xF0) >> 4];
-			*dst++ = arr[val & 0xF];
+			auto p = (T*)malloc(sizeof(T) * cnt);
+			for (uv32 i = 0; i < cnt; i++)
+				new(p + i)T();
+			return p;
 		}
-		*dst = 0;
-		return len << 1;
-	}
 
-	//成功返回数据大小, 否则返回0
-	uv32 unhex_mem(_out void* data, _in uv32 size, _in const uc8* str, _in uv32 len);
-	uv32 unhex_mem(_out void* data, _in uv32 size, _in const uc16* str, _in uv32 len);
-
+		void free_n( T* p, uv32 cnt)
+		{
+			for (uv32 i = 0; i < cnt; i++)
+				(p + i)->~T();
+			::free(p);
+		}
+	};*/
+	 
 	/*#####################################################################################*/
 	//内存 大小端 工具类
 	/*#####################################################################################*/
@@ -140,41 +198,52 @@ namespace cl
 		bool is_big() { return !is_little(); }
 	};
 	/*#####################################################################################*/
-	//MemBuf
+	//Buf
 	/*#####################################################################################*/
-	template<typename T, MemAllocType MA = MemAllocator>
+	template<typename T, class MA = MemAllocator, uv32 Extra_N = 0> 
 	class MemBuf
 	{
-	public:
-		uv32 size_ = 0;//可以存储 size 个 T 元素
-		uv32 len_ = 0;//当前存储了 len 个 T 元素
+		uv32 size_ = 0;//可以存储 size 个 T 元素 
 		T* buf_ = nullptr;
-
-		~MemBuf() { clear(); }
-
-		void clear() { if (buf_) MA().free(buf_); }
-
-		bool need(_in uv32 len)
+	public: 
+		MemBuf() {} 
+		MemBuf(MemBuf&& buf) : size_(buf.size_), buf_(buf.buf_)
 		{
-			len += len_;
-			if (len < size_) return true; 
-
-			auto byte_size = align_power2(len * sizeof(T));
-			size_ = byte_size / sizeof(T);
-
-			auto p = (T*)MA().alloc(byte_size);
-			if (p == nullptr) return false;
-			 
-			if (buf_)
-			{
-				mem::copy(p, buf_, len_ * sizeof(T));
-				MA().free(buf_);
-			}
-
-			buf_ = p;
-			return true;
+			buf.buf_ = nullptr;
+			buf.size_ = 0; 
 		}
+		 
+		~MemBuf() { free(); }
+
+		uv32 size() const { return size_; }
+		T* data() const { return buf_; }
+		 
+		void free() { if (buf_) { MA().free(buf_); buf_ = nullptr; } }
+		  
+		void alloc(uv32 size) 
+		{
+			buf_ = (T*)MA().alloc(sizeof(T) * (size + Extra_N));
+			size_ = size; 
+		}
+		 
+		void operator=(MemBuf&& buf)
+		{
+			free();
+			size_ = buf.size_;
+			buf_ = buf.buf_; 
+			buf.size_ = 0;
+			buf.buf_ = nullptr;
+		}
+
+		void copy(uv32 self_offset, const T* buf, uv32 offset, uv32 cnt)
+		{
+			auto dst = buf_ + self_offset;
+			auto src = buf + offset;
+			for (uv32 i = 0; i < cnt; i++)
+				dst[i] = src[i];
+		} 
 	};
+	 
 }
 
 #endif//__cl_base_mem__ 

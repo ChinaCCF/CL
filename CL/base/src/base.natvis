@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="cl::PtrCnt&lt;*,*&gt;">
+		<DisplayString>PtrCnt  :  {iholder_-&gt;ptr_}</DisplayString>
+		<Expand>
+			<Item Name="obj">iholder_-&gt;ptr_</Item>
+			<Item Name="cnt">iholder_-&gt;cnt_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::lib::_StrView&lt;*&gt;">
+		<DisplayString>StrView  :  {str_}</DisplayString>
+		<Expand>
+			<Item Name="str">str_</Item>
+			<Item Name="len">len_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::lib::_NString&lt;*,*,0&gt;">
+		<DisplayString>String  : {buf_.buf_}</DisplayString>
+		<Expand>
+			<Item Name="str">buf_.buf_</Item>
+			<Item Name="len">len_</Item>
+			<Item Name="size">buf_.size_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::lib::_NString&lt;*,*,*&gt;">
+		<DisplayString>StrBuf  :  {str_}</DisplayString>
+		<Expand>
+			<Item Name="str">str_</Item>
+			<Item Name="len">len_</Item>
+		</Expand>
+	</Type> 
+
+</AutoVisualizer>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<Type Name="cl::lib::ArrayIt&lt;*&gt;">
+		<DisplayString>ArrayIt  {arr_[index_]}</DisplayString>
+		<Expand>
+			<Item Name="index">index_</Item>
+			<Item Name="value">arr_[index_]</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::Stack&lt;*,*&gt;">
+		<DisplayString>Stack  cnt: {cnt_}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>cnt_</Size>
+				<ValuePointer>arr_</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::Array&lt;*,*&gt;">
+		<DisplayString>Array  cnt: {cnt_}  |  size: {buf_.size_}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>cnt_</Size>
+				<ValuePointer>buf_.buf_</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::lib::ListIt&lt;*&gt;">
+		<DisplayString>ListIt  :  {node_->val_}</DisplayString>
+		<Expand>
+			<Item Name="Value">node_->val_</Item>
+			<Item Name="Node">node_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::List&lt;*,*&gt;">
+		<DisplayString>List  cnt  :  {cnt_}</DisplayString>
+		<Expand>
+			<LinkedListItems>
+				<Size>cnt_</Size>
+				<HeadPointer>head_.next_</HeadPointer>
+				<NextPointer>next_</NextPointer>
+				<ValueNode>val_</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+
+
+	<Type Name="cl::Heap&lt;*,*,*&gt;">
+		<DisplayString>heap cnt: {cnt_}  |  size: {arr_.size_}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>cnt_</Size>
+				<ValuePointer>arr_.buf_</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+
+	<Type Name="cl::lib::HashMapNode&lt;*,*&gt;">
+		<DisplayString>first: {first} | second: {second}</DisplayString>
+		<Expand>
+			<Item Name="first">first</Item>
+			<Item Name="second">second</Item>
+			<Item Name="next">next_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::HashMap&lt;*,*,*&gt;::It">
+		<DisplayString>first : {node_->first},  second : {node_->second}</DisplayString>
+		<Expand>
+			<Item Name="first">node_->first</Item>
+			<Item Name="second">node_->second</Item>
+			<Item Name="index">index_</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::HashMap&lt;*,*,*&gt;">
+		<DisplayString>map cnt: {cnt_}</DisplayString>
+		<Expand>
+			<CustomListItems MaxItemsPerView="100">
+				<Variable Name="arr" InitialValue="buf_.buf_"/>
+				<Variable Name="arr_size" InitialValue="buf_.size_"/>
+				<Variable Name="index" InitialValue="0"/>
+				<Variable Name="p" InitialValue="arr[0]"/>
+				<Size>cnt_</Size>
+				<Loop>
+					<If Condition="p == nullptr">
+						<Exec>index++</Exec>
+						<Break Condition="index &gt;= arr_size"/>
+						<Exec>p = arr[index]</Exec>
+					</If>
+					<If Condition="p != nullptr">
+						<Item>*p</Item>
+						<Exec>p = p-&gt;next_</Exec>
+					</If>
+				</Loop>
+			</CustomListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="cl::RBTree&lt;*,*,*&gt;">
+		<DisplayString>tree cnt: {cnt_}</DisplayString>
+		<Expand>
+			<TreeItems>
+				<Size>cnt_</Size>
+				<HeadPointer>root_</HeadPointer>
+				<LeftPointer>left_</LeftPointer>
+				<RightPointer>right_</RightPointer>
+				<ValueNode>pair_</ValueNode>
+			</TreeItems>
+		</Expand>
+	</Type>
+	<!--
+  <Type Name="cl::_MixObj&lt;*,*&gt;">
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Map">{*val_.map_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::List">{*val_.list_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Str">String : {*val_.str_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Int">Int : {val_.sv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Float">Float : {val_.fv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Bool">Bool : {val_.bv_} </DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::None">None</DisplayString>
+    <DisplayString Condition="val_type_ == cl::detail::MixObjType::Null">Null</DisplayString>
+    <Expand>  
+      <CustomListItems MaxItemsPerView="100" Condition="val_type_ == cl::detail::MixObjType::Map">
+        <Variable Name="arr" InitialValue="val_.map_->hash_arr_"/>
+        <Variable Name="arr_size" InitialValue="val_.map_->hash_arr_size_"/>
+
+        <Variable Name="index" InitialValue="0"/>
+        <Variable Name="p" InitialValue="arr[0]"/> 
+        <Size>val_.map_->cnt_</Size>
+        <Loop>
+          <If Condition="p == nullptr">
+            <Exec>index++</Exec>
+            <Break Condition="index &gt;= arr_size"/>
+            <Exec>p = arr[index]</Exec>
+          </If>
+          <If Condition="p != nullptr">
+            <Item>*p</Item>
+            <Exec>p = p-&gt;next_</Exec>
+          </If>
+        </Loop>
+      </CustomListItems>
+
+      <LinkedListItems Condition="val_type_ == cl::detail::MixObjType::List">
+        <Size>val_.list_->cnt_</Size>
+        <HeadPointer>val_.list_->head_.next_</HeadPointer>
+        <NextPointer>next_</NextPointer>
+        <ValueNode>val_</ValueNode>
+      </LinkedListItems>
+       
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Str">*val_.str_</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Int">val_.sv_</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Float">val_.fv_</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Bool">val_.bv_</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::None">0</Item>
+      <Item Name="val" Condition="val_type_ == cl::detail::MixObjType::Null">0</Item>
+    </Expand>
+  </Type>
+  -->
+</AutoVisualizer>

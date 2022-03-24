@@ -15,6 +15,7 @@
     <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
+    <ClInclude Include="base\10time.h" />
     <ClInclude Include="base\1cfg.h" />
     <ClInclude Include="base\2type.h" />
     <ClInclude Include="base\3type_traits.h" />
@@ -25,12 +26,23 @@
     <ClInclude Include="base\8cstr.h" />
     <ClInclude Include="base\9str.h" />
     <ClInclude Include="base\_exception_code.h" />
+    <ClInclude Include="set\1base.h" />
+    <ClInclude Include="set\2arr.h" />
+    <ClInclude Include="set\3list.h" />
+    <ClInclude Include="set\4heap.h" />
+    <ClInclude Include="set\5hash_map.h" />
+    <ClInclude Include="set\6rbtree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base\src\10time.cpp" />
     <ClCompile Include="base\src\2type.cpp" />
     <ClCompile Include="base\src\5mem.cpp" />
     <ClCompile Include="base\src\8cstr.cpp" />
     <ClCompile Include="note.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="base\src\base.natvis" />
+    <Natvis Include="set\set.natvis" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\3setting.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

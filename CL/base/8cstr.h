@@ -16,7 +16,7 @@ namespace cl
 	{ 
 		template<CharType T>
 		static inline uv32 length(const T* str) { return (uv32)::strlen(str); }
-		static inline uv32 length(const uc16* str) { return (uv32)::wcslen((wchar_t*)str); }
+		static inline uv32 length(const uc16* str) { return (uv32)::wcslen((wchar*)str); }
 
 		/*############################################################################################*/
 		//rshift
@@ -46,13 +46,13 @@ namespace cl
 			while (--size && *src) { *dst++ = *src++; }
 			*dst = 0;
 			[[unlikely]]
-			if (size == 0) CL_Throw(ExceptionCode::Buffer_OverFlow, 0, "");
+			if (size == 0) CL_Throw(ExceptionCode::Buffer_OverWrite, 0, "");
 		}
 
 		template<CharType C1, CharType C2>
 		static inline void copy(C1* dst, uv32 size, const C2* src, uv32 len)
 		{
-			if (len >= size) CL_Throw(ExceptionCode::Buffer_OverFlow, 0, "");
+			if (len >= size) CL_Throw(ExceptionCode::Buffer_OverWrite, 0, "");
 			for (uv32 i = 0; i < len; i++) dst[i] = src[i];
 			dst[len] = 0; 
 		}
@@ -215,7 +215,8 @@ namespace cl
 
 		namespace lib
 		{
-			//转换无符号整数
+			//转换无符号整数, 返回转换的字符串长度
+			//失败 0 个字符转换
 			template<CharType T, UintType V>
 			static inline uv32 _from_val(T* buf, uv32 size, V val)
 			{
@@ -237,10 +238,13 @@ namespace cl
 				return len;
 			}
 
-			FloatStrInfo<uc8> _from_val(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
-			FloatStrInfo<uc16> _from_val(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
+			//转换失败 number_cnt_ == 0
+			FloatStrInfo<uc8> _from_fval(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
+			//转换失败 number_cnt_ == 0
+			FloatStrInfo<uc16> _from_fval(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
 		}
 
+		//
 		template<CharType T, CharType C>
 		static inline uv32 from_val(T* buf, uv32 size, C val)
 		{
@@ -292,7 +296,7 @@ namespace cl
 				size--;
 				len++;
 			}
-			auto ret = lib::_from_val((TC*)buf, size, (fv64)val, fraction);
+			auto ret = lib::_from_fval((TC*)buf, size, (fv64)val, fraction);
 			if (ret.number_cnt_ != 0) return ret.number_cnt_ + 1 + ret.fraction_cnt_ + len;
 			return 0;
 		}

@@ -41,6 +41,27 @@
     <ClInclude Include="base\_exception_code.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="base\10time.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\1base.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\2arr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\3list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\4heap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\5hash_map.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="set\6rbtree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\src\5mem.cpp">
@@ -55,5 +76,12 @@
     <ClCompile Include="note.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="base\src\10time.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="set\set.natvis" />
+    <Natvis Include="base\src\base.natvis" />
   </ItemGroup>
 </Project>

@@ -20,9 +20,11 @@ typedef int64_t  sv64;
 typedef float    fv32;
 typedef double   fv64;
 
+typedef wchar_t   wchar;
 typedef char      ac8;  //ascii
-typedef char8_t   uc8;  //utf8 
-typedef char16_t  uc16; //在Windows上char16_t == wchar_t 
+typedef char8_t   uc8;  //utf8 prefix : u8
+typedef char16_t  uc16; //在Windows上char16_t == wchar_t  prefix : u
+typedef char32_t  uc32; //prefix : U
 
 #define CL_TXT8(x)  u8##x
 #define CL_TXT16(x) u##x
@@ -116,7 +118,7 @@ namespace cl
 		uc16 buf_[512];
 	public:
 		Exception() { buf_[0] = 0; }
-		Exception(_in const uc16* file, _in uv32 line, _in uv16 main_code, _in uv16 sub_code, _in const uc16* msg);
+		Exception( const uc16* file,  uv32 line,  uv16 main_code,  uv16 sub_code,  const uc16* msg);
 
 		Exception(const Exception& e) = delete;
 		Exception& operator=(const Exception& e) = delete;

@@ -12,7 +12,7 @@ namespace cl
 	/*############################################################################################*/
 	//指针对象, 用来保存指针
 	/*############################################################################################*/
-	template<typename T, template<typename R> class Allocator = ObjAllocator> requires ObjAllocType<Allocator, T>
+	template<typename T, class MA = MemAllocator> requires MemAllocType<MA>
 	class Ptr : public NoCopyObj
 	{
 	public:
@@ -23,7 +23,7 @@ namespace cl
 		Ptr(T* p) : ptr_(p) {}
 		Ptr(Ptr&& pt) noexcept : ptr_(pt.ptr_) { pt.ptr_ = nullptr; }
 
-		~Ptr() { if(ptr_) Allocator<T>().free(ptr_); }
+		~Ptr() { free_obj<MA>(ptr_); }
 
 		bool valid() { return ptr_ != nullptr; }
 
@@ -70,26 +70,22 @@ namespace cl
 			virtual ~HoldObj() {}
 		};
 
-		template<typename T, template<typename> class Allocator = ObjAllocator> requires ObjAllocType<Allocator, T>
+		template<typename T, class MA = MemAllocator> requires MemAllocType<MA>
 		class HoldPtr : public iHolder<T>
 		{
 		public:
 			HoldPtr() {}
-			virtual ~HoldPtr()
-			{
-				if(iHolder<T>::ptr_) Allocator<T>().free(iHolder<T>::ptr_);
-			}
+			virtual ~HoldPtr() { free_obj<MA>(iHolder<T>::ptr_); }
 		};
 	}
 
 	//对象的申请器, 和容器的申请器可以不一致
-	template<typename T,template<typename> class Allocator = ObjAllocator>
-		requires ObjAllocType<Allocator, lib::iHolder<T>> && ObjAllocType<Allocator, T>
+	template<typename T, class MA = MemAllocator> requires MemAllocType<MA>
 	class PtrCnt
 	{
 	public:
 		using iHolder = lib::iHolder<T>;
-		using HoldPtr = lib::HoldPtr<T, Allocator>;
+		using HoldPtr = lib::HoldPtr<T, MA>;
 	private:
 		iHolder* iholder_ = nullptr;
 
@@ -105,9 +101,10 @@ namespace cl
 	public:
 		PtrCnt() {}
 		PtrCnt(const std::nullptr_t&) {}
+		//当赋值指针时候, 默认指针的 Allocator 和 PtrCnt 的 Allocator 是一致的
 		PtrCnt(T* p)
 		{
-			iholder_ = Allocator<HoldPtr>().alloc();
+			iholder_ = alloc_obj<MA, HoldPtr>();
 			iholder_->ptr_ = p;
 			iholder_->cnt_ = 1;
 		}
@@ -116,10 +113,10 @@ namespace cl
 
 
 		template<typename T2> 
-		PtrCnt(const PtrCnt<T2, Allocator>& p) { retain(p.iholder_); }
+		PtrCnt(const PtrCnt<T2, MA>& p) { retain(p.iholder_); }
 
 		template<typename T2> 
-		PtrCnt& operator=(const PtrCnt<T2, Allocator>& p) { release(); retain(p.iholder_); return *this; }
+		PtrCnt& operator=(const PtrCnt<T2, MA>& p) { release(); retain(p.iholder_); return *this; }
 
 		~PtrCnt() { release(); }
 
@@ -128,8 +125,7 @@ namespace cl
 			if(iholder_)
 			{
 				--iholder_->cnt_;
-				if(iholder_->cnt_ == 0) Allocator<iHolder>().free(iholder_);
-				iholder_ = nullptr;
+				if (iholder_->cnt_ == 0) free_obj<MA>(iholder_);
 			}
 		}
 
@@ -151,7 +147,7 @@ namespace cl
 		bool operator==(T* p) const { return iholder_->ptr_ == p; }
 		bool operator!=(T* p) const { return iholder_->ptr_ != p; }
 
-		static inline auto make() { return PtrCnt(Allocator<lib::HoldObj<T>>().alloc()); }
+		static inline auto make() { return PtrCnt(alloc_obj<MA, lib::HoldObj<T>>()); }
 	};
 }
 

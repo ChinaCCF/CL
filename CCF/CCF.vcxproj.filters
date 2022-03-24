@@ -14,27 +14,45 @@
     <ClCompile Include="CCF.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="test_cl\set\src\list.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cl\set\src\arr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cl\set\src\heap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cl\set\src\map.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_cl\set\src\tree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="test_cl\6ptr.h">
+    <ClInclude Include="test_cl\base\6ptr.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\5mem.h">
+    <ClInclude Include="test_cl\base\5mem.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\4val.h">
+    <ClInclude Include="test_cl\base\4val.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\8cstr.h">
+    <ClInclude Include="test_cl\base\8cstr.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\7call.h">
+    <ClInclude Include="test_cl\base\7call.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\9str.h">
+    <ClInclude Include="test_cl\base\9str.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="test_cl\3type_traits.h">
+    <ClInclude Include="test_cl\base\3type_traits.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_cl\set\set.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

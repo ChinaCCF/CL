@@ -81,11 +81,11 @@ namespace cl
 				return ret;
 			}
 			 
-			FloatStrInfo<uc8> _from_val(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
+			FloatStrInfo<uc8> _from_fval(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
 			{
 				return _do_from_val(buf, size, fval, fraction_cnt);
 			}
-			FloatStrInfo<uc16> _from_val(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
+			FloatStrInfo<uc16> _from_fval(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
 			{
 				return _do_from_val(buf, size, fval, fraction_cnt);
 			}
