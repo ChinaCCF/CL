@@ -89,12 +89,11 @@ namespace cl
 		return p;
 	}
 	template<class MA, typename T>
-	cl_si void free_obj(T*& p)
+	cl_si void free_obj(T* p)
 	{
 		if (p == nullptr) return;
 		p->~T();
 		MA().free(p);
-		p = nullptr;
 	}
 
 	template<class MA, typename T>

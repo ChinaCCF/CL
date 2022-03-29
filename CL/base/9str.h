@@ -347,7 +347,7 @@ namespace cl
 
 			template<CharType C> uv32 copy_to(C* buf, uv32 size, uv32 start) const { return copy_to(buf, size, start, length()); }
 		private:
-			sv32 _find_ret(T* p) { if (p == nullptr) return -1; return sv32(p - data()); }
+			sv32 _find_ret(T* p) const { if (p == nullptr) return -1; return sv32(p - data()); }
 		public:
 			template<CharType C> sv32 find(C c) const { return _find_ret(cstr::find(data(), c)); }
 			template<CharType C> sv32 findr(C c) const { return _find_ret(cstr::findr(data(), c)); }

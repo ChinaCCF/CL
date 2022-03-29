@@ -9,6 +9,6 @@ namespace test
 		cl::Print print;
 		print << 123;
 		print << "中文";
-		print << L"中国"; 
+		print << L"中国\n"; 
 	}
 }

@@ -28,41 +28,6 @@ namespace cl
 
 	namespace lib
 	{
-		//struct IMAGEHLP_MODULE64_V2
-		//{
-		//	DWORD    SizeOfStruct;           // set convert sizeof(IMAGEHLP_MODULE64)
-		//	DWORD64  BaseOfImage;            // base load address of module
-		//	DWORD    ImageSize;              // virtual size of the loaded module
-		//	DWORD    TimeDateStamp;          // date/time stamp from pe header
-		//	DWORD    CheckSum;               // checksum from the pe header
-		//	DWORD    NumSyms;                // number of symbols in the symbol table
-		//	SYM_TYPE SymType;                // type of symbols loaded
-		//	CHAR     ModuleName[32];         // module name
-		//	CHAR     ImageName[256];         // image name
-		//	CHAR     LoadedImageName[256];   // symbol file name
-		//};
-
-		//struct IMAGEHLP_MODULE64_V3 : public IMAGEHLP_MODULE64_V2
-		//{
-		//	CHAR     LoadedPdbName[256];     // pdb file name
-		//	DWORD    CVSig;                  // Signature of the CV record in the debug directories
-		//	CHAR     CVData[MAX_PATH * 3];   // Contents of the CV record
-		//	DWORD    PdbSig;                 // Signature of PDB
-		//	GUID     PdbSig70;               // Signature of PDB (VC 7 and up)
-		//	DWORD    PdbAge;                 // DBI age of pdb
-		//	BOOL     PdbUnmatched;           // loaded an unmatched pdb
-		//	BOOL     DbgUnmatched;           // loaded an unmatched dbg
-		//	BOOL     LineNumbers;            // we have line number information
-		//	BOOL     GlobalSymbols;          // we have internal symbol information
-		//	BOOL     TypeInfo;               // we have type information
-		//									 // new elements: 17-Dec-2003
-		//	BOOL     SourceIndexed;          // pdb supports source server
-		//	BOOL     Publics;                // contains public symbols
-		//									 // new element: 15-Jul-2009
-		//	DWORD    MachineType;            // IMAGE_FILE_MACHINE_XXX from ntimage.h and winnt.h
-		//	DWORD    Reserved;               // Padding - don't remove.
-		//};
-
 		static cl::SpinLock g_locker;
 
 		//初始化符号路径(即*.pdb文件的路径)
@@ -169,7 +134,7 @@ namespace cl
 
 				SymLoadModuleExW(proc, 0, file, name, (DWORD64)mi.lpBaseOfDll, mi.SizeOfImage, nullptr, 0);
 			}
-		} 
+		}
 
 		class Symbol
 		{
@@ -210,7 +175,7 @@ namespace cl
 			}
 
 			//根据addr来填充SymbolObj
-			//本函数非线程安全, 所以需要加锁
+			//本函数非线程安全, 所以需要加锁 
 			cl::StringW get_fun(void* addr)
 			{
 				cl::MemBuf<uv8> buf;
@@ -234,9 +199,9 @@ namespace cl
 				name[len] = 0;
 				return name;
 			}
-
 			//根据addr来填充SymbolObj
-			//本函数非线程安全, 所以需要加锁
+			//本函数非线程安全, 所以需要加锁 
+
 			cl::StringW get_file_and_line(void* addr, uv32& line)
 			{
 				line = 0;
@@ -249,10 +214,9 @@ namespace cl
 					LockGuard(g_locker);
 					DWORD offset;
 					if (!SymGetLineFromAddrW64(proc_, (DWORD64)addr, &offset, &info)) return L"";
-
-					line = info.LineNumber;
-					return info.FileName;
 				}
+				line = info.LineNumber;
+				return info.FileName;
 			}
 
 		};
@@ -272,9 +236,12 @@ namespace cl
 
 	stack_api StackInfo* stack_alloc()
 	{
-		auto stack = (StackInfo*)VirtualAlloc(nullptr, 8192, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+		auto stack = (StackInfo*)VirtualAlloc(nullptr, 4096, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 		if (stack == nullptr) return nullptr;
-		stack->size_ = CaptureStackBackTrace(0, 8192 / sizeof(void*), (void**)stack->buf_, nullptr);
+		stack->size_ = CaptureStackBackTrace(1, //跳过当前函数
+											 4096 / sizeof(void*), //最大数目
+											 (void**)stack->buf_,
+											 nullptr);
 		return stack;
 	}
 	stack_api void stack_free(StackInfo* stack)
@@ -282,20 +249,35 @@ namespace cl
 		VirtualFree(stack, 0, MEM_RELEASE);
 	}
 
-	stack_api bool frame_info(StackInfo* stack, uv32 index, FrameInfo* frame)
+	class FrameInfoImp : public FrameInfo
 	{
-		if (index >= stack->size_) return false;
+	public:
+		StringW _fun_;
+		StringW _file_;
+	};
+
+	stack_api FrameInfo* frame_alloc(StackInfo* stack, uv32 index)
+	{
+		if (index >= stack->size_) return nullptr;
+
 		auto addrs = (void**)stack->buf_;
 		auto sym = (lib::Symbol*)lib::g_symbol_buf;
 		auto addr = addrs[index];
-		{ 
-			//frame->fun_ = sym->get_fun(addr);
-			//frame->file_ = sym->get_file_and_line(addr, frame->line_);
-			sym->get_fun(addr);
-			sym->get_file_and_line(addr, frame->line_);
-		}
-		return frame->fun_.length() && frame->file_.length();
+
+		auto info = alloc_obj<MemAllocator, FrameInfoImp>();
+		info->_file_ = sym->get_file_and_line(addr, info->line_);
+		info->_fun_ = sym->get_fun(addr);
+
+		info->file_ = (wchar*)info->_file_.data();
+		info->fun_ = (wchar*)info->_fun_.data();
+
+		return info;
 	}
+	stack_api void frame_free(FrameInfo* frame)
+	{
+		free_obj<MemAllocator, FrameInfoImp>((FrameInfoImp*)frame);
+	}
+
 }
 
 

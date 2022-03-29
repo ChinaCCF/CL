@@ -22,12 +22,16 @@
 void fun2()
 {
     auto stack = cl::stack_alloc();
+
+	cl::stack_init(); 
     for (uv32 i = 0; i < stack->size_; i++)
     {
-        cl::FrameInfo info;
-        cl::frame_info(stack, i, &info);
-        printf("%d\n", info.line_);
+        cl::FrameInfo* info = cl::frame_alloc(stack, i);
+        cl::Print() << info->file_ << '[' << info->line_ << ']' << info->fun_ << '\n';
+        cl::frame_free(info);
     }
+	cl::stack_uninit();
+
     cl::stack_free(stack);
 }
 void fun1()
@@ -37,31 +41,29 @@ void fun1()
 
 
 int main()
-{       
-    test::test_type_traits();
-    test::test_val();
-    test::test_mem();
-    test::test_ptr();
-    test::test_cstr();
-    test::test_call();
-    test::test_str();
-    test::test_time();
+{
+	test::test_type_traits();
+	test::test_val();
+	test::test_mem();
+	test::test_ptr();
+	test::test_cstr();
+	test::test_call();
+	test::test_str();
+	test::test_time();
 
-    test::test_arr();
-    test::test_list();
-    test::test_heap();
-    test::test_map();
-    test::test_rbtree();
+	test::test_arr();
+	test::test_list();
+	test::test_heap();
+	test::test_map();
+	test::test_rbtree();
 
-    test::test_path();
-    test::test_print();
-    {
-    cl::stack_init(); 
-    fun1();
-    cl::stack_uninit();
-}
-    std::cout << "Hello World!\n";
-    return 0;
+	test::test_path();
+	test::test_print();
+
+	fun1();
+
+	std::cout << "Hello World!\n";
+	return 0;
 }
 
 

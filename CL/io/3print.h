@@ -14,14 +14,14 @@ namespace cl
 		static void init();
 
 		template<typename T>
-		requires (IsBool_v<T> || IsInt_v<T> || IsFloat_v<T>)
+		requires (IsBool_v<T> || IsInt_v<T> || IsFloat_v<T> || IsChar_v<T>)
 		Print& operator<<(const T& val) { std::cout << val; return *this; }
 
 		template<uv32 N>
 		Print& operator<<(const char val[N]) { return operator<<((const char*)val); }
 		template<uv32 N>
 		Print& operator<<(const wchar val[N]) { return operator<<((const wchar*)val); }
-
+		 
 		Print& operator<<(const char* val) { std::cout << val; return *this; }
 		Print& operator<<(const uc8* val);
 		Print& operator<<(const wchar* val);

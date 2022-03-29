@@ -34,8 +34,12 @@ namespace cl
         ret.reserve(path_len); 
         auto len = GetModuleFileNameW(nullptr, (wchar*)ret.data(), path_len);
         if (len == 0) ret.clear(); 
-
+         
         ret.length(len);
+
+        auto index = ret.findr('\\');
+        if (index != -1) ret.length(index + 1);
+
         ret.replace('\\', '/');
         return ret;
     }

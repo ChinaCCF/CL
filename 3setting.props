@@ -70,9 +70,9 @@
 			<!--c++->优化->优化 Disabled MaxSpeed MinSpace Full-->
 			<Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
 			<Optimization Condition="'$(Configuration)'!='Debug'">MaxSpeed</Optimization> 
-		  
-			<RuntimeLibrary Condition="'$(Configuration)|$(UM_MT_Type)'=='Debug|True'">MultiThreadedDebug</RuntimeLibrary>
-      		<RuntimeLibrary Condition="'$(Configuration)|$(UM_MT_Type)'=='Release|True'">MultiThreaded</RuntimeLibrary>  
+		  	<!--MT / MD-->
+			<RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RuntimeLibrary>
+      		<RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreaded</RuntimeLibrary>  
 
 			<!--预定义宏-->
 			<PreprocessorDefinitions>WIN64; %(PreprocessorDefinitions)</PreprocessorDefinitions> 

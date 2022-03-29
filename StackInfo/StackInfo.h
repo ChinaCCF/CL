@@ -20,34 +20,35 @@
 #	endif  
 
 #endif
-  
+
 #include <CL/base/2type.h>
 #include <CL/base/9str.h>
 
+//DLL不要暴露对象的构造和析构函数, 否则可能会导致
+//_ASSERTE(__acrt_first_block == header);
 namespace cl
-{ 
-    class FrameInfo
-    { 
-    public:
-        uv32 line_ = 0; 
-        StringW fun_;
-        StringW file_;
-    };
+{
+	struct FrameInfo
+	{
+		uv32 line_ = 0;
+		wchar* file_ = nullptr;
+		wchar* fun_ = nullptr;
+	};
 
-    struct StackInfo
-    {
-        uv32 size_ = 0;
-        uv8 buf_[1];
-    };
+	struct StackInfo
+	{
+		uv32 size_ = 0;
+		uv8 buf_[1];
+	};
 
-    stack_api void stack_init(const wchar* pdb_dir = nullptr);
-    stack_api void stack_uninit();
+	stack_api void stack_init(const wchar* pdb_dir = nullptr);
+	stack_api void stack_uninit();
 
-    stack_api StackInfo* stack_alloc();
-    stack_api void stack_free(StackInfo* nodes); 
+	stack_api StackInfo* stack_alloc();
+	stack_api void stack_free(StackInfo* nodes);
 
-    stack_api bool frame_info(StackInfo* stack, uv32 index, FrameInfo* frame);
-
+	stack_api FrameInfo* frame_alloc(StackInfo* stack, uv32 index);
+	stack_api void frame_free(FrameInfo* frame);
 }
 
 #endif//__dll_StackInfo__
