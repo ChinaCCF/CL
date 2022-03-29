@@ -8,23 +8,27 @@
 namespace cl
 {
 	template<CharType T>
-	static inline T clower(T c) { if (c >= 'A' && c <= 'Z') return c + 32; return c; }
+	cl_si T clower(T c) { if (c >= 'A' && c <= 'Z') return c + 32; return c; }
 	template<CharType T>
-	static inline T cupper(T c) { if (c >= 'a' && c <= 'z') return c - 32; return c; }
+	cl_si T cupper(T c) { if (c >= 'a' && c <= 'z') return c - 32; return c; }
 
 	namespace cstr
 	{ 
 		template<CharType T>
-		static inline uv32 length(const T* str) { return (uv32)::strlen(str); }
-		static inline uv32 length(const uc16* str) { return (uv32)::wcslen((wchar*)str); }
-
+		cl_si uv32 length(const T* str)
+		{ 
+			if (str == nullptr) return 0;
+			uv32 len = 0;
+			while (*str++) len++;
+			return len;
+		} 
 		/*############################################################################################*/
 		//rshift
 		//指定长度len的字符串向右移动cnt个字符
 		//"ABC" 右移 1 个字符,变为 " ABC"
 		/*############################################################################################*/
 		template<CharType C>
-		static inline void rshift(C* buf, uv32 len, uv32 cnt)
+		cl_si void rshift(C* buf, uv32 len, uv32 cnt)
 		{
 			mem::rshift(buf, len, cnt);
 			buf[len + cnt] = 0; 
@@ -34,14 +38,14 @@ namespace cl
 		//copy
 		/*############################################################################################*/
 		template<CharType C1, CharType C2>
-		static inline void copy(C1* dst, const C2* src, uv32 len)
+		cl_si void copy(C1* dst, const C2* src, uv32 len)
 		{
-			while (len-- && *src) { *dst++ = *src++; }
+			while (len-- && *src) { *dst++ = (C1) * src++; }
 			*dst = 0; 
 		}
 
 		template<CharType C1, CharType C2>
-		static inline void copy(C1* dst, uv32 size, const C2* src)
+		cl_si void copy(C1* dst, uv32 size, const C2* src)
 		{
 			while (--size && *src) { *dst++ = *src++; }
 			*dst = 0;
@@ -50,7 +54,7 @@ namespace cl
 		}
 
 		template<CharType C1, CharType C2>
-		static inline void copy(C1* dst, uv32 size, const C2* src, uv32 len)
+		cl_si void copy(C1* dst, uv32 size, const C2* src, uv32 len)
 		{
 			if (len >= size) CL_Throw(ExceptionCode::Buffer_OverWrite, 0, "");
 			for (uv32 i = 0; i < len; i++) dst[i] = src[i];
@@ -60,52 +64,52 @@ namespace cl
 		//compare
 		/*############################################################################################*/
 		template<CharType C1, CharType C2>
-		static inline sv32 cmp(const C1* t1, const C2* t2)
+		cl_si sv32 cmp(const C1* t1, const C2* t2)
 		{
 			while (*t1 && *t1 == *t2) { ++t1; ++t2; }
 			if (*t1 == *t2) return 0;
 			return *t1 < *t2 ? -1 : 1;
 		}
 		template<CharType C1, CharType C2>
-		static inline sv32 cmp(const C1* t1, const C2* t2, uv32 len)
+		cl_si sv32 cmp(const C1* t1, const C2* t2, uv32 len)
 		{
-			while (len-- && *t1 && *t1 == *t2) { ++t1; ++t2; }
+			while (len && *t1 && *t1 == *t2) { ++t1; ++t2; --len; }
 			if (len == 0 || *t1 == *t2) return 0;
 			return *t1 < *t2 ? -1 : 1;
 		}
 
 		template<CharType C1, CharType C2>
-		static inline sv32 icmp(const C1* t1, const C2* t2)
+		cl_si sv32 icmp(const C1* t1, const C2* t2)
 		{
 			while (*t1 && clower(*t1) == clower(*t2)) { ++t1; ++t2; }
 			if (*t1 == *t2) return 0;
 			return clower(*t1) < clower(*t2) ? -1 : 1;
 		} 
 		template<CharType C1, CharType C2>
-		static inline sv32 icmp(const C1* t1, const C2* t2, uv32 len)
+		cl_si sv32 icmp(const C1* t1, const C2* t2, uv32 len)
 		{
-			while (len-- && *t1 && clower(*t1) == clower(*t2)) { ++t1; ++t2; }
+			while (len && *t1 && clower(*t1) == clower(*t2)) { ++t1; ++t2; --len; }
 			if (len == 0 || *t1 == *t2) return 0;
 			return clower(*t1) < clower(*t2) ? -1 : 1;
 		}
 
 		template<CharType C1, CharType C2>
-		static inline bool equ(const C1* t1, const C2* t2) { return cmp(t1, t2) == 0; }
+		cl_si bool equ(const C1* t1, const C2* t2) { return cmp(t1, t2) == 0; }
 
 		template<CharType C1, CharType C2>
-		static inline bool equ(const C1* t1, const C2* t2, uv32 len) { return cmp(t1, t2, len) == 0; }
+		cl_si bool equ(const C1* t1, const C2* t2, uv32 len) { return cmp(t1, t2, len) == 0; }
 
 		template<CharType C1, CharType C2>
-		static inline bool iequ(const C1* t1, const C2* t2) { return icmp(t1, t2) == 0; }
+		cl_si bool iequ(const C1* t1, const C2* t2) { return icmp(t1, t2) == 0; }
 
 		template<CharType C1, CharType C2>
-		static inline bool iequ(const C1* t1, const C2* t2, uv32 len) { return icmp(t1, t2, len) == 0; }
+		cl_si bool iequ(const C1* t1, const C2* t2, uv32 len) { return icmp(t1, t2, len) == 0; }
 
 		/*############################################################################################*/
 		//find
 		/*############################################################################################*/
 		template<CharType C1, typename C2>
-		static inline C1* find(const C1* str, C2 c)
+		cl_si C1* find(const C1* str, C2 c)
 		{
 			while (*str && *str != c) str++;
 			if (*str == 0) return nullptr;
@@ -113,7 +117,7 @@ namespace cl
 		}
 
 		template<CharType C1, CharType C2>
-		static inline C1* find(const C1* str, const C2* sub, uv32 len)
+		cl_si C1* find(const C1* str, const C2* sub, uv32 len)
 		{
 			while (true)
 			{
@@ -125,26 +129,26 @@ namespace cl
 		}
 
 		template<CharType C1, CharType C2>
-		static inline C1* find(const C1* str, const C2* sub) { return find(str, sub, length(sub)); }
+		cl_si C1* find(const C1* str, const C2* sub) { return find(str, sub, length(sub)); }
 		 
 		namespace lib
 		{
 			template<CharType C1, CharType C2>
-			static inline C1* findr(const C1* start, const C1* end, const C2 c)
+			cl_si C1* findr(const C1* start, const C1* end, const C2 c)
 			{
 				while (*end != c && end > start) --end;
 				if (end == start) return nullptr;
-				return end;
+				return (C1*)end;
 			}
 		} 
 		template<CharType C1, CharType C2>
-		static inline C1* findr(const C1* str, C2 c) { return lib::findr(str, str + length(str), c); }
+		cl_si C1* findr(const C1* str, C2 c) { return lib::findr(str, str + length(str), c); }
 		template<CharType C1, CharType C2>
-		static inline C1* findr(const C1* str, uv32 len, C2 c) { return lib::findr(str, str + len, c); }
+		cl_si C1* findr(const C1* str, uv32 len, C2 c) { return lib::findr(str, str + len, c); }
 		/*############################################################################################*/
 		//replace
 		/*############################################################################################*/
-		template<CharType T, CharType S, CharType D> static inline void replace(T* str, S src, D dst)
+		template<CharType T, CharType S, CharType D> cl_si void replace(T* str, S src, D dst)
 		{
 			while (*str)
 			{
@@ -156,30 +160,34 @@ namespace cl
 		//反转指定长度字符串
 		/*############################################################################################*/
 		template<CharType T>
-		static inline void flip(T* str, uv32 len)
+		cl_si void flip(T* str, uv32 len)
 		{
 			T* end = str + len - 1;
 			while (str < end) swap(*str++, *end--);
 		}
 		template<CharType T>
-		static inline void flip(T* str) { flip(str, length(str)); }
+		cl_si void flip(T* str) { flip(str, length(str)); }
 		/*############################################################################################*/
 		//大小写转换
 		/*############################################################################################*/
-		template<CharType T> static inline void lower(T* str) { while (*str) { *str = clower(*str); ++str; } }
-		template<CharType T> static inline void upper(T* str) { while (*str) { *str = cupper(*str); ++str; } }
+		template<CharType T>
+		cl_si void lower(T* str) { while (*str) { *str = clower(*str); ++str; } }
+		template<CharType T> 
+		cl_si void upper(T* str) { while (*str) { *str = cupper(*str); ++str; } }
 
 		/*############################################################################################*/
 		//裁剪
 		/*############################################################################################*/
-		template<CharType T> static inline uv32 trim_back(T* str, uv32 len)
+		template<CharType T>
+		cl_si uv32 trim_back(T* str, uv32 len)
 		{
 			auto end = str + len - 1;
 			while (*end && *end <= 32 && end >= str) --end;
 			end[1] = 0;
 			return uv32(end - str) + 1;
 		}
-		template<CharType T> static inline uv32 trim(T* str, uv32 len)
+		template<CharType T> 
+		cl_si uv32 trim(T* str, uv32 len)
 		{
 			len = trim_back(str, len);
 			if (len)
@@ -197,7 +205,8 @@ namespace cl
 		/*############################################################################################*/
 		//start_with
 		/*############################################################################################*/
-		template<CharType T1, CharType T2> static inline bool start_with(const T1* s1, const T2* s2)
+		template<CharType T1, CharType T2> 
+		cl_si bool start_with(const T1* s1, const T2* s2)
 		{
 			while (*s1 && *s2 && *s1 == *s2) { ++s1; ++s2; }
 			return *s2 == 0;
@@ -218,7 +227,7 @@ namespace cl
 			//转换无符号整数, 返回转换的字符串长度
 			//失败 0 个字符转换
 			template<CharType T, UintType V>
-			static inline uv32 _from_val(T* buf, uv32 size, V val)
+			cl_si uv32 _from_val(T* buf, uv32 size, V val)
 			{
 				if (size <= 1) { *buf = 0; return 0; }
 
@@ -246,7 +255,7 @@ namespace cl
 
 		//
 		template<CharType T, CharType C>
-		static inline uv32 from_val(T* buf, uv32 size, C val)
+		cl_si uv32 from_val(T* buf, uv32 size, C val)
 		{
 			buf[0] = val;
 			buf[1] = 0;
@@ -254,7 +263,7 @@ namespace cl
 		}
 
 		template<CharType T>
-		static inline uv32 from_val(T* buf, uv32 size, bool val)
+		cl_si uv32 from_val(T* buf, uv32 size, bool val)
 		{
 			if (size < 6) { *buf = 0; return 0; }
 
@@ -268,10 +277,10 @@ namespace cl
 		}
 
 		template<CharType T, UintType V>
-		static inline uv32 from_val(T* buf, uv32 size, V val) { return lib::_from_val(buf, size, val); }
+		cl_si uv32 from_val(T* buf, uv32 size, V val) { return lib::_from_val(buf, size, val); }
 
 		template<CharType T, SintType V>
-		static inline uv32 from_val(T* buf, uv32 size, V val)
+		cl_si uv32 from_val(T* buf, uv32 size, V val)
 		{
 			if (val < 0)
 			{
@@ -284,7 +293,7 @@ namespace cl
 		}
 
 		template<CharType T, FloatType V>
-		static inline uv32 from_val(T* buf, uv32 size, V val, uv32 fraction = 6)
+		cl_si uv32 from_val(T* buf, uv32 size, V val, uv32 fraction = 6)
 		{
 			typedef SelectType_t<sizeof(T) == sizeof(uc8), uc8, uc16> TC;
 
@@ -307,7 +316,7 @@ namespace cl
 		{
 			//返回第一个无法解析的字符位置
 			template<CharType T>
-			static inline T* _2_val(const T* str, uv64& val)
+			cl_si T* _2_val(const T* str, uv64& val)
 			{
 				val = 0;
 
@@ -328,7 +337,7 @@ namespace cl
 			void* _2_fval(const uc16* str, fv64& val);
 
 			template<CharType T>
-			static inline T* _2_val(const T* str, fv64& val)
+			cl_si T* _2_val(const T* str, fv64& val)
 			{
 				using V = typename SameSizeType<T, uc8, uc16>::type;
 				return (T*)_2_fval((V*)str, val);
@@ -336,7 +345,7 @@ namespace cl
 		}
 
 		template<CharType T>
-		static inline T* to_val(const T* str, bool& val)
+		cl_si T* to_val(const T* str, bool& val)
 		{
 			T buf[8];
 			{
@@ -359,7 +368,7 @@ namespace cl
 			return nullptr;
 		}
 		template<CharType C, UintType T>
-		static inline C* to_val(const C* str, T& val)
+		cl_si C* to_val(const C* str, T& val)
 		{
 			uv64 tv;
 			auto ret = lib::_2_val(str, tv);
@@ -369,7 +378,7 @@ namespace cl
 
 		template<CharType C, typename T>
 			requires IsSint_v<T> || IsFloat_v<T>
-		static inline C * to_val(const C * str, T & val)
+		cl_si C * to_val(const C * str, T & val)
 		{
 			bool neg = false;
 			if (*str == '-') { neg = true; ++str; }
@@ -388,7 +397,7 @@ namespace cl
 
 	//跳过utf8的头部tag
 	template<C8Type T>
-	static inline T* skip_utf8_bom(const T* buf)
+	cl_si T* skip_utf8_bom(const T* buf)
 	{
 		uv8* data = (uv8*)buf;
 		if (data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)

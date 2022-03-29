@@ -1,6 +1,23 @@
 #include <CL/base/9str.h>  
 namespace test
 { 
+	namespace namespace_test_str_return{
+		cl::String get_str()
+		{
+			cl::String ret;
+			ret = "123";
+			printf("test str return : get str\n");
+			return ret;
+		}
+	}
+	void test_str_return()
+	{
+		{
+			auto str = namespace_test_str_return::get_str();
+			printf("test str return : release str\n");
+		} 
+		int i = 0;
+	}
 	void test_str()
 	{
 		{//strview
@@ -142,5 +159,7 @@ namespace test
 				int i = 0;
 			}
 		}
+
+		test_str_return();
 	}
 }

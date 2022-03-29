@@ -55,5 +55,14 @@
     <ClInclude Include="test_cl\set\set.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="test_cl\base\10time.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_cl\io\path.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="test_cl\io\print.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

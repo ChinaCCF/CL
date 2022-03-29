@@ -34,6 +34,7 @@ namespace cl
 			uv32 length() const { return len_; }
 			const T* data() const { return str_; }
 			T back() const { return str_[len_ - 1]; }
+			void clear() { len_ = 0; str_ = nullptr; }
 			T operator[](uv32 index) const { return str_[index]; }
 
 			operator T* () const { return str_; }
@@ -144,6 +145,7 @@ namespace cl
 			{
 				cstr::copy(str_ + len_, str, len);
 				len_ += len;
+				str_[len_] = 0;
 			}
 
 			uv32 size() const { return N; } 
@@ -188,12 +190,13 @@ namespace cl
 			{ 
 				cstr::copy(buf_.data() + len_, str, len);
 				len_ += len;
+				buf_.data()[len_] = 0;
 			}
 
 			uv32 size() const { return buf_.size(); }
 			uv32 length() const { return len_; }
-			void length(uv32 len) { if (len_) { len_ = len; buf_.data()[len] = 0; } }
-			T* data() const { return len_ == 0 ? EmptyStr<T>()() : buf_.data(); } 
+			void length(uv32 len) { len_ = len; if(buf_.size()) buf_.data()[len] = 0; }
+			T* data() const { return buf_.size() == 0 ? EmptyStr<T>()() : buf_.data(); }
 			   
 			void pop(uv32 cnt) { len_ -= cnt;  buf_.data()[len_] = 0; }
 		};
@@ -205,21 +208,15 @@ namespace cl
 			using ThisType = _NString<T, MA, N>;
 			  
 			uv32 _size() const { return Base::size(); }    
-			 
-			template<typename T2>
-			_NString& _append(const T2* str, uv32 len)
-			{
-				if (str == nullptr || len == 0) return *this;
-				reserve(len);
-				Base::append(str, len);
-				return *this;
-			} 
+			  
 		public:
 			_NString() {} 
 			_NString(const std::nullptr_t&) {}
 			  
 			uv32 length() const { return Base::length(); }
 			void length(uv32 len) { Base::length(len); }
+			void clear() { length(0); }
+
 			T* data() const { return Base::data(); }
 			void reserve(uv32 len) { Base::reserve(len); } 
 
@@ -234,21 +231,34 @@ namespace cl
 			void pop(uv32 len) { Base::pop(len); }
 			T pop() { T c = back(); pop(1); return c; }
 			 
+			template<typename T2>
+			_NString& append(const T2* str, uv32 len)
+			{
+				if (str == nullptr || len == 0) return *this;
+				reserve(len);
+				Base::append(str, len);
+				return *this;
+			}
+			template<typename T2>
+			_NString& append(const T2* str)
+			{  
+				return append(str, cstr::length(str));
+			}
 			/*#################################################################################*/
 			//构造函数和赋值
 			/*#################################################################################*/
-			template<CharType T2> _NString(const T2* str) { _append(str, cstr::length(str)); }
-			template<CharType T2> _NString(const _StrView<T2>& str) { _append(str.data(), str.length()); }
-			_NString(const ThisType& str) { _append(str.data(), str.length()); } //无法取消,否则会提示调用已删除的函数   
+			template<CharType T2> _NString(const T2* str) { append(str, cstr::length(str)); }
+			template<CharType T2> _NString(const _StrView<T2>& str) { append(str.data(), str.length()); }
+			_NString(const ThisType& str) { append(str.data(), str.length()); } //无法取消,否则会提示调用已删除的函数   
 			template<CharType T2, MemAllocType MA2, uv32 M>
-			_NString(const _NString<T2, MA2, M>& str) { _append(str.data(), str.length()); }
+			_NString(const _NString<T2, MA2, M>& str) { append(str.data(), str.length()); }
 			_NString(ThisType&& str) noexcept { Base::move(std::move(str)); }
 
-			template<CharType T2> _NString& operator=(const T2* str) { length(0); return _append(str, cstr::length(str)); }
-			template<CharType T2> _NString& operator=(const _StrView<T2>& str) { length(0); return _append(str.data(), str.length()); }
-			_NString& operator=(const ThisType& str) { length(0); return _append(str.data(), str.length()); } 
+			template<CharType T2> _NString& operator=(const T2* str) { clear(); return append(str, cstr::length(str)); }
+			template<CharType T2> _NString& operator=(const _StrView<T2>& str) { clear(); return append(str.data(), str.length()); }
+			_NString& operator=(const ThisType& str) { clear(); return append(str.data(), str.length()); }
 			template<CharType T2, MemAllocType MA2, uv32 M>
-			_NString& operator=(const _NString<T2, MA2, M>& str) { length(0); return _append(str.data(), str.length()); }
+			_NString& operator=(const _NString<T2, MA2, M>& str) { clear(); return append(str.data(), str.length()); }
 			_NString& operator=(ThisType&& str) noexcept { Base::move(std::move(str)); return *this; }
 
 			/*#################################################################################*/
@@ -263,18 +273,18 @@ namespace cl
 				return val;
 			}
 			template<typename V> requires IsBool_v<V> || IsInt_v<V> || IsFloat_v<V>
-			_NString & operator=(const V & val) { length(0); return operator<<(val); }
+			_NString & operator=(const V & val) { clear(); return operator<<(val); }
 			/*#################################################################################*/
 			//追加 << 
 			/*#################################################################################*/ 
-			_NString& operator<<(const std::nullptr_t&) { return _append("null", 4); }
+			_NString& operator<<(const std::nullptr_t&) { return append("null", 4); }
 
 			template<typename V> requires IsBool_v<V> || IsInt_v<V> || IsFloat_v<V>
 			_NString & operator<<(const V & val)
 			{
 				T buf[64];
 				uv32 len = cstr::from_val(buf, 64, val);
-				return _append(buf, len);
+				return append(buf, len);
 			}
 
 			template<FloatType F>
@@ -282,19 +292,26 @@ namespace cl
 			{
 				T buf[64];
 				uv32 len = cstr::from_val(buf, 64, f.val_, f.len_);
-				return _append(buf, len); 
+				return append(buf, len); 
 			}
 
 			template<CharType T2>
-			_NString& operator<<(T2 str) { return _append(str, 1); }
+			_NString& operator<<(T2 c) 
+			{
+				reserve(1);
+				data()[length()] = c;
+				length(length() + 1);
+				data()[length()] = 0; 
+				return *this;
+			}
 			template<CharType T2>
-			_NString& operator<<(const T2* str) { return _append(str, cstr::length(str)); }
+			_NString& operator<<(const T2* str) { return append(str, cstr::length(str)); }
 
 			template<CharType T2>
-			_NString& operator<<(const _StrView<T2>& str) { return _append(str.data(), str.length()); }
+			_NString& operator<<(const _StrView<T2>& str) { return append(str.data(), str.length()); }
 
 			template<CharType T2, MemAllocType MA2, uv32 M>
-			_NString& operator<<(const _NString<T2, MA2, M>& str) { return _append(str.data(), str.length()); }
+			_NString& operator<<(const _NString<T2, MA2, M>& str) { return append(str.data(), str.length()); }
 			/*#######################################################################################*/
 			//比较
 			/*#######################################################################################*/

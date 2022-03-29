@@ -9,7 +9,7 @@
 
 namespace cl
 {
-#define cl_const_bool  static inline constexpr bool
+#define cl_const_bool static constexpr bool
 
 	template<typename T> struct IsNull { cl_const_bool value = std::is_null_pointer<T>::value; };
 	template<> struct IsNull<std::nullptr_t> { cl_const_bool value = true; };

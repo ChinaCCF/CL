@@ -7,24 +7,25 @@ namespace cl
 {
 	namespace lib
 	{
-		template <typename Return, typename... Args> class _iCall
+		template <typename Return, typename... Args> 
+		class iCall
 		{
 		public:
-			virtual ~_iCall() {}
-			virtual Return call(Args...) const = 0;
-			virtual void clone_to(void* buf) = 0;
+			virtual ~iCall() {}
+			virtual Return iCall_call(Args...) const = 0;
+			virtual void iCall_clone_to(void* buf) = 0;
 		};
 
 		template <typename Return, typename... Args> 
-		class NormalFun : public _iCall<Return, Args...>
+		class NormalFun : public iCall<Return, Args...>
 		{
 		public:
 			using FunType = Return(*)(Args...);
 			FunType fun_ = nullptr;
 
 			NormalFun() {}
-			virtual Return call(Args... args) const override { return fun_(std::forward<Args>(args)...); }
-			virtual void clone_to(void* buf) override
+			virtual Return iCall_call(Args... args) const override { return fun_(std::forward<Args>(args)...); }
+			virtual void iCall_clone_to(void* buf) override
 			{
 				auto p = (NormalFun*)buf;
 				new(p)NormalFun();
@@ -34,7 +35,7 @@ namespace cl
 
 		//类成员函数
 		template <typename Obj, typename Return, typename... Args> requires std::is_class_v<Obj>
-		class ClassMemFun : public _iCall<Return, Args...>
+		class ClassMemFun : public iCall<Return, Args...>
 		{
 		public:
 			using FunType = Return(Obj::*)(Args...);
@@ -42,8 +43,8 @@ namespace cl
 			FunType fun_ = nullptr;
 
 			ClassMemFun() {}
-			virtual Return call(Args... args) const override { return (obj_->*fun_)(std::forward<Args>(args)...); }
-			virtual void clone_to(void* buf) override
+			virtual Return iCall_call(Args... args) const override { return (obj_->*fun_)(std::forward<Args>(args)...); }
+			virtual void iCall_clone_to(void* buf) override
 			{
 				auto p = (ClassMemFun*)buf;
 				new(p)ClassMemFun();
@@ -54,7 +55,7 @@ namespace cl
 
 		//仿函数对象
 		template <typename Obj, typename Return, typename... Args> requires std::is_class_v<Obj>
-		class ObjFun : public _iCall<Return, Args...>
+		class ObjFun : public iCall<Return, Args...>
 		{
 		public:
 			Obj obj_;
@@ -62,8 +63,8 @@ namespace cl
 			ObjFun(Obj&& obj) : obj_(std::forward<Obj>(obj)) {}
 
 			virtual ~ObjFun() {}  
-			virtual Return call(Args... args) const override { return obj_(std::forward<Args>(args)...); }
-			virtual void clone_to(void* buf) override
+			virtual Return iCall_call(Args... args) const override { return obj_(std::forward<Args>(args)...); }
+			virtual void iCall_clone_to(void* buf) override
 			{
 				auto p = (ObjFun*)buf;
 				new(p)ObjFun(obj_);
@@ -74,15 +75,15 @@ namespace cl
 		template <size_t ByteSize, typename Return, typename... Args>
 		class _SizeCall
 		{
-			using iCall = _iCall<Return, Args...>;
+			using iCall = iCall<Return, Args...>;
 			//lamda捕捉的对象尽量少, 否则超过这个缓存... 
 			uv8 buf_[ByteSize];
 			 
-			iCall* call() const { return (iCall*)buf_; }
+			iCall* get_call() const { return (iCall*)buf_; }
 		public:
 			~_SizeCall()
 			{
-				if (valid()) call()->~_iCall(); 
+				if (valid()) get_call()->~iCall();
 			}
 
 			_SizeCall() { *((void**)buf_) = nullptr; }
@@ -126,7 +127,7 @@ namespace cl
 
 			_SizeCall(const _SizeCall& c)
 			{
-				if (valid()) c.call()->clone_to(buf_);
+				if (valid()) c.get_call()->iCall_clone_to(buf_);
 			}
 
 			bool valid() 
@@ -135,7 +136,7 @@ namespace cl
 				return false; 
 			}
 			operator bool() const { return valid(); }
-			Return operator()(Args... args) const { return call()->call(std::forward<Args>(args)...); }
+			Return operator()(Args... args) const { return get_call()->iCall_call(std::forward<Args>(args)...); }
 
 			//普通call复制
 			_SizeCall& operator=(const _SizeCall& c) { this->~_SizeCall(); new(this)_SizeCall(c); return *this; }

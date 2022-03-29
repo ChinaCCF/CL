@@ -6,30 +6,32 @@
 //if x < y, then -(x < y) will be all ones, so r = y ^ (x ^ y) & ~0 = y ^ x ^ y = x. 
 //Otherwise, if x >= y, then -(x < y) will be all zeros, so r = y ^ ((x ^ y) & 0) = y.
 template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-static inline T cl_max(const T & x, const T & y) { return x ^ ((x ^ y) & -(x < y)); }
+cl_si T cl_max(const T & x, const T & y) { return x ^ ((x ^ y) & -(x < y)); }
 
 template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-static inline T cl_min(const T & x, const T & y) { return y ^ ((x ^ y) & -(x < y)); }
+cl_si T cl_min(const T & x, const T & y) { return y ^ ((x ^ y) & -(x < y)); }
 
-template<cl::FloatType T> static inline T cl_max(const T& x, const T& y) { return x < y ? y : x; }
-template<cl::FloatType T> static inline T cl_min(const T& x, const T& y) { return x > y ? y : x; }
+template<cl::FloatType T> cl_si T cl_max(const T& x, const T& y) { return x < y ? y : x; }
+template<cl::FloatType T> cl_si T cl_min(const T& x, const T& y) { return x > y ? y : x; }
 
 namespace cl
 {
 	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-	static inline T abs(const T & val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
+	cl_si T abs(const T & val) { T mask = val >> (sizeof(T) * 8 - 1); return (val + mask) ^ mask; }
 
-	static inline fv32 abs(fv32 v) { auto tv = *(uv32*)&v; tv &= 0x7FFFFFFF; return *(fv32*)&tv; }
-	static inline fv64 abs(fv64 v) { auto tv = *(uv64*)&v; tv &= 0x7FFFFFFFFFFFFFFF; return *(fv64*)&tv; }
+	cl_si fv32 abs(fv32 v) { auto tv = *(uv32*)&v; tv &= 0x7FFFFFFF; return *(fv32*)&tv; }
+	cl_si fv64 abs(fv64 v) { auto tv = *(uv64*)&v; tv &= 0x7FFFFFFFFFFFFFFF; return *(fv64*)&tv; }
 
-	static inline sv64 mul(sv32 x, sv32 y) { return sv64(x) * sv64(y); }
-	static inline fv64 mul(fv32 x, fv32 y) { return fv64(x) * fv64(y); }
+	cl_si sv64 mul(sv32 x, sv32 y) { return sv64(x) * sv64(y); }
+	cl_si fv64 mul(fv32 x, fv32 y) { return fv64(x) * fv64(y); }
 
-	template<typename T> static inline void swap(T& a, T& b)
+	template<typename T> 
+	cl_si void swap(T& a, T& b)
 	{ 
 		T tmp = std::move(a); a = std::move(b); b = std::move(tmp);
 	}
-	template<typename T> static inline void swap(T* p, uv32 i, uv32 j) 
+	template<typename T> 
+	cl_si void swap(T* p, uv32 i, uv32 j) 
 	{
 		T tmp = std::move(p[i]); p[i] = std::move(p[j]); p[j] = std::move(tmp);
 	}
@@ -122,33 +124,34 @@ namespace cl
 	//     即 4 = 4-1 + 1, 8 = 8-1 + 1, ....
 	//只要把某个数的最高位后面的所有位都置1,再加上1就是2指数
 	//向上对齐2的指数, 不支持负数
-	static inline uv8  align_power2(uv8 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v++; return v; }
-	static inline uv16 align_power2(uv16 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v++; return v; }
-	static inline uv32 align_power2(uv32 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v |= v >> 16; v++; return v; }
-	static inline uv64 align_power2(uv64 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v |= v >> 16; v |= v >> 32; v++; return v; }
+	cl_si uv8  align_power2(uv8 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v++; return v; }
+	cl_si uv16 align_power2(uv16 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v++; return v; }
+	cl_si uv32 align_power2(uv32 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v |= v >> 16; v++; return v; }
+	cl_si uv64 align_power2(uv64 v) { v--; v |= v >> 1; v |= v >> 2; v |= v >> 4; v |= v >> 8; v |= v >> 16; v |= v >> 32; v++; return v; }
 
-	static inline sv8  align_power2(sv8 v) { return (sv8)align_power2((uv8)v); }
-	static inline sv16 align_power2(sv16 v) { return (sv16)align_power2((uv16)v); }
-	static inline sv32 align_power2(sv32 v) { return (sv32)align_power2((uv32)v); }
-	static inline sv64 align_power2(sv64 v) { return (sv64)align_power2((uv64)v); }
+	cl_si sv8  align_power2(sv8 v) { return (sv8)align_power2((uv8)v); }
+	cl_si sv16 align_power2(sv16 v) { return (sv16)align_power2((uv16)v); }
+	cl_si sv32 align_power2(sv32 v) { return (sv32)align_power2((uv32)v); }
+	cl_si sv64 align_power2(sv64 v) { return (sv64)align_power2((uv64)v); }
 
 	template<typename T, typename T2> requires (cl::IsInt_v<T> || cl::IsChar_v<T>) && (cl::IsInt_v<T2> || cl::IsChar_v<T2>)
-	static inline T align(T val, T2 align) { T n = align - 1; return (val + n) & ~n; }
+	cl_si T align(T val, T2 align) { T n = align - 1; return (val + n) & ~n; }
 	//求2的几多次方才能大于或等于某个数, 例如log2(8) = 3
 	template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-	static inline sv32 log2(T val) { sv32 index = 0; while(val >>= 1) index++; return index; }
+	cl_si sv32 log2(T val) { sv32 index = 0; while(val >>= 1) index++; return index; }
 
 	namespace lib
 	{//todo 后面要修改为 Google 的 cityhash 
-		template<FloatType T> static inline uv32 _hash(T val) { auto f = (uv32*)&val; return f[0]; };
+		template<FloatType T> 
+		cl_si uv32 _hash(T val) { auto f = (uv32*)&val; return f[0]; };
 
 		template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-		static inline uv32 _hash(T val) { return (uv32)(uvt)val; };
+		cl_si uv32 _hash(T val) { return (uv32)(uvt)val; };
 
-		template<PtrType T> static inline uv32 _hash(T val) { return (uv32)(uvt)val; };
+		template<PtrType T> cl_si uv32 _hash(T val) { return (uv32)(uvt)val; };
 
 		template<typename T> requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
-		static inline uv32 _hash(const T & val) //BKDRHash
+		cl_si uv32 _hash(const T & val) //BKDRHash
 		{
 			using Type = SelectType_t<ToC8Ptr_v<T>, uc8, uc16>;
 			const Type* str = (const Type*)val;
@@ -159,7 +162,8 @@ namespace cl
 		};
 	}
 
-	template<typename T> static inline uv32 hash(const T& val) { return lib::_hash(val); }
+	template<typename T> 
+	cl_si uv32 hash(const T& val) { return lib::_hash(val); }
 }
 
 #endif//__cl_base_val__ 

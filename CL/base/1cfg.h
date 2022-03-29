@@ -1,6 +1,7 @@
 #ifndef __cl_base_cfg__
 #define __cl_base_cfg__
 
+// 本工程是静态库
 // 这个文件夹中的头文件, 可以用于应用程序, Windows和Linux
 // 但是最基本要求是必须支持C++20, 不依赖内存
 
@@ -10,11 +11,11 @@
 //位数   32位还是64位
 //版本   开发还是发布
 
-#define CL_Sys_Win       1
-#define CL_Sys_Linux     2
-#define CL_Sys_Mac       3
-#define CL_Sys_Android   4 
-#define CL_Sys_IOS       5
+#define CL_Sys_Win         1
+#define CL_Sys_Linux       2
+#define CL_Sys_Mac         3
+#define CL_Sys_Android     4 
+#define CL_Sys_IOS         5
 
 #define CL_Compiler_VC  1
 #define CL_Compiler_GCC 2
@@ -84,7 +85,7 @@
 #endif
 
 /*#####################################################################################*/
-//cl_dbg 用来调试代码
+// 一些常用宏
 /*#####################################################################################*/
 #if CL_Version == CL_Version_Debug 
 #define CL_DBG(x) do{if(!(x)) {char* _XXXXX = nullptr; *_XXXXX = 0;} } while(false)
@@ -93,6 +94,9 @@
 #endif
  
 #define _out  
+ 
+#define cl_si static inline
+
 /*#####################################################################################*/
 //警告
 /*#####################################################################################*/

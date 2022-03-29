@@ -4,6 +4,8 @@
 
 #include "1base.h"
 
+//rbtree 在范围查询和并发操作上确实比不上skiplist
+
 namespace cl
 {
 	namespace lib

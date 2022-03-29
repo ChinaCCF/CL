@@ -62,6 +62,24 @@
     <ClInclude Include="set\6rbtree.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="set\7skip_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="task\lock.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="io\1stream.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="io\2path.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="task\thread.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="io\3print.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\src\5mem.cpp">
@@ -77,6 +95,18 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="base\src\10time.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="task\src\lock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="io\src\2path.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="task\src\thread.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="io\src\3print.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

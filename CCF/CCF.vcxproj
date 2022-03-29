@@ -23,6 +23,7 @@
     <ClCompile Include="test_cl\set\src\tree.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="test_cl\base\10time.h" />
     <ClInclude Include="test_cl\base\3type_traits.h" />
     <ClInclude Include="test_cl\base\4val.h" />
     <ClInclude Include="test_cl\base\5mem.h" />
@@ -30,6 +31,8 @@
     <ClInclude Include="test_cl\base\7call.h" />
     <ClInclude Include="test_cl\base\8cstr.h" />
     <ClInclude Include="test_cl\base\9str.h" />
+    <ClInclude Include="test_cl\io\path.h" />
+    <ClInclude Include="test_cl\io\print.h" />
     <ClInclude Include="test_cl\set\set.h" />
   </ItemGroup>
   <Import Project="$(SolutionDir)\3setting.props" />

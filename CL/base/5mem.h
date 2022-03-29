@@ -12,19 +12,19 @@ namespace cl
 	/*#####################################################################################*/
 	namespace mem
 	{
-		static inline void zero(void* _p, uv32 size)
+		cl_si void zero(void* _p, uv32 size)
 		{
 			auto p = (uv8*)_p;
 			while (size--)  *p++ = 0;
 		}
 
-		static inline void copy(_out void* _dst, const void* _src, uv32 size)
+		cl_si void copy(_out void* _dst, const void* _src, uv32 size)
 		{
 			auto dst = (uv8*)_dst; auto src = (uv8*)_src;
 			for (uv32 i = 0; i < size; i++) dst[i] = src[i]; 
 		}
 		  
-		static inline void rshift(_out void* _buf, uv32 buf_size, uv32 shift_size)
+		cl_si void rshift(_out void* _buf, uv32 buf_size, uv32 shift_size)
 		{
 			auto buf = (uv8*)_buf; buf += buf_size - 1;
 			for (sv32 i = 0; i < (sv32)shift_size; i++)
@@ -36,7 +36,7 @@ namespace cl
 		/*#####################################################################################*/
 		//返回字符串长度, 失败返回0 
 		template<CharType T>
-		static inline uv32 hex(_out T* buf, uv32 size, const void* data, uv32 len)
+		cl_si uv32 hex(_out T* buf, uv32 size, const void* data, uv32 len)
 		{
 			if (size < (len << 1)) return 0;
 
@@ -82,14 +82,14 @@ namespace cl
 	};
 
 	template<class MA, typename T, typename ... Args>
-	T* alloc_obj(Args&& ... args)
+	cl_si T* alloc_obj(Args&& ... args)
 	{
 		auto p = (T*)MA().alloc(sizeof(T));
 		new(p)T(std::forward<Args>(args)...);
 		return p;
 	}
 	template<class MA, typename T>
-	void free_obj(T*& p)
+	cl_si void free_obj(T*& p)
 	{
 		if (p == nullptr) return;
 		p->~T();
@@ -98,7 +98,7 @@ namespace cl
 	}
 
 	template<class MA, typename T>
-	T* alloc_objs(uv32 n)
+	cl_si T* alloc_objs(uv32 n)
 	{
 		auto p = (T*)MA().alloc(sizeof(T) * n);
 		for (uv32 i = 0; i < n; i++)
@@ -106,7 +106,7 @@ namespace cl
 		return p;
 	}
 	template<class MA, typename T>
-	void free_objs(T*& p, uv32 n)
+	cl_si void free_objs(T*& p, uv32 n)
 	{
 		if (p == nullptr) return; 
 		for (uv32 i = 0; i < n; i++)
@@ -155,20 +155,20 @@ namespace cl
 	/*#####################################################################################*/
 	class Endian
 	{
-		template<uvt Size> static inline void _size_swap(void* p) { static_assert(Size > 1, "1 or 0 not need swap!"); }
+		template<uvt Size> cl_si void _size_swap(void* p) { static_assert(Size > 1, "1 or 0 not need swap!"); }
 
-		template<> static inline void _size_swap<2>(void* _p)
+		template<> cl_si void _size_swap<2>(void* _p)
 		{
 			uv8* p = (uv8*)_p;
 			swap(p[0], p[1]);
 		}
-		template<> static inline void _size_swap<4>(void* _p)
+		template<> cl_si void _size_swap<4>(void* _p)
 		{
 			uv8* p = (uv8*)_p;
 			swap(p[0], p[3]);
 			swap(p[1], p[2]);
 		}
-		template<> static inline void _size_swap<8>(void* _p)
+		template<> cl_si void _size_swap<8>(void* _p)
 		{
 			uv8* p = (uv8*)_p;
 			swap(p[0], p[7]);
@@ -179,7 +179,7 @@ namespace cl
 	public:
 		//改变当前值为另一端, 大端变小端 或 小端变大端
 		template<typename T> requires cl::IsInt_v<T> || cl::IsChar_v<T>
-		static inline T change(T val)
+		cl_si T change(T val)
 		{
 			static_assert(sizeof(T) >= 2, "can't change one byte endian!");
 			_size_swap<sizeof(T)>(&val);
@@ -187,7 +187,7 @@ namespace cl
 		}
 
 		//判断当前运行环境是小端还是大端
-		bool is_little()
+		cl_si bool is_little()
 		{
 			uv16 val = 0x1234;
 			auto p = (uv8*)&val;
@@ -195,7 +195,7 @@ namespace cl
 			return false;
 		}
 
-		bool is_big() { return !is_little(); }
+		cl_si bool is_big() { return !is_little(); }
 	};
 	/*#####################################################################################*/
 	//Buf
@@ -215,15 +215,24 @@ namespace cl
 		 
 		~MemBuf() { free(); }
 
+		//返回当前缓存能够存储多少个T
 		uv32 size() const { return size_; }
 		T* data() const { return buf_; }
 		 
-		void free() { if (buf_) { MA().free(buf_); buf_ = nullptr; } }
+		void free()
+		{ 
+			if (buf_)
+			{ 
+				MA().free(buf_);
+				buf_ = nullptr;
+			} 
+		}
 		  
-		void alloc(uv32 size) 
+		//申请指定个数T的缓存
+		void alloc(uv32 cnt) 
 		{
-			buf_ = (T*)MA().alloc(sizeof(T) * (size + Extra_N));
-			size_ = size; 
+			buf_ = (T*)MA().alloc(sizeof(T) * (cnt + Extra_N));
+			size_ = cnt; 
 		}
 		 
 		void operator=(MemBuf&& buf)

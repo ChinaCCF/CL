@@ -29,31 +29,31 @@ typedef char32_t  uc32; //prefix : U
 #define CL_TXT8(x)  u8##x
 #define CL_TXT16(x) u##x
 
-static constexpr sv8   max_sv8 = (sv8)0x7F;
-static constexpr sv16 max_sv16 = (sv16)0x7FFF;
-static constexpr sv32 max_sv32 = (sv32)0x7FFFFFFF;
-static constexpr sv64 max_sv64 = (sv64)0x7FFFFFFFFFFFFFFF;
+constexpr sv8   max_sv8 = (sv8)0x7F;
+constexpr sv16 max_sv16 = (sv16)0x7FFF;
+constexpr sv32 max_sv32 = (sv32)0x7FFFFFFF;
+constexpr sv64 max_sv64 = (sv64)0x7FFFFFFFFFFFFFFF;
 
-static constexpr sv8   min_sv8 = (sv8)0x80;
-static constexpr sv16 min_sv16 = (sv16)0x8000;
-static constexpr sv32 min_sv32 = (sv32)0x80000000;
-static constexpr sv64 min_sv64 = (sv64)0x8000000000000000;
+constexpr sv8   min_sv8 = (sv8)0x80;
+constexpr sv16 min_sv16 = (sv16)0x8000;
+constexpr sv32 min_sv32 = (sv32)0x80000000;
+constexpr sv64 min_sv64 = (sv64)0x8000000000000000;
 
-static constexpr uv8   max_uv8 = (uv8)0xFF;
-static constexpr uv16 max_uv16 = (uv16)0xFFFF;
-static constexpr uv32 max_uv32 = (uv32)0xFFFFFFFF;
-static constexpr uv64 max_uv64 = (uv64)0xFFFFFFFFFFFFFFFF;
+constexpr uv8   max_uv8 = (uv8)0xFF;
+constexpr uv16 max_uv16 = (uv16)0xFFFF;
+constexpr uv32 max_uv32 = (uv32)0xFFFFFFFF;
+constexpr uv64 max_uv64 = (uv64)0xFFFFFFFFFFFFFFFF;
 
 #if CL_Bits == CL_Bits_64 
 typedef sv64 svt;
 typedef uv64 uvt;
-static constexpr uvt max_uvt = max_uv64;
-static constexpr svt max_svt = max_sv64;
+constexpr uvt max_uvt = max_uv64;
+constexpr svt max_svt = max_sv64;
 #else  
 typedef sv32 svt;
 typedef uv32 uvt;
-static constexpr uvt max_uvt = max_uv32;
-static constexpr svt max_svt = max_sv32;
+constexpr uvt max_uvt = max_uv32;
+constexpr svt max_svt = max_sv32;
 #endif
 
 

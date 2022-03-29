@@ -147,7 +147,7 @@ namespace cl
 		bool operator==(T* p) const { return iholder_->ptr_ == p; }
 		bool operator!=(T* p) const { return iholder_->ptr_ != p; }
 
-		static inline auto make() { return PtrCnt(alloc_obj<MA, lib::HoldObj<T>>()); }
+		cl_si auto make() { return PtrCnt(alloc_obj<MA, lib::HoldObj<T>>()); }
 	};
 }
 

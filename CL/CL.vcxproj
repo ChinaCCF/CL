@@ -26,19 +26,29 @@
     <ClInclude Include="base\8cstr.h" />
     <ClInclude Include="base\9str.h" />
     <ClInclude Include="base\_exception_code.h" />
+    <ClInclude Include="io\1stream.h" />
+    <ClInclude Include="io\2path.h" />
+    <ClInclude Include="io\3print.h" />
     <ClInclude Include="set\1base.h" />
     <ClInclude Include="set\2arr.h" />
     <ClInclude Include="set\3list.h" />
     <ClInclude Include="set\4heap.h" />
     <ClInclude Include="set\5hash_map.h" />
     <ClInclude Include="set\6rbtree.h" />
+    <ClInclude Include="set\7skip_list.h" />
+    <ClInclude Include="task\lock.h" />
+    <ClInclude Include="task\thread.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="base\src\10time.cpp" />
     <ClCompile Include="base\src\2type.cpp" />
     <ClCompile Include="base\src\5mem.cpp" />
     <ClCompile Include="base\src\8cstr.cpp" />
+    <ClCompile Include="io\src\2path.cpp" />
+    <ClCompile Include="io\src\3print.cpp" />
     <ClCompile Include="note.cpp" />
+    <ClCompile Include="task\src\lock.cpp" />
+    <ClCompile Include="task\src\thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="base\src\base.natvis" />

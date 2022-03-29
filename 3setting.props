@@ -78,8 +78,10 @@
 			<PreprocessorDefinitions>WIN64; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
 			<PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">XDEBUG; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
 			<PreprocessorDefinitions Condition="'$(Configuration)'=='Condition'">Build_Condition; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
-			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='dll'">$(ProjectName)_DLL; _USRDLL; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
-			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='lib'">$(ProjectName)_LIB; %(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='dll'">$(ProjectName)_DLL; Build_DLL; _USRDLL; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='lib'">$(ProjectName)_LIB; Build_LIB; %(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='app'">Build_APP; %(PreprocessorDefinitions)</PreprocessorDefinitions> 
+			<PreprocessorDefinitions Condition="'$(UM_Proj_Type)'=='con'">Build_CON; %(PreprocessorDefinitions)</PreprocessorDefinitions>  
 			<!--头文件目录-->
 			<AdditionalIncludeDirectories>$(UM_inc_Dir); $(SolutionDir); $(SolutionDir)build_need\inc\; $(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 

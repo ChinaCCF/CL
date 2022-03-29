@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>lib</UM_Proj_Type>
+    <!--MT, MTd, MDd, MD-->
+    <UM_MT_Type>true</UM_MT_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\1platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>$(UM_VC)</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{807ed9ed-4bb9-4f25-8d0d-6c4031a20412}</ProjectGuid>
+    <RootNamespace>WL</RootNamespace>
+    <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="app\1app.h" />
+    <ClInclude Include="base\1type.h" />
+    <ClInclude Include="base\2ptr.h" />
+    <ClInclude Include="ui\2msg.h" />
+    <ClInclude Include="ui\1window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="app\src\1app.cpp" />
+    <ClCompile Include="base\src\2ptr.cpp" />
+    <ClCompile Include="ui\src\1window.cpp" />
+    <ClCompile Include="ui\src\2msg.cpp" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\3setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
