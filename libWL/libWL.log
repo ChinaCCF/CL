@@ -1,0 +1,15 @@
+﻿  2msg.cpp
+  libWL.vcxproj -> D:\VS_Build\CCF\Debug_x64\libWLD.lib
+  
+  
+  python argv :  SolutionDir  ProjectDir  UM_Build_Dir  ProjectName  TargetName  Configuration  PlatformTarget
+  ['E:\\Project_Self\\Projcet_CCF\\', 'E:\\Project_Self\\Projcet_CCF\\libWL\\', 'D:\\VS_Build\\CCF\\', 'libWL', 'libWLD', 'Debug', 'x64']
+  
+  
+  D:\VS_Build\CCF\inc\libWL\
+  D:\VS_Build\CCF\lib\Debug_x64\
+  D:\VS_Build\CCF\bin\Debug_x64\
+  D:\VS_Build\CCF\pdb\Debug_x64\
+  Debug Dir : D:\VS_Build\CCF\Debug_x64\
+  modify file D:\VS_Build\CCF\lib\Debug_x64\libWLD.lib
+  modify file D:\VS_Build\CCF\pdb\Debug_x64\libWLD.pdb

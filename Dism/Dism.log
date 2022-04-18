@@ -1,0 +1,17 @@
+﻿  dism.cpp
+  wim.cpp
+E:\Project_Self\Projcet_CCF\Dism\src\dism.cpp(111,23): warning C4018: “<”: 有符号/无符号不匹配
+  Dism.vcxproj -> D:\VS_Build\CCF\Debug_x64\DismD.dll
+  
+  
+  python argv :  SolutionDir  ProjectDir  UM_Build_Dir  ProjectName  TargetName  Configuration  PlatformTarget
+  ['E:\\Project_Self\\Projcet_CCF\\', 'E:\\Project_Self\\Projcet_CCF\\Dism\\', 'D:\\VS_Build\\CCF\\', 'Dism', 'DismD', 'Debug', 'x64']
+  
+  
+  D:\VS_Build\CCF\inc\Dism\
+  D:\VS_Build\CCF\lib\Debug_x64\
+  D:\VS_Build\CCF\bin\Debug_x64\
+  D:\VS_Build\CCF\pdb\Debug_x64\
+  Debug Dir : D:\VS_Build\CCF\Debug_x64\
+  modify file D:\VS_Build\CCF\pdb\Debug_x64\DismD.pdb
+  modify file D:\VS_Build\CCF\bin\Debug_x64\DismD.dll

@@ -1,0 +1,15 @@
+﻿  TestCode.cpp
+  TestCode.vcxproj -> D:\VS_Build\CCF\Debug_x64\TestCodeD.exe
+  
+  
+  python argv :  SolutionDir  ProjectDir  UM_Build_Dir  ProjectName  TargetName  Configuration  PlatformTarget
+  ['E:\\Project_Self\\Projcet_CCF\\', 'E:\\Project_Self\\Projcet_CCF\\TestCode\\', 'D:\\VS_Build\\CCF\\', 'TestCode', 'TestCodeD', 'Debug', 'x64']
+  
+  
+  D:\VS_Build\CCF\inc\TestCode\
+  D:\VS_Build\CCF\lib\Debug_x64\
+  D:\VS_Build\CCF\bin\Debug_x64\
+  D:\VS_Build\CCF\pdb\Debug_x64\
+  Debug Dir : D:\VS_Build\CCF\Debug_x64\
+  modify file D:\VS_Build\CCF\pdb\Debug_x64\TestCodeD.pdb
+  modify file D:\VS_Build\CCF\bin\Debug_x64\TestCodeD.exe

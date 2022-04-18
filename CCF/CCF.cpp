@@ -27,7 +27,7 @@ void fun2()
     for (uv32 i = 0; i < stack->size_; i++)
     {
         cl::FrameInfo* info = cl::frame_alloc(stack, i);
-        cl::Print() << info->file_ << '[' << info->line_ << ']' << info->fun_ << '\n';
+        CPrint << info->file_ << '[' << info->line_ << ']' << info->fun_ << '\n';
         cl::frame_free(info);
     }
 	cl::stack_uninit();
@@ -41,7 +41,19 @@ void fun1()
 
 
 int main()
-{
+{ 
+	for(int j = 0; j < 100; j++)
+	{
+		int v = j;
+		for(int i = 0; i < 100; i++)
+		{
+			printf("%d\n", v & 0xFF);
+			v += 0xa7;
+			v *= 5;
+		}
+		printf("\n\n\n");
+	}
+
 	test::test_type_traits();
 	test::test_val();
 	test::test_mem();
@@ -62,18 +74,16 @@ int main()
 
 	fun1();
 
+
+
 	std::cout << "Hello World!\n";
 	return 0;
 }
+ 
 
 
 
-
-
-
-
-
-
+//
 //#include <windows.h>   
 //#define WND_CLASSNAME	L"MainWnd"
 //#define WND_TITLENAME	L"Test"
@@ -176,8 +186,9 @@ int main()
 //
 //#define Win_W 914 
 //
-//int main()
-////int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int nCmdShow)
+////int main()
+//#pragma comment(linker, "/subsystem:\"windows\" ") 
+//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int nCmdShow)
 //{
 //    WNDCLASSEXW wndClass;
 //    wndClass.cbSize = sizeof(wndClass);
@@ -291,7 +302,7 @@ int main()
 //
 //    return 0;
 //}
-//
+
 
 
  

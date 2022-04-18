@@ -4,7 +4,7 @@
 	<!--本文件不被svn, git等代码管理工具所管理-->
 	<PropertyGroup Label="UserMacros">
 		<UM_Build_Dir>D:\VS_Build\$(SolutionName)\</UM_Build_Dir> <!--目录后面必须带\-->
-		<UM_Self_inc_Dir></UM_Self_inc_Dir>
-		<UM_Self_lib_Dir>$(UM_Build_Dir)lib\$(Configuration)_$(PlatformTarget);</UM_Self_lib_Dir>
+		<UM_Self_inc_Dir>E:\Visual_Studio_Lib\dism\</UM_Self_inc_Dir>
+		<UM_Self_lib_Dir>E:\Visual_Studio_Lib\dism\;$(UM_Build_Dir)lib\$(Configuration)_$(PlatformTarget);</UM_Self_lib_Dir>
 	</PropertyGroup>
 </Project>

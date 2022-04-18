@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <CL/base/7call.h>
+#include <libCL/base/7call.h>
 
 namespace test
 {
@@ -31,6 +31,14 @@ namespace test
             cl::Call<void(void)> call = []() 
             {
                 printf("lambda call\n");
+            };
+            call();
+        }
+        {
+            int i = 2;
+            cl::Call<void(void)> call = [&i]()
+            {
+                printf("lambda call %d\n", i);
             };
             call();
         }

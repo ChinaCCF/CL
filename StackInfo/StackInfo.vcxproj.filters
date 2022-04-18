@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="src\StackInfo.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\StackInfo.cpp">
+    <ClCompile Include="src\dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -27,6 +27,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\win_imp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\old_stack_imp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

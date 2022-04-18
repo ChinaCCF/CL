@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>dll</UM_Proj_Type>
+    <!--MT, MTd, MDd, MD-->
+    <UM_MT_Type>true</UM_MT_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\1platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>$(UM_VC)</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{3783f77d-c475-40db-bb37-efa5e5b0c79f}</ProjectGuid>
+    <RootNamespace>dism</RootNamespace>
+    <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="dism.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dism.cpp" />
+    <ClCompile Include="src\dllmain.cpp" />
+    <ClCompile Include="src\wim.cpp" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\3setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,4 +1,4 @@
-#include <CL/base/6ptr.h>
+#include <libCL/base/6ptr.h>
 
 namespace test
 {

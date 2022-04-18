@@ -1,4 +1,4 @@
-#include <CL/set/4heap.h>
+#include <libCL/set/4heap.h>
 
 namespace test
 {
@@ -9,7 +9,7 @@ namespace test
 
 	void test_heap()
 	{
-		cl::Heap<int> heap;
+		cl::HeapArr<int> heap;
 		heap.push(1);
 		heap.push(2);
 		heap.push(3);

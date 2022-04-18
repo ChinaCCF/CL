@@ -15,10 +15,11 @@
     <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\StackInfo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\old_stack_imp.h" />
     <ClInclude Include="src\win_imp.h" />
     <ClInclude Include="StackInfo.h" />
   </ItemGroup>

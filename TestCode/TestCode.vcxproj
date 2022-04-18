@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <!--lib, dll, app, con-->
+    <UM_Proj_Type>con</UM_Proj_Type>
+    <!--MT, MTd, MDd, MD-->
+    <UM_MT_Type>true</UM_MT_Type>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\1platform.props" />
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>$(UM_VC)</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{e7128f3a-0a0a-4f06-8f27-c07ed26d8f42}</ProjectGuid>
+    <RootNamespace>TestCode</RootNamespace>
+    <WindowsTargetPlatformVersion>$(UM_SDK)</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="lib_code.cpp" />
+    <ClCompile Include="TestCode.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib_code.h" />
+  </ItemGroup>
+  <Import Project="$(SolutionDir)\3setting.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

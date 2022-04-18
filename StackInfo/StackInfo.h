@@ -1,7 +1,7 @@
 #ifndef __dll_StackInfo__
 #define __dll_StackInfo__
 
-#include <CL/base/1cfg.h>
+#include <libCL/base/1cfg.h>
 
 #if CL_Compiler == CL_Compiler_VC
 
@@ -21,8 +21,8 @@
 
 #endif
 
-#include <CL/base/2type.h>
-#include <CL/base/9str.h>
+#include <libCL/base/2type.h>
+#include <libCL/base/9str.h>
 
 //DLL不要暴露对象的构造和析构函数, 否则可能会导致
 //_ASSERTE(__acrt_first_block == header);

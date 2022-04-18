@@ -5,14 +5,15 @@
 #include <tlhelp32.h>
 #include <psapi.h>  
 
-#include <CL/base/2type.h>
-#include <CL/base/9str.h>
-#include <CL/io/2path.h>
-#include <CL/io/3print.h>
+#include <libCL/base/2type.h>
+#include <libCL/base/9str.h>
+#include <libCL/io/2path.h>
+#include <libCL/io/3print.h>
 
-#include <CL/task/lock.h>
+#include <libCL/task/lock.h>
 
-#include <WL/base/2ptr.h>
+#include <libCL/base/6ptr.h>
+#include <libWL/base/1type.h>
 
 #pragma comment(lib, "Dbghelp.lib")
 #pragma comment(lib, "User32.lib")
@@ -65,7 +66,7 @@ namespace cl
 				ret << exe;
 			}
 #if CL_Version == CL_Version_Debug
-			cl::Print() << ret << "\n";
+			CPrint << ret << "\n";
 #endif 
 			return ret;
 		}
@@ -73,7 +74,7 @@ namespace cl
 		//¼ÓÔØÄ£¿é
 		void _init_load_module_from_TH32(HANDLE proc, DWORD proc_id)
 		{
-			wl::Ptr<HANDLE, wl::Fun_CloseHanle> snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, proc_id);
+			cl::Ptr<HANDLE, wl::Fun_CloseHanle> snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, proc_id);
 			if (snapshot == INVALID_HANDLE_VALUE)
 				return;
 

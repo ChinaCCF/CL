@@ -1,5 +1,4 @@
-﻿  StackInfo.cpp
-  StackInfo.vcxproj -> D:\VS_Build\CCF\Debug_x64\StackInfoD.dll
+﻿  StackInfo.vcxproj -> D:\VS_Build\CCF\Debug_x64\StackInfoD.dll
   
   
   python argv :  SolutionDir  ProjectDir  UM_Build_Dir  ProjectName  TargetName  Configuration  PlatformTarget
@@ -11,5 +10,3 @@
   D:\VS_Build\CCF\bin\Debug_x64\
   D:\VS_Build\CCF\pdb\Debug_x64\
   Debug Dir : D:\VS_Build\CCF\Debug_x64\
-  modify file D:\VS_Build\CCF\pdb\Debug_x64\StackInfoD.pdb
-  modify file D:\VS_Build\CCF\bin\Debug_x64\StackInfoD.dll
