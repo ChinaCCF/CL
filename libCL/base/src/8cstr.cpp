@@ -81,11 +81,11 @@ namespace cl
 				return ret;
 			}
 			 
-			FloatStrInfo<uc8> _from_fval(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
+			FloatStrInfo<tc8> _from_fval(tc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
 			{
 				return _do_from_val(buf, size, fval, fraction_cnt);
 			}
-			FloatStrInfo<uc16> _from_fval(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
+			FloatStrInfo<tc16> _from_fval(tc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt)
 			{
 				return _do_from_val(buf, size, fval, fraction_cnt);
 			}
@@ -139,8 +139,8 @@ namespace cl
 				return (T*)str;
 			}
 			 
-			void* _2_fval(const uc8* str, fv64& val) { return (void*)_do_2_fval(str, val); }
-			void* _2_fval(const uc16* str, fv64& val) { return (void*)_do_2_fval(str, val); }
+			void* _2_fval(const tc8* str, fv64& val) { return (void*)_do_2_fval(str, val); }
+			void* _2_fval(const tc16* str, fv64& val) { return (void*)_do_2_fval(str, val); }
 		} 
 	}
 }

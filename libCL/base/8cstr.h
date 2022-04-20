@@ -248,9 +248,9 @@ namespace cl
 			}
 
 			//×ª»»Ê§°Ü number_cnt_ == 0
-			FloatStrInfo<uc8> _from_fval(uc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
+			FloatStrInfo<tc8> _from_fval(tc8* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
 			//×ª»»Ê§°Ü number_cnt_ == 0
-			FloatStrInfo<uc16> _from_fval(uc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
+			FloatStrInfo<tc16> _from_fval(tc16* buf, uv32 size, fv64 fval, uv32 fraction_cnt);
 		}
 
 		//
@@ -295,7 +295,7 @@ namespace cl
 		template<CharType T, FloatType V>
 		cl_si uv32 from_val(T* buf, uv32 size, V val, uv32 fraction = 6)
 		{
-			typedef SelectType_t<sizeof(T) == sizeof(uc8), uc8, uc16> TC;
+			typedef SelectType_t<sizeof(T) == sizeof(tc8), tc8, tc16> TC;
 
 			uv32 len = 0;
 			if (val < 0)
@@ -333,13 +333,13 @@ namespace cl
 				return (T*)p;
 			}
 
-			void* _2_fval(const uc8* str, fv64& val);
-			void* _2_fval(const uc16* str, fv64& val);
+			void* _2_fval(const tc8* str, fv64& val);
+			void* _2_fval(const tc16* str, fv64& val);
 
 			template<CharType T>
 			cl_si T* _2_val(const T* str, fv64& val)
 			{
-				using V = typename SameSizeType<T, uc8, uc16>::type;
+				using V = typename SameSizeType<T, tc8, tc16>::type;
 				return (T*)_2_fval((V*)str, val);
 			}
 		}

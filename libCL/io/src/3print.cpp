@@ -13,14 +13,14 @@ namespace cl
 		}
 #endif
 	}
-	Print& Print::operator<<(const uc8* val)
+	Print& Print::operator<<(const tc8* val)
 	{
 #if CL_Version == CL_Version_Debug 
-		//todo
+		std::cout << (const char*)val; 
 #endif
-		return *this;
+		return *this; 
 	}
-	Print& Print::operator<<(const wchar* val)
+	Print& Print::operator<<(const tc16* val)
 	{
 #if CL_Version == CL_Version_Debug 
 		init();

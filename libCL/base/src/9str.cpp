@@ -42,7 +42,7 @@ namespace cl
 		ret.length(len - 1);//包含了空白字符 
 		return ret;
 	}
-	String c16_2_c8(uv32 code, const uc16* str, uv32 len)
+	String c16_2_c8(uv32 code, const tc16* str, uv32 len)
 	{
 		uv32 size = len * 4 + 1; //一个宽字节字符极端情况下占据4个字节
 		String ret;
@@ -64,25 +64,25 @@ namespace cl
 	{
 		return c8_2_c16(CP_UTF8, str, len);
 	}
-	String UTF8::from_UTF16(const uc16* str, uv32 len)
-	{
-		return c16_2_c8(CP_UTF8, str, len);
-	}
 	String UTF8::to_gbk(const uc8* str, uv32 len)
 	{
 		auto mid = c8_2_c16(CP_UTF8, str, len);
-		return c16_2_c8(CP_ACP, (uc16*)mid.data(), mid.length());
+		return c16_2_c8(CP_ACP, (tc16*)mid.data(), mid.length());
 	}
-	String UTF8::from_gbk(const char* str, uv32 len)
+	String UTF8::from_UTF16(const tc16* str, uv32 len)
+	{
+		return c16_2_c8(CP_UTF8, str, len);
+	} 
+	String UTF8::from_gbk(const ac8* str, uv32 len)
 	{
 		auto mid = c8_2_c16(CP_ACP, (uc8*)str, len);
-		return c16_2_c8(CP_UTF8, (uc16*)mid.data(), mid.length());
+		return c16_2_c8(CP_UTF8, (tc16*)mid.data(), mid.length());
 	}
 
-	String UTF16::to_gbk(const uc16* str, uv32 len) { return c16_2_c8(CP_ACP, str, len); }
-	StringW UTF16::from_gbk(const uc8* str, uv32 len) { return c8_2_c16(CP_ACP, str, len); }
+	String UTF16::to_gbk(const tc16* str, uv32 len) { return c16_2_c8(CP_ACP, str, len); }
+	StringW UTF16::from_gbk(const ac8* str, uv32 len) { return c8_2_c16(CP_ACP, (uc8*)str, len); }
 
-	String rand_str(const uc8* letter, uv32 letter_cnt, uv32 str_dst_len)
+	String rand_str(const tc8* letter, uv32 letter_cnt, uv32 str_dst_len)
 	{
 		//CL_Assert(letter_cnt < 128);
 

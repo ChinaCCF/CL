@@ -93,17 +93,17 @@ namespace cl
         while (src[0] == '/') ++src;
         if (src[0] == '.' && src[1] == '/') src += 2;
           
-        wchar* p = nullptr;
+        tc16* p = nullptr;
         while (src[0] == '.' && src[1] == '.' && src[2] == '/')//删减父目录对
         {
             src += 3; 
             p = cstr::findr(dst, '/');
-            if (!p) return CL_TXT16("");
+            if (!p) return CL_TC16("");
             *p = 0; 
         }  
         {//防止 ../abc/../efd/a.exe  这种格式
             auto tp = cstr::find(src, "../");
-            if (tp) return CL_TXT16("");
+            if (tp) return CL_TC16("");
         }
         if (p)
         {

@@ -18,6 +18,6 @@
 	<PropertyGroup Label="UserMacros">
 		<UM_VC>16.0</UM_VC>		<!--VCProjectVersion-->
 		<UM_SDK>10.0</UM_SDK>		<!--WindowsTargetPlatformVersion-->
-		<UM_ToolSet>v143</UM_ToolSet>		<!--PlatformToolset 142 2019, 143 2022-->
+		<UM_ToolSet>v142</UM_ToolSet>		<!--PlatformToolset 142 2019, 143 2022-->
 	</PropertyGroup>
 </Project>

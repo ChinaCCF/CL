@@ -80,11 +80,11 @@ namespace cl
 			return uv32(dst - (uv8*)data);
 		}
 
-		uv32 unhex(_out void* data, uv32 size, const uc8* str, uv32 len)
+		uv32 unhex(_out void* data, uv32 size, const tc8* str, uv32 len)
 		{
 			return _unhex(data, size, str, len);
 		}
-		uv32 unhex(_out void* data, uv32 size, const uc16* str, uv32 len)
+		uv32 unhex(_out void* data, uv32 size, const tc16* str, uv32 len)
 		{
 			return _unhex(data, size, str, len);
 		}

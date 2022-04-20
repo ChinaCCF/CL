@@ -27,8 +27,12 @@ typedef char8_t   uc8;  //utf8 prefix : u8
 typedef char16_t  uc16; //在Windows上char16_t == wchar_t  prefix : u
 typedef char32_t  uc32; //prefix : U
 
-#define CL_TXT8(x)  u8##x
-#define CL_TXT16(x) u##x
+typedef uc8       tc8;
+typedef wchar     tc16;
+typedef uc32      tc32;
+
+#define CL_TC8(x)   u8##x
+#define CL_TC16(x)  L##x
 
 constexpr sv8   max_sv8 = (sv8)0x7F;
 constexpr sv16 max_sv16 = (sv16)0x7FFF;
@@ -79,10 +83,10 @@ namespace cl
 		C8,//字符
 		C16,
 		C32,
-		ACs8,//ac8字符串, typeid + 16位长度 + "String", 16位长度不包括字符串空结尾
-		UCs8,//同上
-		Cs16,//同上
-		Cs32,//同上
+		AC8,//ac8字符串, typeid + 16位长度 + "String", 16位长度不包括字符串空结尾
+		UC8,//同上
+		UC16,//同上
+		UC32,//同上
 		Fv32,
 		Fv64,
 		Fv128, 
@@ -113,19 +117,19 @@ namespace cl
 		uv16 main_code_ = 0;
 		uv16 sub_code_ = 0;
 		uv32 line_ = 0;
-		uc16* msg_ = nullptr;
-		uc16* file_ = nullptr;
+		tc16* msg_ = nullptr;
+		tc16* file_ = nullptr;
 	private:
-		uc16 buf_[512];
+		tc16 buf_[512];
 	public:
 		Exception() { buf_[0] = 0; }
-		Exception( const uc16* file,  uv32 line,  uv16 main_code,  uv16 sub_code,  const uc16* msg);
+		Exception( const tc16* file,  uv32 line,  uv16 main_code,  uv16 sub_code,  const tc16* msg);
 
 		Exception(const Exception& e) = delete;
 		Exception& operator=(const Exception& e) = delete;
 
-		const uc16* msg() const { return msg_; }
-		const uc16* file() const { return file_; }
+		const tc16* msg() const { return msg_; }
+		const tc16* file() const { return file_; }
 		sv32 line() const { return line_; }
 		sv32 main_code() const { return main_code_; }
 		sv32 sub_code() const { return sub_code_; }
@@ -133,11 +137,11 @@ namespace cl
 		virtual char const* what() const override { return "cl_exception_2D5A1B2F"; }
 	};
 
-#define _CL_Throw(file, MainCode, SubCode, Msg) do{throw cl::Exception(CL_TXT16(file), __LINE__, MainCode, SubCode, CL_TXT16(Msg));}while(0)
+#define _CL_Throw(file, MainCode, SubCode, Msg) do{throw cl::Exception(CL_TC16(file), __LINE__, MainCode, SubCode, CL_TC16(Msg));}while(0)
 #define CL_Throw(MainCode, SubCode, Msg) _CL_Throw(__FILE__, (uv16)MainCode, (uv16)SubCode, Msg)
 
 #if CL_Version == CL_Version_Debug 
-#   define CL_Assert(x) do{if(!(x)) {uc8* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
+#   define CL_Assert(x) do{if(!(x)) {tc8* _XXXXX = nullptr; *_XXXXX = 0;} } while(0)
 #else
 #   define CL_Assert(x) do{if(!(x)) CL_Throw(cl::ExceptionCode::Debug, 0, #x); } while(0)
 #endif

@@ -43,7 +43,7 @@ namespace cl
 			auto src = (const uv8*)data;
 			auto dst = buf;
 
-			static const uc8* arr = "0123456789ABCDEF";
+			static const tc8* arr = "0123456789ABCDEF";
 			while (len--)
 			{
 				uv8 val = *src++;
@@ -55,8 +55,8 @@ namespace cl
 		}
 
 		//成功返回数据大小, 否则返回0
-		uv32 unhex(_out void* data, uv32 size, const uc8* str, uv32 len);
-		uv32 unhex(_out void* data, uv32 size, const uc16* str, uv32 len);
+		uv32 unhex(_out void* data, uv32 size, const tc8* str, uv32 len);
+		uv32 unhex(_out void* data, uv32 size, const tc16* str, uv32 len);
 	}
 
 	/*#####################################################################################*/

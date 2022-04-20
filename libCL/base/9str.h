@@ -74,32 +74,32 @@ namespace cl
 			/*#######################################################################################*/
 			_StrView(const std::string& str)
 			{
-				static_assert(sizeof(T) == 1, "can't convert multibyte to wchar!");
+				static_assert(sizeof(T) == 1, "can't convert tc8 to tc16!");
 				str_ = (T*)str.data();
 				len_ = str.length();
 			}
 			_StrView& operator=(const std::string& std_str)
 			{
-				static_assert(sizeof(T) == 1, "can't convert multibyte to wchar!");
+				static_assert(sizeof(T) == 1, "can't convert tc8 to tc16!");
 				new(this)_StrView(std_str.data(), (uv32)std_str.length()); return *this;
 			}
 
 			_StrView(const std::wstring& str)
 			{
-				static_assert(sizeof(T) == 2, "can't convert wchar to multibyte!");
+				static_assert(sizeof(T) == 2, "can't convert tc16 to tc8!");
 				str_ = (T*)str.data();
 				len_ = str.length();
 			}
 			_StrView& operator=(const std::wstring& std_str)
 			{
-				static_assert(sizeof(T) == 2, "can't convert wchar to multibyte!");
+				static_assert(sizeof(T) == 2, "can't convert tc16 to tc8!");
 				new(this)_StrView(std_str.data(), (uv32)std_str.length()); return *this;
 			}
 		};
 
 	}
-	using StrView = lib::_StrView<uc8>;
-	using StrViewW = lib::_StrView<wchar>;
+	using StrView = lib::_StrView<tc8>;
+	using StrViewW = lib::_StrView<tc16>;
 
 	//用于格式化时, 指示浮点数保留多少位小数
 	template<FloatType F>
@@ -115,9 +115,7 @@ namespace cl
 	template<CharType T>
 	struct EmptyStr { T* operator()() const { return (T*)""; } };
 	template<>
-	struct EmptyStr<uc16> { uc16* operator()() const { return (uc16*)u""; } };
-	template<>
-	struct EmptyStr<wchar> { wchar* operator()() const { return (wchar*)L""; } };
+	struct EmptyStr<tc16> { tc16* operator()() const { return (tc16*)CL_TC16(""); } }; 
 	template<>
 	struct EmptyStr<uc32> { uc32* operator()() const { return (uc32*)U""; } };
 
@@ -408,12 +406,12 @@ namespace cl
 	}
 	 
 	template<uv32 N>
-	using StrBuf = lib::_NString<uc8, MemAllocator, N>;
+	using StrBuf = lib::_NString<tc8, MemAllocator, N>;
 	template<uv32 N>
-	using StrBufW = lib::_NString<wchar, MemAllocator, N>;
+	using StrBufW = lib::_NString<tc16, MemAllocator, N>;
 
-	using String = lib::_NString<uc8, MemAllocator, 0>;
-	using StringW = lib::_NString<wchar, MemAllocator, 0>;
+	using String = lib::_NString<tc8, MemAllocator, 0>;
+	using StringW = lib::_NString<tc16, MemAllocator, 0>;
 
 	class UTF8
 	{
@@ -421,21 +419,21 @@ namespace cl
 		static String to_gbk(const uc8* str, uv32 len);
 		static StringW to_UTF16(const uc8* str, uv32 len);
 
-		static String from_gbk(const char* str, uv32 len);
-		static String from_UTF16(const uc16* str, uv32 len);
+		static String from_gbk(const ac8* str, uv32 len);
+		static String from_UTF16(const tc16* str, uv32 len);
 	};
 
 	class UTF16
 	{
 	public:
-		static String to_gbk(const uc16* str, uv32 len);
-		static String to_UTF8(const uc16* str, uv32 len) { return UTF8::from_UTF16(str, len); }
+		static String to_gbk(const tc16* str, uv32 len);
+		static String to_UTF8(const tc16* str, uv32 len) { return UTF8::from_UTF16(str, len); }
 
-		static StringW from_gbk(const uc8* str, uv32 len);
+		static StringW from_gbk(const ac8* str, uv32 len);
 		static StringW from_UTF8(const uc8* str, uv32 len) { return UTF8::to_UTF16(str, len); }
 	};
 
-	String rand_str(const uc8* letter, uv32 letter_cnt, uv32 str_dst_len);
+	String rand_str(const tc8* letter, uv32 letter_cnt, uv32 str_dst_len);
 }
 
 #endif//__cl_base_str__ 

@@ -156,7 +156,7 @@ namespace cl
 		template<typename T> requires ToC16Ptr_v<T> || ToC8Ptr_v<T>
 		cl_si uv32 _hash(const T & val) //BKDRHash
 		{
-			using Type = SelectType_t<ToC8Ptr_v<T>, uc8, uc16>;
+			using Type = SelectType_t<ToC8Ptr_v<T>, tc8, tc16>;
 			const Type* str = (const Type*)val;
 			uv32 seed = 1313;
 			uv32 ret = 0;

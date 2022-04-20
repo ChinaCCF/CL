@@ -3,13 +3,13 @@
 
 namespace cl
 { 
-	static inline uv32 slen(const uc16* str)
+	static inline uv32 slen(const tc16* str)
 	{
 		auto start = str;
 		while (*str) ++str;
 		return (uv32)(str - start);
 	}
-	static inline uv32 scopy(_out uc16* dst, uv32 size, const uc16* src)
+	static inline uv32 scopy(_out tc16* dst, uv32 size, const tc16* src)
 	{
 		auto len = slen(src);
 		if (len >= size) return 0;
@@ -18,7 +18,7 @@ namespace cl
 		return len;
 	}
 
-	Exception::Exception(const uc16* file, uv32 line, uv16 main_code, uv16 sub_code, const uc16* msg)
+	Exception::Exception(const tc16* file, uv32 line, uv16 main_code, uv16 sub_code, const tc16* msg)
 	{
 		buf_[0] = 0;
 

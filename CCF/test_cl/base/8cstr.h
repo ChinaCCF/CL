@@ -7,8 +7,8 @@ namespace test
 	void test_cstr()
 	{
 		{
-			uc16 buf[32];
-			cs::copy(buf, 32, u"123");
+			tc16 buf[32];
+			cs::copy(buf, 32, CL_TC16("123"));
 		}
 		{//tos
 			char buf[256];

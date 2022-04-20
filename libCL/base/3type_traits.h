@@ -192,10 +192,10 @@ namespace cl
 	/*#####################################################################################*/
 	//根据传递进来的类型能否转为不同的字符串,进而选择字符类型
 	/*#####################################################################################*/
-	template<typename T, typename DefaultC8Type = uc8> 
-	struct GetCharType { using type = SelectType_t<ToC16Ptr_v<T>, uc16, DefaultC8Type>; };
+	template<typename T, typename DefaultC8Type = tc8> 
+	struct GetCharType { using type = SelectType_t<ToC16Ptr_v<T>, tc16, DefaultC8Type>; };
 
-	template<typename T, typename DefaultC8Type = uc8> 
+	template<typename T, typename DefaultC8Type = tc8> 
 	using GetCharType_t = typename GetCharType<T, DefaultC8Type>::type;
 	 
 	/*#####################################################################################*/

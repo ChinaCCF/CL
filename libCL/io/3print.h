@@ -20,14 +20,12 @@ namespace cl
 		Print& operator<<(const T& val) { std::cout << val; return *this; }
 
 		template<uv32 N>
-		Print& operator<<(const char val[N]) { return operator<<((const char*)val); }
+		Print& operator<<(const tc8 val[N]) { return operator<<((const tc8*)val); }
 		template<uv32 N>
-		Print& operator<<(const wchar val[N]) { return operator<<((const wchar*)val); }
-
-		Print& operator<<(const char* val) { std::cout << val; return *this; }
-		Print& operator<<(const uc8* val);
-		Print& operator<<(const wchar* val);
-		Print& operator<<(const uc16* val) { return operator<<((const wchar*)val); }
+		Print& operator<<(const tc16 val[N]) { return operator<<((const tc16*)val); }
+		 
+		Print& operator<<(const tc8* val);
+		Print& operator<<(const tc16* val); 
 
 		Print& operator<<(const StrView& val) { return operator<<(val.data()); }
 		Print& operator<<(const StrViewW& val) { return operator<<(val.data()); }
